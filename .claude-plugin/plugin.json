@@ -1,0 +1,34 @@
+{
+  "name": "ui-color-palette",
+  "version": "1.0.0",
+  "description": "Design color palettes, audit contrast, generate code, and sync to Figma, Penpot, Sketch, and Framer — powered by the UI Color Palette API",
+  "author": {
+    "name": "Aurélien Grimaud",
+    "url": "https://github.com/a-ng-d"
+  },
+  "repository": "https://github.com/a-ng-d/claude-ui-color-palette",
+  "license": "MIT",
+  "keywords": [
+    "color",
+    "palette",
+    "design-system",
+    "contrast",
+    "wcag",
+    "apca",
+    "figma",
+    "penpot",
+    "sketch",
+    "framer",
+    "tokens"
+  ],
+  "userConfig": {
+    "gitlab_url": {
+      "description": "Your GitLab instance URL (e.g. https://gitlab.example.com). Leave empty if not using GitLab.",
+      "sensitive": false
+    },
+    "framer_mcp_url": {
+      "description": "Your Framer MCP URL from https://www.framer.com/marketplace/plugins/mcp/. Leave empty if not using Framer.",
+      "sensitive": false
+    }
+  }
+}
