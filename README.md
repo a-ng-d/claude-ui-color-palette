@@ -4,14 +4,15 @@ A [Claude Code](https://code.claude.com/) plugin that brings color palette desig
 
 ## Features
 
-| Skill                   | Description                                                                        |
-| ----------------------- | ---------------------------------------------------------------------------------- |
-| `generate-harmony`      | Create color harmonies (complementary, analogous, triadic, etc.) from a base color |
-| `generate-from-prompt`  | Generate a palette from a natural language description via AI                      |
-| `manage-palettes`       | Browse, publish, share, and manage palettes on the platform                        |
-| `generate-code`         | Export palettes as CSS, SCSS, Tailwind, SwiftUI, Compose, DTCG, etc.               |
-| `audit-contrast`        | Audit color pairs for WCAG 2.1 and APCA compliance with a global contrast score    |
-| `sync-design-variables` | Push palette colors to Figma, Penpot, Sketch, or Framer as variables/tokens/styles |
+| Skill                      | Description                                                                        |
+| -------------------------- | ---------------------------------------------------------------------------------- |
+| `generate-harmony`         | Create color harmonies (complementary, analogous, triadic, etc.) from a base color |
+| `generate-from-prompt`     | Generate a palette from a natural language description via AI                      |
+| `extract-dominant-colors`  | Extract dominant colors from a JPEG/PNG image using k-means clustering             |
+| `manage-palettes`          | Browse, publish, share, and manage palettes on the platform                        |
+| `generate-code`            | Export palettes as CSS, SCSS, Tailwind, SwiftUI, Compose, DTCG, etc.               |
+| `audit-contrast`           | Audit color pairs for WCAG 2.1 and APCA compliance with a global contrast score    |
+| `sync-design-variables`    | Push palette colors to Figma, Penpot, Sketch, or Framer as variables/tokens/styles |
 
 ## MCP Servers
 
@@ -61,6 +62,9 @@ On first enable, the plugin prompts for optional config:
 
 # Export to Tailwind v4
 /ui-color-palette:generate-code tailwind-v4
+
+# Extract colors from an image
+/ui-color-palette:extract-dominant-colors https://example.com/photo.jpg
 
 # Browse community palettes
 /ui-color-palette:manage-palettes sunset warm

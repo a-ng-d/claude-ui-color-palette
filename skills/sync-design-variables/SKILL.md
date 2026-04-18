@@ -1,5 +1,7 @@
 ---
+name: sync-design-variables
 description: Sync palette colors to a design tool as variables, tokens, or styles. Supports Figma, Penpot, Sketch, and Framer. Use when the user wants to push colors into their design tool.
+argument-hint: <design-tool> [palette-id]
 ---
 
 # Sync Design Variables
