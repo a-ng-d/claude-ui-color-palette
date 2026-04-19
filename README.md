@@ -4,15 +4,13 @@ A [Claude Code](https://code.claude.com/) plugin that brings color palette desig
 
 ## Features
 
-| Skill                      | Description                                                                        |
-| -------------------------- | ---------------------------------------------------------------------------------- |
-| `generate-harmony`         | Create color harmonies (complementary, analogous, triadic, etc.) from a base color |
-| `generate-from-prompt`     | Generate a palette from a natural language description via AI                      |
-| `extract-dominant-colors`  | Extract dominant colors from a JPEG/PNG image using k-means clustering             |
-| `manage-palettes`          | Browse, publish, share, and manage palettes on the platform                        |
-| `generate-code`            | Export palettes as CSS, SCSS, Tailwind, SwiftUI, Compose, DTCG, etc.               |
-| `audit-contrast`           | Audit color pairs for WCAG 2.1 and APCA compliance with a global contrast score    |
-| `sync-design-variables`    | Push palette colors to Figma, Penpot, Sketch, or Framer as variables/tokens/styles |
+| Skill                        | Description                                                                                               |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `generate-source-colors`     | Generate source colors from an image (k-means), a text prompt (AI), or a base color (harmony)             |
+| `scale-palette`              | Build a full palette with `get_full_palette` and export as code/tokens (CSS, Tailwind, SwiftUI, DTCG, …)  |
+| `manage-palettes`            | Browse, publish, share, update, and delete palettes on the platform                                       |
+| `audit-palette`              | Audit color pairs for WCAG 2.1 and APCA compliance with a global contrast score                           |
+| `sync-design-variables`      | Push palette colors to Figma, Penpot, Sketch, or Framer as variables/tokens/styles                        |
 
 ## MCP Servers
 
@@ -51,20 +49,23 @@ On first enable, the plugin prompts for optional config:
 ## Usage
 
 ```bash
-# Generate a triadic harmony from a blue
-/ui-color-palette:generate-harmony #3B82F6 triadic
+# Generate source colors from an image
+/ui-color-palette:generate-source-colors https://example.com/photo.jpg 8
 
-# Create a palette from a mood description
-/ui-color-palette:generate-from-prompt a warm sunset over the ocean
+# Generate source colors from a mood description
+/ui-color-palette:generate-source-colors a warm sunset over the ocean
+
+# Generate source colors from a base color (harmony)
+/ui-color-palette:generate-source-colors #3B82F6 triadic
+
+# Build a palette and export to Tailwind v4
+/ui-color-palette:scale-palette tailwind-v4
+
+# Build a palette and export to CSS with OKLCH
+/ui-color-palette:scale-palette css oklch
 
 # Audit contrast of a color set
-/ui-color-palette:audit-contrast #1E293B #F8FAFC #3B82F6 #FFFFFF
-
-# Export to Tailwind v4
-/ui-color-palette:generate-code tailwind-v4
-
-# Extract colors from an image
-/ui-color-palette:extract-dominant-colors https://example.com/photo.jpg
+/ui-color-palette:audit-palette #1E293B #F8FAFC #3B82F6 #FFFFFF
 
 # Browse community palettes
 /ui-color-palette:manage-palettes sunset warm
