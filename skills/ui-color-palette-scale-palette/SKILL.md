@@ -179,11 +179,15 @@ Only applies to `css`, `scss`, `less`, and `dtcg-tokens`. Other formats use thei
 
 1. Collect source colors from the user or from a previous **generate-source-colors** step.
 2. Call `get_full_palette` with a `BaseConfiguration` and at least one `ThemeConfiguration` to generate the full palette with scales.
-3. **Do NOT read, summarize, or display the `PaletteData` result.** The response is a large JSON object with many color values — reading it wastes tokens. Pass it directly as the `paletteData` parameter to `generate_code` in the next call.
-4. Ask the user which format(s) and color space they want.
-5. Call `generate_code` with the raw `PaletteData` from step 2 and the desired `format`/`colorSpace`.
-6. Present the generated code in a fenced code block with the appropriate language tag.
-7. Offer to write the output to a file in the project.
+3. **Do NOT read, summarize, or display the `PaletteData` result.** The response is a large JSON object with many color values — reading it wastes tokens.
+4. **Ask the user what to do next.** Exporting as code is not the only option. The user may want to:
+   - **Audit the palette** first — use the **audit-palette** skill to check contrast and accessibility before exporting.
+   - **Publish the palette** — use the **manage-palettes** skill to save it to the database and optionally share it with the community.
+   - **Export as code** — continue to step 5.
+5. Ask the user which format(s) and color space they want.
+6. Call `generate_code` with the raw `PaletteData` from step 2 and the desired `format`/`colorSpace`.
+7. Present the generated code in a fenced code block with the appropriate language tag.
+8. Offer to write the output to a file in the project.
 
 ## Arguments
 
