@@ -179,10 +179,11 @@ Only applies to `css`, `scss`, `less`, and `dtcg-tokens`. Other formats use thei
 
 1. Collect source colors from the user or from a previous **generate-source-colors** step.
 2. Call `get_full_palette` with a `BaseConfiguration` and at least one `ThemeConfiguration` to generate the full palette with scales.
-3. Ask the user which format(s) and color space they want.
-4. Call `generate_code` with the `PaletteData` from step 2 and the desired `format`/`colorSpace`.
-5. Present the generated code in a fenced code block with the appropriate language tag.
-6. Offer to write the output to a file in the project.
+3. **Do NOT read, summarize, or display the `PaletteData` result.** The response is a large JSON object with many color values — reading it wastes tokens. Pass it directly as the `paletteData` parameter to `generate_code` in the next call.
+4. Ask the user which format(s) and color space they want.
+5. Call `generate_code` with the raw `PaletteData` from step 2 and the desired `format`/`colorSpace`.
+6. Present the generated code in a fenced code block with the appropriate language tag.
+7. Offer to write the output to a file in the project.
 
 ## Arguments
 
@@ -195,6 +196,7 @@ Only applies to `css`, `scss`, `less`, and `dtcg-tokens`. Other formats use thei
 
 ## Tips
 
+- **Token efficiency**: Never read, print, or summarize the `PaletteData` JSON. It contains dozens of color shades with multiple color space values each. Always pass it opaquely to `generate_code`.
 - **Hex to rgb conversion**: Divide each 0–255 channel by 255 to get the 0–1 value. E.g. `#3B82F6` → `r: 59/255 = 0.23`, `g: 130/255 = 0.51`, `b: 246/255 = 0.96` → `{ r: 0.23, g: 0.51, b: 0.96 }`.
 - **Scale computation**: If the user doesn't provide a `scale` object, compute it from the preset: distribute lightness values between `min` (darkest) and `max` (lightest) across `stops` using the `easing` function. First stop → `max`, last stop → `min`.
 - When the user mentions a specific framework, pick the matching format automatically.

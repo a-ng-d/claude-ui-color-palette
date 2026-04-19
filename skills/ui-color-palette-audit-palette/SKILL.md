@@ -98,7 +98,8 @@ Controls the lightness scale distribution.
 
 1. Collect the palette colors from the user or from a previous generation step.
 2. Call `get_full_palette` with the palette configuration to get contrast data embedded in the result.
-3. For each foreground/background pair, report:
+3. **Do NOT read or summarize the full `PaletteData` JSON.** Only extract the `hex` values from each shade to compute contrast. The response contains many color space values per shade — reading it all wastes tokens.
+4. For each foreground/background pair, report:
    - WCAG contrast ratio and pass/fail for AA and AAA
    - APCA Lc value and minimum font size recommendation
 4. Compute a **global contrast score** summary:
