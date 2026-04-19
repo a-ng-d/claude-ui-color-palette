@@ -1,5 +1,5 @@
 ---
-name: generate-source-colors
+name: ui-color-palette-generate-source-colors
 description: Generate source colors for a palette — extract dominant colors from an image, generate colors from a natural language prompt, or create color harmonies from a base color. Use when the user wants to produce starting colors before building a full palette.
 argument-hint: <image-url|prompt|color> [options]
 ---

@@ -1,5 +1,5 @@
 ---
-name: manage-palettes
+name: ui-color-palette-manage-palettes
 description: Browse, publish, share, update, and delete palettes on the UI Color Palette platform. Use when the user wants to manage their published palettes or explore community palettes.
 argument-hint: <action|search-query|palette-id>
 ---
