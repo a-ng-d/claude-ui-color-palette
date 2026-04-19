@@ -89,6 +89,32 @@ Controls the lightness scale distribution.
 
 **Returns**: A `PaletteData` object containing `name`, `description`, `themes` (with full color scales including contrast values), and `type`.
 
+## Pre-computed contrast data
+
+Each shade in the palette data includes pre-computed contrast scores. **Do NOT recalculate contrast — just read the values from the response.**
+
+### `shade.contrast` — shade vs palette background
+
+| Field | Path | Type | Description |
+| ----- | ---- | ---- | ----------- |
+| WCAG ratio | `contrast.wcag.ratio` | number | Contrast ratio (e.g. `4.52`) |
+| WCAG score | `contrast.wcag.score` | `"A"` \| `"AA"` \| `"AAA"` | WCAG level |
+| APCA Lc | `contrast.apca.lc` | number | Lightness contrast value |
+| APCA usage | `contrast.apca.recommendedUsage` | string | `"FLUENT_TEXT"`, `"BODY_TEXT"`, `"CONTENT_TEXT"`, `"HEADLINES"`, `"SPOT_TEXT"`, `"NON_TEXT"`, `"AVOID"`, `"UNKNOWN"` |
+
+### `shade.textContrast` — light & dark text on shade (optional, present when `textColorsTheme` is set)
+
+| Field | Path | Type | Description |
+| ----- | ---- | ---- | ----------- |
+| WCAG light ratio | `textContrast.wcag.light.ratio` | number | White text on shade |
+| WCAG light score | `textContrast.wcag.light.score` | `"A"` \| `"AA"` \| `"AAA"` | WCAG level |
+| WCAG dark ratio | `textContrast.wcag.dark.ratio` | number | Black text on shade |
+| WCAG dark score | `textContrast.wcag.dark.score` | `"A"` \| `"AA"` \| `"AAA"` | WCAG level |
+| APCA light Lc | `textContrast.apca.light.lc` | number | White text Lc |
+| APCA light usage | `textContrast.apca.light.recommendedUsage` | string | Recommended usage |
+| APCA dark Lc | `textContrast.apca.dark.lc` | number | Black text Lc |
+| APCA dark usage | `textContrast.apca.dark.recommendedUsage` | string | Recommended usage |
+
 ## Standards
 
 - **WCAG 2.1**: Contrast ratios — AA requires 4.5:1 for normal text, 3:1 for large text; AAA requires 7:1 / 4.5:1
@@ -97,16 +123,17 @@ Controls the lightness scale distribution.
 ## Workflow
 
 1. Collect the palette colors from the user or from a previous generation step.
-2. Call `get_full_palette` with the palette configuration to get contrast data embedded in the result.
-3. **Do NOT read or summarize the full `PaletteData` JSON.** Only extract the `hex` values from each shade to compute contrast. The response contains many color space values per shade — reading it all wastes tokens.
-4. For each foreground/background pair, report:
-   - WCAG contrast ratio and pass/fail for AA and AAA
-   - APCA Lc value and minimum font size recommendation
-4. Compute a **global contrast score** summary:
-   - Percentage of pairs passing WCAG AA
-   - Average APCA Lc across all pairs
-   - Flag any failing pairs prominently
-5. Provide actionable recommendations to fix failing pairs (suggest lighter/darker alternatives).
+2. Call `get_full_palette` with the palette configuration (ensure `textColorsTheme` is set in themes).
+3. **Do NOT read the full `PaletteData` JSON.** Only extract from each shade: `name`, `hex`, `textContrast` (and `contrast` if needed). Skip all other color space values (`rgb`, `gl`, `lch`, `oklch`, `lab`, `oklab`, `hsl`, `hsluv`, `hsv`, `cmyk`).
+4. For each shade, read the pre-computed scores directly — no need to recalculate:
+   - `shade.textContrast.wcag.light` / `shade.textContrast.wcag.dark` — WCAG ratio & score
+   - `shade.textContrast.apca.light` / `shade.textContrast.apca.dark` — APCA Lc & recommendation
+5. Build the **data visualization** (see output format below).
+6. Compute the **global contrast score** as a consolidated percentage:
+   - **WCAG pass rate** = (shades where at least one of light/dark passes AA) / total shades × 100
+   - **APCA pass rate** = (shades where at least one of light/dark has |Lc| ≥ 60) / total shades × 100
+   - **Global score** = average of WCAG pass rate and APCA pass rate, displayed as `XX%`
+7. Flag failing pairs and provide actionable recommendations.
 
 ## Arguments
 
@@ -117,15 +144,50 @@ Controls the lightness scale distribution.
 
 ## Output format
 
-Present results as a table:
+Present results per color as a detailed table, one row per shade:
 
-| Foreground | Background | WCAG Ratio | AA | AAA | APCA Lc |
-| ---------- | ---------- | ---------- | -- | --- | ------- |
+### Per-color table
+
+**Color: `{colorName}`** `{sourceHex}`
+
+| Shade | Hex | Light text WCAG | | Dark text WCAG | | Light text APCA | | Dark text APCA | | Best text |
+| ----- | --- | --------------- | - | -------------- | - | --------------- | - | -------------- | - | --------- |
+| | | Ratio | Score | Ratio | Score | Lc | Usage | Lc | Usage | |
+| 50 | #F8FAFC | 1.07 | A | 17.58 | AAA | -4.2 | AVOID | 106.0 | FLUENT_TEXT | Dark |
+| 100 | #E2E8F0 | 1.32 | A | 13.16 | AAA | -11.5 | AVOID | 95.2 | FLUENT_TEXT | Dark |
+| ... | | | | | | | | | | |
+
+- **Best text**: recommend `Light` or `Dark` based on the highest WCAG score (prioritize AAA > AA > A), then highest APCA |Lc| as tiebreaker.
+
+### Global contrast score
+
+```
+╔══════════════════════════════════════════╗
+║          GLOBAL CONTRAST SCORE           ║
+║                                          ║
+║              85%                         ║
+║                                          ║
+║  WCAG AA pass rate:  90% (27/30 shades)  ║
+║  APCA body text:     80% (24/30 shades)  ║
+║                                          ║
+║  Failing shades: 3                       ║
+╚══════════════════════════════════════════╝
+```
+
+### Failing shades summary
+
+List every shade that fails both light and dark text for WCAG AA (ratio < 4.5) or APCA body text (|Lc| < 60):
+
+| Color | Shade | Hex | Issue | Recommendation |
+| ----- | ----- | --- | ----- | -------------- |
+| primary | 400 | #60A5FA | Neither text passes AA | Darken to 500 or lighten to 300 |
 
 End with the global score and recommendations.
 
 ## Tips
 
+- **Contrast data is pre-computed**: The `textContrast` field on each shade already contains WCAG and APCA scores for both light and dark text. Never instantiate `Contrast` yourself — just read the values.
+- **Extract only what you need**: When parsing the `get_full_palette` response, skip `rgb`, `gl`, `lch`, `oklch`, `lab`, `oklab`, `hsl`, `hsluv`, `hsv`, `cmyk`. Only read `name`, `hex`, `contrast`, and `textContrast`.
 - **Hex to rgb conversion**: Divide each 0–255 channel by 255 to get the 0–1 value. E.g. `#3B82F6` → `r: 59/255 = 0.23`, `g: 130/255 = 0.51`, `b: 246/255 = 0.96` → `{ r: 0.23, g: 0.51, b: 0.96 }`.
-- Use `paletteBackground` in the theme to set the surface color that foreground colors are tested against.
+- Ensure `textColorsTheme` is set in each theme (e.g. `{ lightColor: "#FFFFFF", darkColor: "#000000" }`) — otherwise `textContrast` will be `undefined`.
 - For quick audits of two colors, compute WCAG ratio locally instead of calling the full palette generation.
