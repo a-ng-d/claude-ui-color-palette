@@ -20,6 +20,10 @@
       "type": "http",
       "url": "http://localhost:31126/mcp"
     },
+    "framer": {
+      "type": "http",
+      "url": "${user_config.framer_mcp_url}"
+    },
     "github": {
       "type": "http",
       "url": "https://api.githubcopilot.com/mcp/"
@@ -27,10 +31,6 @@
     "gitlab": {
       "type": "http",
       "url": "${user_config.gitlab_url}/api/v4/mcp"
-    },
-    "framer": {
-      "type": "http",
-      "url": "${user_config.framer_mcp_url}"
     }
   }
 }

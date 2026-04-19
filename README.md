@@ -4,13 +4,24 @@ A [Claude Code](https://code.claude.com/) plugin that brings color palette desig
 
 ## Features
 
+### Core skills
+
 | Skill                        | Description                                                                                               |
 | ---------------------------- | --------------------------------------------------------------------------------------------------------- |
 | `generate-source-colors`     | Generate source colors from an image (k-means), a text prompt (AI), or a base color (harmony)             |
 | `scale-palette`              | Build a full palette with `get_full_palette` and export as code/tokens (CSS, Tailwind, SwiftUI, DTCG, …)  |
 | `manage-palettes`            | Browse, publish, share, update, and delete palettes on the platform                                       |
 | `audit-palette`              | Audit color pairs for WCAG 2.1 and APCA compliance with a global contrast score                           |
-| `sync-design-variables`      | Push palette colors to Figma, Penpot, Sketch, or Framer as variables/tokens/styles                        |
+
+### Community skills
+
+| Skill                              | Description                                                              | Source                                                                                          |
+| ---------------------------------- | ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| `figma-variables-tokens-generator` | Generate a fully connected Figma design token system from a chat prompt  | [shanmus4/figma-variables-tokens-generator](https://github.com/Shanmus4/figma-variables-tokens-generator) |
+| `penpot-uiux-design`              | Create professional UI/UX designs in Penpot using MCP tools              | [github/awesome-copilot](https://github.com/github/awesome-copilot)                             |
+| `sketch-implement-design`         | Translate Sketch layers into production-ready code with visual fidelity  | [sketch-hq/skills](https://github.com/sketch-hq/skills)                                         |
+| `gh-cli`                          | GitHub CLI (`gh`) comprehensive reference for all GitHub operations      | [github/awesome-copilot](https://github.com/github/awesome-copilot)                             |
+| `gitlab-cli-skills`               | GitLab CLI (`glab`) command reference and workflows                      | [vince-winkintel/gitlab-cli-skills](https://github.com/vince-winkintel/gitlab-cli-skills)        |
 
 ## MCP Servers
 
@@ -69,9 +80,6 @@ On first enable, the plugin prompts for optional config:
 
 # Browse community palettes
 /ui-color-palette:manage-palettes sunset warm
-
-# Sync to Figma
-/ui-color-palette:sync-design-variables figma
 ```
 
 ## Prerequisites
