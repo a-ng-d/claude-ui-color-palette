@@ -249,3 +249,11 @@ End with the global score and recommendations.
 - **Hex to rgb conversion**: Divide each 0–255 channel by 255 to get the 0–1 value. E.g. `#3B82F6` → `r: 59/255 = 0.23`, `g: 130/255 = 0.51`, `b: 246/255 = 0.96` → `{ r: 0.23, g: 0.51, b: 0.96 }`.
 - Ensure `textColorsTheme` is set in each theme (e.g. `{ lightColor: "#FFFFFF", darkColor: "#000000" }`) — otherwise `textContrast` will be `undefined`.
 - For quick audits of two colors, compute WCAG ratio locally instead of calling the full palette generation.
+
+---
+
+## Recommended subagent
+
+Delegate this skill to **`palette-auditor`**.
+
+The `palette-auditor` agent is optimized for WCAG/APCA contrast audits, global contrast scoring, risky pair detection, and remediation proposals. It knows the audit dataset schema defined in this skill and works from the flattened row representation rather than traversing full `PaletteData`.

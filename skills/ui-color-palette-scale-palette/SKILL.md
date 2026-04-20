@@ -269,3 +269,12 @@ Only applies to `css`, `scss`, `less`, and `dtcg-tokens`. Other formats use thei
 - Use `OKLCH` or `P3` color spaces for wide-gamut displays.
 - The `paletteData` input to `generate_code` must be the full object from `get_full_palette` — it contains `name`, `description`, `themes` (with color scales), and `type`.
 - This skill combines well with **generate-source-colors** (generate colors first, then build + export here), **audit-palette** (check readability before export), and **manage-palettes** (publish the palette after building).
+
+---
+
+## Recommended subagent
+
+Delegate this skill to **`palette-codegen`** for code and token export, or to **`palette-transitioner`** when the target is a design tool or document artifact.
+
+- **`palette-codegen`** — normalizes `PaletteData`, selects the right projection, and generates code in the requested format (CSS, SCSS, Tailwind, DTCG, etc.)
+- **`palette-transitioner`** — converts `PaletteData` into `variableRows`, `tokenRows`, `styleRows`, `swatchRows`, or `previewRows` before routing to a platform workflow

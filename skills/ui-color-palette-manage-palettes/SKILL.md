@@ -158,3 +158,11 @@ Permanently delete a palette.
 - Palettes are private by default after publication — the user must explicitly `share_published_palette` to make them public.
 - Use `list_my_published_palettes` to find palette IDs for update/delete operations.
 - The `preset`, `shift`, `colors`, and `themes` fields match the structures used by `get_full_palette`.
+
+---
+
+## Recommended subagent
+
+Delegate this skill to **`palette-publisher`**.
+
+The `palette-publisher` agent handles all palette lifecycle operations: browse, retrieve, publish, update, share, unshare, and delete. It resolves authentication before any authenticated call and applies minimal update payloads.

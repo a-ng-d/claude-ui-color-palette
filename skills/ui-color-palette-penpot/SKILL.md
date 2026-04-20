@@ -66,3 +66,11 @@ Use MCP or direct API calls as the execution layer, not as the skill structure.
 ## Agent rule
 
 The plugin bridge files are reference implementations. If the plugin action is unavailable, the agent should reproduce the same behavior directly through Penpot API requests.
+
+---
+
+## Recommended subagent
+
+Delegate this skill to **`palette-transitioner`**.
+
+The `palette-transitioner` agent normalizes `PaletteData` into the correct row model for Penpot (`tokenRows`, `styleRows`, `previewRows`), then routes execution through the appropriate Penpot sub-skill.

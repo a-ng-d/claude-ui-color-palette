@@ -40,7 +40,28 @@ The plugin connects to the following MCP servers:
 
 ## Agent
 
-The plugin includes a **color-system** agent — a design system color expert that orchestrates all MCPs for multi-step workflows (generate → audit → export → sync).
+The plugin uses **color-systemer** as the default agent.
+
+It acts as the top-level orchestrator for multi-step workflows such as:
+
+- generate → audit → export
+- generate → transition → sync to design tools
+- retrieve/publish → audit → export
+
+The orchestrator delegates specialized work to focused sub-agents:
+
+- `palette-auditor` — WCAG/APCA audits, risk detection, remediation guidance
+- `palette-codegen` — normalized projection and code/token generation
+- `palette-publisher` — published palette retrieval, publication, update, visibility, deletion
+- `palette-transitioner` — transition from `PaletteData` to variables, tokens, styles, swatches, and preview/document artifacts
+
+The default agent is configured in `settings.json`:
+
+```json
+{
+	"agent": "color-systemer"
+}
+```
 
 ## Installation
 
