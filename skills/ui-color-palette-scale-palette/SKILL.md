@@ -6,7 +6,7 @@ argument-hint: <format> [color-space]
 
 # Create & Deploy Palette
 
-Use the **ui-color-palette** MCP tools `get_full_palette` and `generate_code` to build a complete palette and export it as code.
+Use the **ui-color-palette** MCP tools `get_full_palette` and `generate_code` to build a complete palette, preview it visually, and export it as code.
 
 ---
 
@@ -88,6 +88,56 @@ Controls the lightness scale distribution.
 | `type` | string | `"default theme"` or `"custom theme"` |
 
 **Returns**: A `PaletteData` object containing `name`, `description`, `themes` (with full color scales), and `type`.
+
+---
+
+## Visual preview
+
+After generating a palette, do not assume the next step is code export. A palette is often easier to validate visually first.
+
+At minimum, produce a compact visual preview using the generated shades:
+
+- one section per theme
+- one row per color family
+- one swatch per shade
+- each swatch labeled with its `shade.name` and `hex`
+- when `textColorsTheme` is available, show the preferred text color (`light` or `dark`) on top of each swatch
+
+### Preview layout
+
+Prefer this structure for a quick visual audit:
+
+| Theme | Color | Swatches |
+| ----- | ----- | -------- |
+| Light | primary | `50 100 200 300 400 500 600 700 800 900` |
+
+And render the swatches conceptually like this:
+
+```text
+Light / primary
+[ 50  #F8FAFC ][ 100 #E2E8F0 ][ 200 #CBD5E1 ][ 300 #94A3B8 ]
+[ 400 #64748B ][ 500 #475569 ][ 600 #334155 ][ 700 #1E293B ]
+[ 800 #0F172A ][ 900 #020617 ]
+```
+
+The goal is not pixel-perfect rendering in chat, but a readable, visual summary of the generated palette.
+
+### Design tool handoff
+
+If the user wants the palette generated inside a design document, prefer routing to design tools instead of only exporting code:
+
+- **Figma**: propose generating the palette in the current file as swatches, variables, or local styles
+- **Penpot**: propose generating a palette board or style set for review
+- **Sketch**: propose generating a palette page, symbol sheet, or token handoff artifact
+
+When the user mentions Figma, FigJam, Penpot, Sketch, design board, palette board, style tiles, or visual preview in a document, treat that as a **design-generation** request first, not a code-export request.
+
+If direct write-back tooling is available for the target design tool, use it. Otherwise:
+
+1. build the palette with `get_full_palette`
+2. extract only `theme.name`, `color.name`, `shade.name`, `shade.hex`, and preferred text color
+3. create a compact swatch matrix spec
+4. hand that spec off to the relevant design workflow/tool
 
 ### Example `get_full_palette` input
 
@@ -179,15 +229,23 @@ Only applies to `css`, `scss`, `less`, and `dtcg-tokens`. Other formats use thei
 
 1. Collect source colors from the user or from a previous **generate-source-colors** step.
 2. Call `get_full_palette` with a `BaseConfiguration` and at least one `ThemeConfiguration` to generate the full palette with scales.
-3. **Do NOT read, summarize, or display the `PaletteData` result.** The response is a large JSON object with many color values — reading it wastes tokens.
-4. **Ask the user what to do next.** Exporting as code is not the only option. The user may want to:
+3. **Do NOT read or summarize the full `PaletteData` result.** The response is a large JSON object with many color values — reading it wastes tokens.
+4. If the user asks for a visual preview, design handoff, or document generation, extract only the fields needed for a swatch matrix:
+  - `theme.name`
+  - `color.name`
+  - `shade.name`
+  - `shade.hex`
+  - preferred text color if it can be inferred from `textColorsTheme` or audit data
+5. **Ask the user what to do next.** Exporting as code is not the only option. The user may want to:
+  - **Preview the palette visually** first — render a swatch matrix grouped by theme and color
+  - **Generate it in a design tool** — route to Figma, Penpot, or Sketch workflows
    - **Audit the palette** first — use the **audit-palette** skill to check contrast and accessibility before exporting.
    - **Publish the palette** — use the **manage-palettes** skill to save it to the database and optionally share it with the community.
-   - **Export as code** — continue to step 5.
-5. Ask the user which format(s) and color space they want.
-6. Call `generate_code` with the raw `PaletteData` from step 2 and the desired `format`/`colorSpace`.
-7. Present the generated code in a fenced code block with the appropriate language tag.
-8. Offer to write the output to a file in the project.
+  - **Export as code** — continue to step 6.
+6. If exporting as code, ask the user which format(s) and color space they want.
+7. Call `generate_code` with the raw `PaletteData` from step 2 and the desired `format`/`colorSpace`.
+8. Present the generated code in a fenced code block with the appropriate language tag.
+9. Offer to write the output to a file in the project.
 
 ## Arguments
 
@@ -201,11 +259,13 @@ Only applies to `css`, `scss`, `less`, and `dtcg-tokens`. Other formats use thei
 ## Tips
 
 - **Token efficiency**: Never read, print, or summarize the `PaletteData` JSON. It contains dozens of color shades with multiple color space values each. Always pass it opaquely to `generate_code`.
+- **Visual preview efficiency**: For previews, do not inspect every color-space value. Extract only `theme.name`, `color.name`, `shade.name`, and `shade.hex`, plus preferred text color when available.
 - **Hex to rgb conversion**: Divide each 0–255 channel by 255 to get the 0–1 value. E.g. `#3B82F6` → `r: 59/255 = 0.23`, `g: 130/255 = 0.51`, `b: 246/255 = 0.96` → `{ r: 0.23, g: 0.51, b: 0.96 }`.
 - **Scale computation**: If the user doesn't provide a `scale` object, compute it from the preset: distribute lightness values between `min` (darkest) and `max` (lightest) across `stops` using the `easing` function. First stop → `max`, last stop → `min`.
+- **Design-first requests**: If the user asks for a board, canvas, style tiles, swatches, or a document preview, prioritize the visual/design-tool route before code export.
 - When the user mentions a specific framework, pick the matching format automatically.
 - For design token workflows, prefer `dtcg-tokens` for interoperability or `style-dictionary-v3` for Style Dictionary pipelines.
 - Suggest `tailwind-v4` over `tailwind-v3` for new projects.
 - Use `OKLCH` or `P3` color spaces for wide-gamut displays.
 - The `paletteData` input to `generate_code` must be the full object from `get_full_palette` — it contains `name`, `description`, `themes` (with color scales), and `type`.
-- This skill combines well with **generate-source-colors** (generate colors first, then build + export here) and **manage-palettes** (publish the palette after building).
+- This skill combines well with **generate-source-colors** (generate colors first, then build + export here), **audit-palette** (check readability before export), and **manage-palettes** (publish the palette after building).
