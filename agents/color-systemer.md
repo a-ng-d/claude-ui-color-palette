@@ -209,51 +209,34 @@ Keep the task in this orchestrator when the work is mainly:
 
 Never show raw palette JSON to the user. Any palette payload must be passed opaquely to MCP tools.
 
-**Always generate an HTML artifact** after any palette operation — generation, retrieval, or listing — before asking what to do next. The format differs by source:
+**Always output a visual palette display** after any palette operation — generation, retrieval, or listing — before asking what to do next. The format differs by source:
 
-- **Full palette** (`PaletteData` from `scale-palette`): shade ramp grid — one row per color family, one cell per shade with name and hex
-- **Published palette list** (`list_published_palettes`, `list_my_published_palettes`): one card per palette with source color chips, color space, preset, theme count, and visibility badge
-- **Published palette detail** (`get_published_palette`): single detail card with larger chips, description, and metadata
+- **Full palette** (`PaletteData` from `scale-palette`): ANSI shade ramp — one group per color family, one line per shade with name and hex
+- **Published palette list** (`list_published_palettes`, `list_my_published_palettes`): ANSI blocks per source color per palette
+- **Published palette detail** (`get_published_palette`): ANSI blocks with full metadata
 
-See `ui-color-palette-manage-palettes` for the list and detail HTML templates.
+See `ui-color-palette-manage-palettes` for the list and detail ANSI formats.
 
-#### HTML swatch preview (full palette)
+#### ANSI swatch (full palette)
 
-Generate a self-contained HTML artifact with inline styles. Structure:
+If the output is rendered in a terminal rather than the Claude.ai chat interface, use ANSI 24-bit background color codes. One line per shade:
 
-- one section per theme
-- one row per color family, labeled with the color name
-- one swatch cell per shade: a colored square with the shade name and hex below it
-- no external dependencies, no JavaScript
+```
+Brand System -- OKLCH - Material
 
-Extract only `theme.name`, `color.name`, `shade.name`, and `shade.hex` from the palette data. Do not inspect other color-space fields.
-
-Minimal template:
-
-```html
-<div style="font-family:sans-serif;padding:16px">
-  <h2 style="margin:0 0 4px">Palette name — OKLCH</h2>
-
-  <h3 style="margin:16px 0 8px">Light</h3>
-  <div style="margin-bottom:12px">
-    <div style="font-size:11px;color:#666;margin-bottom:4px">primary</div>
-    <div style="display:flex;gap:4px">
-      <div style="text-align:center">
-        <div style="width:48px;height:48px;background:#EFF6FF;border-radius:4px"></div>
-        <div style="font-size:10px;margin-top:2px">50</div>
-        <div style="font-size:9px;color:#888">#EFF6FF</div>
-      </div>
-      <!-- repeat per shade -->
-    </div>
-  </div>
-</div>
+Light
+  primary
+    50   \033[48;2;239;246;255m      \033[0m  #EFF6FF
+    100  \033[48;2;219;234;254m      \033[0m  #DBEAFE
+    500  \033[48;2;59;130;246m       \033[0m  #3B82F6  <-- source
+    900  \033[48;2;30;58;138m        \033[0m  #1E3A8A
 ```
 
-Render the HTML artifact immediately after palette generation, before the phase question.
+Format per shade: `    {shade}  \033[48;2;{R};{G};{B}m      \033[0m  {hex}` — mark the source shade with `<-- source`.
 
-#### Text fallback
+#### Plain text fallback
 
-If an HTML artifact cannot be rendered, fall back to a compact text summary:
+If ANSI cannot be rendered, fall back to a compact text summary:
 
 ```
 Palette “Brand System” — OKLCH — Material scale
