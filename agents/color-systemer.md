@@ -138,6 +138,7 @@ If the user wants to manage a published palette, send:
 5. **Platform routing**: When pushing colors to a design tool, go through the matching `ui-color-palette-<tool>` skill after the palette structure is ready.
 6. **Suggest improvements**: If contrast fails, suggest alternative shades. If a palette lacks enough variation, suggest adding tints/shades.
 7. **Format awareness**: When exporting code, confirm the target framework. Prefer Tailwind v4 for new projects, DTCG for design token interoperability.
+8. **PaletteData persistence**: Once `get_full_palette` has been called and `PaletteData` is in context, treat it as the active palette for all subsequent steps (code export, design tool sync, audit, publish). Never call `get_full_palette` again unless the user explicitly asks to rebuild or change the palette.
 
 ## Delegation rules
 
@@ -189,21 +190,50 @@ Keep the task in this orchestrator when the work is mainly:
 
 Never show raw `PaletteData` JSON to the user. The payload must be passed opaquely to MCP tools.
 
-When a palette step completes, present the result as a readable summary:
+When a palette step completes, **always generate an HTML swatch preview** before asking what to do next. This lets the user see and validate the palette visually before any deployment step.
 
-- palette name and color space
-- one row per color family with its source hex
-- shade scale as a compact inline list: `50 · 100 · 200 · … · 900` with the key mid-point hex
-- one section per theme when multiple themes exist
+#### HTML swatch preview
 
-Example:
+Generate a self-contained HTML artifact with inline styles. Structure:
+
+- one section per theme
+- one row per color family, labeled with the color name
+- one swatch cell per shade: a colored square with the shade name and hex below it
+- no external dependencies, no JavaScript
+
+Extract only `theme.name`, `color.name`, `shade.name`, and `shade.hex` from the palette data. Do not inspect other color-space fields.
+
+Minimal template:
+
+```html
+<div style="font-family:sans-serif;padding:16px">
+  <h2 style="margin:0 0 4px">Palette name — OKLCH</h2>
+
+  <h3 style="margin:16px 0 8px">Light</h3>
+  <div style="margin-bottom:12px">
+    <div style="font-size:11px;color:#666;margin-bottom:4px">primary</div>
+    <div style="display:flex;gap:4px">
+      <div style="text-align:center">
+        <div style="width:48px;height:48px;background:#EFF6FF;border-radius:4px"></div>
+        <div style="font-size:10px;margin-top:2px">50</div>
+        <div style="font-size:9px;color:#888">#EFF6FF</div>
+      </div>
+      <!-- repeat per shade -->
+    </div>
+  </div>
+</div>
+```
+
+Render the HTML artifact immediately after palette generation, before the phase question.
+
+#### Text fallback
+
+If an HTML artifact cannot be rendered, fall back to a compact text summary:
 
 ```
 Palette “Brand System” — OKLCH — Material scale
 
 Light theme
-  primary   #3B82F6   50 · 100 · 200 · 300 · [400 #60A5FA] · 500 · 600 · 700 · 800 · 900
-  neutral   #6B7280   50 · 100 · 200 · 300 · [400 #9CA3AF] · 500 · 600 · 700 · 800 · 900
+  primary   #3B82F6   50 · 100 · 200 · 300 · [500 #3B82F6] · 600 · 700 · 800 · 900
+  neutral   #6B7280   50 · 100 · 200 · 300 · [500 #6B7280] · 600 · 700 · 800 · 900
 ```
-
-For the visual preview, extract only `theme.name`, `color.name`, `shade.name`, and `shade.hex`. Do not inspect other color-space fields.

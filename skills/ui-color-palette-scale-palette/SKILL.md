@@ -12,6 +12,56 @@ Code export is handled by `ui-color-palette-generate-code`. Design tool deployme
 
 ---
 
+## Step 0 — Gather parameters
+
+**Ask these questions before calling `get_full_palette`.** Do not call the tool until all required answers are collected. Stop after each question if the user hasn’t answered it yet.
+
+### Required
+
+**1. Palette name**
+> What should this palette be called?
+
+**2. Source colors**
+> List the colors to include. For each one, provide:
+> - A role name (e.g. `primary`, `neutral`, `accent`, `error`)
+> - A hex value (e.g. `#3B82F6`)
+>
+> You can add as many colors as you like.
+
+**3. Color space**
+> Which color space should be used to compute the shades?
+> - **OKLCH** — perceptually uniform, recommended for modern systems
+> - **LCH** — perceptually uniform, wider browser support
+> - **OKLAB** — perceptually uniform, no hue rotation
+> - **HSL** — classic HSL (not perceptually uniform)
+> - **P3** — wide-gamut Display P3
+
+**4. Scale preset**
+> Which stop structure should be used?
+> - **Material** — 50–1000, 10 stops
+> - **Tailwind** — 50–950, 11 stops
+> - **Ant Design** — 1–10, 10 stops
+> - **Radix** — 1–12, 12 stops
+
+**5. Themes**
+> How many themes do you need?
+> - **Light only**
+> - **Light + Dark**
+> - **Custom** — describe the themes you want
+
+### Optional (use defaults if not specified)
+
+| Parameter | Default |
+| --------- | ------- |
+| Algorithm version | `v3` |
+| Chroma shift | `100` (no change) |
+| Hue shift | `0` (no rotation) |
+| Source colors locked | `false` |
+
+Once all required answers are collected, build the `get_full_palette` input and proceed to Step 1.
+
+---
+
 ## Step 1 — Build the palette
 
 **Tool**: `get_full_palette`

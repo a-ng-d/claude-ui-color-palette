@@ -10,6 +10,8 @@ Use the **ui-color-palette** MCP tool `generate_code` to export a `PaletteData` 
 
 The `PaletteData` JSON comes from a previous `get_full_palette` call. It must be passed **as-is** — do not read, summarize, or transform it.
 
+**Reuse rule**: If `PaletteData` is already present in the conversation context from a prior palette build step, use it directly. **Never call `get_full_palette` again** just to obtain it — regenerating the palette is expensive and may produce different results.
+
 ---
 
 ## Tool — `generate_code`
