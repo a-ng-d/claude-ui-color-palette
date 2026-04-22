@@ -66,10 +66,16 @@ If the caller needs validation after generation:
 
 If the caller needs design-tool synchronization after generation:
 
-- hand off to the appropriate platform workflow for Figma, Penpot, Sketch, or Framer
+- hand off to `ui-color-palette-figma` for Figma
+- hand off to `ui-color-palette-penpot` for Penpot
+- hand off to `ui-color-palette-framer` for Framer
+- hand off to `ui-color-palette-sketch` for Sketch
 
 ---
 
 ## Uses skills
 
-- **`ui-color-palette-scale-palette`** — primary skill for palette generation, `PaletteData` normalization, projection selection, and code/token format export
+- **`ui-color-palette-scale-palette`** — palette generation and `PaletteData` normalization
+- **`ui-color-palette-generate-code`** — code and token export in all supported formats (CSS, SCSS, Tailwind, DTCG, etc.)
+- **`gh-cli`** — create branches, commits, and pull requests on GitHub after code generation
+- **`gitlab-cli-skills`** — create branches, commits, and merge requests on GitLab after code generation

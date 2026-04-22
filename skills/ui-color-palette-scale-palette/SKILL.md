@@ -1,12 +1,14 @@
 ---
 name: ui-color-palette-scale-palette
-description: Build a full color palette from source colors and export it as code or design tokens. Uses get_full_palette to generate scales and themes, then generate_code to output in any format (CSS, SCSS, Tailwind, SwiftUI, Compose, DTCG, etc.). Use when the user wants to create a complete palette and export it for development.
-argument-hint: <format> [color-space]
+description: Build a full color palette from source colors. Uses get_full_palette to generate scales and themes, then previews the result visually. Use when the user wants to create a complete palette before auditing, exporting, or deploying it.
+argument-hint: <color-space>
 ---
 
-# Create & Deploy Palette
+# Build Palette
 
-Use the **ui-color-palette** MCP tools `get_full_palette` and `generate_code` to build a complete palette, preview it visually, and export it as code.
+Use the **ui-color-palette** MCP tool `get_full_palette` to build a complete palette, then preview it visually.
+
+Code export is handled by `ui-color-palette-generate-code`. Design tool deployment is handled by `ui-color-palette-figma`, `ui-color-palette-penpot`, `ui-color-palette-framer`, and `ui-color-palette-sketch`.
 
 ---
 
@@ -188,43 +190,6 @@ If direct write-back tooling is available for the target design tool, use it. Ot
 
 ---
 
-## Step 2 — Export as code
-
-**Tool**: `generate_code`
-
-| Parameter | Type | Required | Description |
-| --------- | ---- | -------- | ----------- |
-| `paletteData` | object | Yes | The `PaletteData` object returned by `get_full_palette` |
-| `format` | enum | No | Output format (default: `css`) — see table below |
-| `colorSpace` | enum | No | Color space for output values (default: `RGB`) |
-
-### `format` values
-
-| Value | Description | `colorSpace` used? |
-| ----- | ----------- | ------------------ |
-| `css` | CSS custom properties (`--color-name: value`) | Yes |
-| `scss` | SCSS variables (`$color-name: value`) | Yes |
-| `less` | Less variables (`@color-name: value`) | Yes |
-| `tailwind-v3` | Tailwind CSS v3 `theme.extend.colors` config | No |
-| `tailwind-v4` | Tailwind CSS v4 `@theme` block | No |
-| `swift-ui` | SwiftUI `Color` extensions | No |
-| `ui-kit` | UIKit `UIColor` extensions | No |
-| `compose` | Jetpack Compose `Color()` constants | No |
-| `resources` | Android XML color resources | No |
-| `csv` | CSV spreadsheet (name, hex, rgb columns) | No |
-| `native-tokens` | Native JSON token format | No |
-| `dtcg-tokens` | DTCG (Design Tokens Community Group) JSON | Yes |
-| `style-dictionary-v3` | Style Dictionary v3 token format | No |
-| `universal-json` | Universal JSON (flat key/value) | No |
-
-### `colorSpace` values
-
-`RGB` · `LCH` · `LAB` · `HSL` · `OKLCH` · `OKLAB` · `P3`
-
-Only applies to `css`, `scss`, `less`, and `dtcg-tokens`. Other formats use their own fixed color representation.
-
----
-
 ## Workflow
 
 1. Collect source colors from the user or from a previous **generate-source-colors** step.
@@ -236,30 +201,25 @@ Only applies to `css`, `scss`, `less`, and `dtcg-tokens`. Other formats use thei
   - `shade.name`
   - `shade.hex`
   - preferred text color if it can be inferred from `textColorsTheme` or audit data
-5. **Ask the user what to do next.** Exporting as code is not the only option. The user may want to:
+5. **Ask the user what to do next.** Building the palette is not the end. The user may want to:
   - **Preview the palette visually** first — render a swatch matrix grouped by theme and color
-  - **Generate it in a design tool** — route to Figma, Penpot, or Sketch workflows
-   - **Audit the palette** first — use the **audit-palette** skill to check contrast and accessibility before exporting.
-   - **Publish the palette** — use the **manage-palettes** skill to save it to the database and optionally share it with the community.
-  - **Export as code** — continue to step 6.
-6. If exporting as code, ask the user which format(s) and color space they want.
-7. Call `generate_code` with the raw `PaletteData` from step 2 and the desired `format`/`colorSpace`.
-8. Present the generated code in a fenced code block with the appropriate language tag.
-9. Offer to write the output to a file in the project.
+  - **Generate it in a design tool** — route to `ui-color-palette-figma`, `ui-color-palette-penpot`, `ui-color-palette-framer`, or `ui-color-palette-sketch`
+  - **Audit the palette** first — use `ui-color-palette-audit-palette` to check contrast and accessibility
+  - **Publish the palette** — use `ui-color-palette-manage-palettes` to save it to the platform
+  - **Export as code** — hand off to `ui-color-palette-generate-code`
 
 ## Arguments
 
-`$ARGUMENTS` can be a format, a format + color space, or a description of the target.
+`$ARGUMENTS` can be a color space or a description of the palette context.
 
-- `/ui-color-palette:scale-palette tailwind-v4`
-- `/ui-color-palette:scale-palette css oklch`
-- `/ui-color-palette:scale-palette dtcg-tokens P3`
-- `/ui-color-palette:scale-palette scss variables for my design system`
+- `/ui-color-palette:scale-palette oklch`
+- `/ui-color-palette:scale-palette tailwind stops for my design system`
+- `/ui-color-palette:scale-palette material dark and light themes`
 
 ## Tips
 
-- **Token efficiency**: Never read, print, or summarize the `PaletteData` JSON. It contains dozens of color shades with multiple color space values each. Always pass it opaquely to `generate_code`.
-- **Visual preview efficiency**: For previews, do not inspect every color-space value. Extract only `theme.name`, `color.name`, `shade.name`, and `shade.hex`, plus preferred text color when available.
+- **Token efficiency**: Never read, print, or summarize the `PaletteData` JSON. It contains dozens of color shades with multiple color-space values each. Pass it opaquely to downstream skills.
+- **Visual preview efficiency**: For previews, extract only `theme.name`, `color.name`, `shade.name`, and `shade.hex`, plus preferred text color when available.
 - **Hex to rgb conversion**: Divide each 0–255 channel by 255 to get the 0–1 value. E.g. `#3B82F6` → `r: 59/255 = 0.23`, `g: 130/255 = 0.51`, `b: 246/255 = 0.96` → `{ r: 0.23, g: 0.51, b: 0.96 }`.
 - **Scale computation**: If the user doesn't provide a `scale` object, compute it from the preset: distribute lightness values between `min` (darkest) and `max` (lightest) across `stops` using the `easing` function. First stop → `max`, last stop → `min`.
 - **Design-first requests**: If the user asks for a board, canvas, style tiles, swatches, or a document preview, prioritize the visual/design-tool route before code export.
@@ -268,13 +228,11 @@ Only applies to `css`, `scss`, `less`, and `dtcg-tokens`. Other formats use thei
 - Suggest `tailwind-v4` over `tailwind-v3` for new projects.
 - Use `OKLCH` or `P3` color spaces for wide-gamut displays.
 - The `paletteData` input to `generate_code` must be the full object from `get_full_palette` — it contains `name`, `description`, `themes` (with color scales), and `type`.
-- This skill combines well with **generate-source-colors** (generate colors first, then build + export here), **audit-palette** (check readability before export), and **manage-palettes** (publish the palette after building).
+- This skill combines well with `ui-color-palette-generate-source-colors` (generate colors first, then build here), `ui-color-palette-audit-palette` (check readability after building), `ui-color-palette-generate-code` (export as code), and `ui-color-palette-manage-palettes` (publish after building).
 
 ---
 
-## Recommended subagent
+## Recommended subagents
 
-Delegate this skill to **`palette-codegen`** for code and token export, or to **`palette-transitioner`** when the target is a design tool or document artifact.
-
-- **`palette-codegen`** — normalizes `PaletteData`, selects the right projection, and generates code in the requested format (CSS, SCSS, Tailwind, DTCG, etc.)
-- **`palette-transitioner`** — converts `PaletteData` into `variableRows`, `tokenRows`, `styleRows`, `swatchRows`, or `previewRows` before routing to a platform workflow
+- **`palette-codegen`** — normalizes `PaletteData` and generates code/tokens; use after this skill when code export is needed
+- **`palette-transitioner`** — converts `PaletteData` into `variableRows`, `tokenRows`, `styleRows`, or `swatchRows` before routing to a platform workflow

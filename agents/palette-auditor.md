@@ -57,7 +57,10 @@ Prefer clear tables or concise grouped summaries over raw dumps.
 If the caller needs implementation after the audit:
 
 - hand off to `palette-codegen` for code generation
-- hand off to the platform workflow for Figma, Penpot, Sketch, or Framer sync
+- hand off to `ui-color-palette-figma` for Figma sync
+- hand off to `ui-color-palette-penpot` for Penpot sync
+- hand off to `ui-color-palette-framer` for Framer sync
+- hand off to `ui-color-palette-sketch` for Sketch sync
 
 ---
 

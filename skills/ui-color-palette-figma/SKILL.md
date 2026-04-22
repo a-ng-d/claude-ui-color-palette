@@ -1,12 +1,19 @@
 ---
 name: ui-color-palette-figma
-description: Entry point for UI Color Palette workflows targeting Figma. Use to choose between variables, styles, and document preview generation.
-argument-hint: <variables|styles|tokens|preview>
+description: Entry point for UI Color Palette workflows targeting Figma. Use to choose between variables and styles generation.
+argument-hint: <variables|styles>
 ---
 
 # UI Color Palette Figma
 
 Use this folder as the platform entry point for all **UI Color Palette → Figma** workflows.
+
+Figma does not have a native token format. The canonical artifacts in Figma are:
+
+- **Variables** — the primary token system (modes, themes, value bindings)
+- **Styles** — the visual/application layer (paint styles, swatch reuse)
+
+For design token formats (DTCG, Style Dictionary, etc.), use `ui-color-palette-generate-code` instead.
 
 ## Folder structure
 
@@ -36,9 +43,11 @@ Do not start from raw API calls. Start from the workflow structure.
 
 Choose the sub-skill by user intent:
 
-- “variables”, “tokens”, “modes”, “theme variables” → `references/generate-variables.md`
-- “paint styles”, “local styles”, “style library”, “swatches” → `references/generate-styles.md`
-- “full handoff”, “everything in Figma”, “variables + styles + preview” → `references/generate-tokens.md`
+- "variables", "modes", "theme variables" → `references/generate-variables.md`
+- "paint styles", "local styles", "style library", "swatches" → `references/generate-styles.md`
+- "full handoff", "everything in Figma", "variables + styles + preview" → `references/generate-tokens.md`
+
+If the user asks for "tokens" in the context of Figma, clarify that Figma does not have a native token format and route to variables instead. If they want exportable design tokens, route to `ui-color-palette-generate-code`.
 
 ## Platform API references
 

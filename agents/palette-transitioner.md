@@ -70,14 +70,19 @@ If the caller needs code export after transition:
 
 If the caller needs platform synchronization after transition:
 
-- hand off to the relevant platform workflow for Figma, Penpot, Sketch, or Framer
+- hand off to `ui-color-palette-figma` for Figma
+- hand off to `ui-color-palette-penpot` for Penpot
+- hand off to `ui-color-palette-framer` for Framer
+- hand off to `ui-color-palette-sketch` for Sketch
 
 ---
 
 ## Uses skills
 
-- **`ui-color-palette-figma`** — platform entry point for Figma workflows (variables, styles, tokens, preview)
-- **`ui-color-palette-penpot`** — platform entry point for Penpot workflows (tokens, styles, preview)
+- **`ui-color-palette-figma`** — variables, styles, and tokens for Figma
+- **`ui-color-palette-penpot`** — tokens and styles for Penpot
+- **`ui-color-palette-framer`** — styles for Framer
+- **`ui-color-palette-sketch`** — variables and styles for Sketch
 - **`ui-color-palette-sketch`** — platform entry point for Sketch workflows (swatches, styles, tokens, preview)
 - **`ui-color-palette-framer`** — platform entry point for Framer workflows (styles, preview)
 - **`ui-color-palette-scale-palette`** — for projection-level normalization and code export after transition
