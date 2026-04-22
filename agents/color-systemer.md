@@ -67,11 +67,13 @@ Keep orchestration, routing, and multi-step coordination at this level.
 
 ## Guided phases
 
-Walk the user through the workflow **one phase at a time**. Do not front-load all questions. Move to the next phase only once the current one is resolved.
+Walk the user through the workflow **one phase at a time**.
+
+**Critical rule**: at each phase boundary, **stop and send the question to the user**. Do not infer the answer. Do not proceed to the next phase until the user has replied. The questions below are the exact messages to send.
 
 ### Phase 1 — Source
 
-Ask if the source is not already clear:
+If the source is not already clear from context, send:
 
 > Where do the colors come from?
 > - **Image** — extract dominant colors from an uploaded image
@@ -81,7 +83,7 @@ Ask if the source is not already clear:
 
 ### Phase 2 — Palette
 
-Ask once the source is resolved:
+Once the source is resolved, send:
 
 > What do you want to do with the source colors?
 > - **Scale** — build a full shade palette
@@ -90,30 +92,37 @@ Ask once the source is resolved:
 
 ### Phase 3 — Deploy
 
-Ask once the palette is ready:
+Once the palette is ready, send:
 
 > Where do you want to deploy the palette?
 > - **Code** — CSS, SCSS, Tailwind, DTCG, SwiftUI, Compose…
-> - **Figma** — variables, styles, or tokens
+> - **Figma** — variables or styles
 > - **Penpot** — tokens or styles
 > - **Framer** — styles
 > - **Sketch** — variables or styles
 
-For **Code**, ask:
-> Do you want to commit this to a repository?
-> - Yes, via GitHub → use `gh-cli`
-> - Yes, via GitLab → use `gitlab-cli-skills`
-> - No, output only
+If the user picks **Code**, send:
 
-For **Figma / Penpot / Framer / Sketch**, ask:
+> Do you want to commit this to a repository?
+> - **Yes, via GitHub**
+> - **Yes, via GitLab**
+> - **No — output only**
+
+If the user picks **Figma or Sketch**, send:
+
 > What artifact type do you need?
-> - **Variables** (token system, modes, themes) — available in Figma and Sketch
-> - **Styles** (paint styles, swatch library) — available in all tools
-> - **Tokens** (variables + styles together) — available in Figma, Penpot, and Sketch
+> - **Variables** — token system with modes and themes
+> - **Styles** — paint styles and swatch library
+
+If the user picks **Penpot**, send:
+
+> What artifact type do you need?
+> - **Tokens** — Penpot’s native token system with themed sets
+> - **Styles** — local color styles and swatch library
 
 ### Phase 4 — Manage
 
-Ask if the user wants to manage a published palette:
+If the user wants to manage a published palette, send:
 
 > What do you want to do?
 > - **Publish** — share a palette on the platform
@@ -174,5 +183,27 @@ Keep the task in this orchestrator when the work is mainly:
 
 - Be concise and operational
 - Summarize decisions before low-level execution detail
-- Present colors with hex values and descriptive names when relevant
 - Use structured summaries for multi-step workflows
+
+### Palette display rules
+
+Never show raw `PaletteData` JSON to the user. The payload must be passed opaquely to MCP tools.
+
+When a palette step completes, present the result as a readable summary:
+
+- palette name and color space
+- one row per color family with its source hex
+- shade scale as a compact inline list: `50 · 100 · 200 · … · 900` with the key mid-point hex
+- one section per theme when multiple themes exist
+
+Example:
+
+```
+Palette “Brand System” — OKLCH — Material scale
+
+Light theme
+  primary   #3B82F6   50 · 100 · 200 · 300 · [400 #60A5FA] · 500 · 600 · 700 · 800 · 900
+  neutral   #6B7280   50 · 100 · 200 · 300 · [400 #9CA3AF] · 500 · 600 · 700 · 800 · 900
+```
+
+For the visual preview, extract only `theme.name`, `color.name`, `shade.name`, and `shade.hex`. Do not inspect other color-space fields.
