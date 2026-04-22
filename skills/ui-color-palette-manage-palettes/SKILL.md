@@ -130,7 +130,18 @@ Permanently delete a palette.
 ### Browse palettes
 
 1. Call `list_published_palettes` with optional `search` and `page`/`limit`.
-2. Present results as a table with name, creator, and color preview swatches.
+2. Generate an HTML card list (see **Visual display** below) — never show raw JSON.
+
+### Load a palette for reuse
+
+1. Call `get_published_palette` with the `paletteId`.
+2. Generate an HTML detail card (see **Visual display** below).
+3. **Session state**: store the result as the `PublishedPaletteConfig` slot. It contains `colors`, `preset`, `shift`, `themes`, `color_space`, and `algorithm_version` — all the parameters needed to call `get_full_palette`.
+4. Confirm to the user:
+
+   > Palette **"Name"** loaded. You can now scale it, export code, or push it to a design tool — I'll use this configuration automatically.
+
+`ui-color-palette-scale-palette` will detect the `PublishedPaletteConfig` slot and skip its Step 0 questions, going straight to the palette build.
 
 ### Publish a palette
 
@@ -144,6 +155,90 @@ Permanently delete a palette.
 
 1. Authenticate if needed.
 2. Call `update_published_palette` with `paletteId` and only the fields to change.
+
+---
+
+## Visual display
+
+Never show raw JSON for any palette response. Always generate an HTML artifact.
+
+The source colors in published palettes are the **seed colors** (not the full shade ramp). Display them as color chips using `colors[i].name` as the label and the closest hex field as the background.
+
+### After `list_published_palettes` or `list_my_published_palettes`
+
+One card per palette. Cards are stacked vertically. Each card shows:
+
+- palette name
+- color space, preset name, theme count, and visibility badge
+- one color chip per source color
+- palette ID
+
+```html
+<div style="font-family:sans-serif;padding:16px;display:flex;flex-direction:column;gap:12px">
+
+  <div style="border:1px solid #e5e7eb;border-radius:8px;padding:12px">
+    <div style="font-weight:600;font-size:14px;margin-bottom:2px">Ocean Breeze</div>
+    <div style="font-size:11px;color:#888;margin-bottom:8px">OKLCH &middot; Material &middot; 2 themes &middot; [public]</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <div style="text-align:center">
+        <div style="width:40px;height:40px;background:#2563EB;border-radius:4px"></div>
+        <div style="font-size:9px;color:#555;margin-top:2px">primary</div>
+      </div>
+      <div style="text-align:center">
+        <div style="width:40px;height:40px;background:#6B7280;border-radius:4px"></div>
+        <div style="font-size:9px;color:#555;margin-top:2px">neutral</div>
+      </div>
+      <!-- repeat per colors[] entry -->
+    </div>
+    <div style="font-size:10px;color:#bbb;margin-top:8px">ID: abc123</div>
+  </div>
+
+  <!-- repeat per palette -->
+
+</div>
+```
+
+### After `get_published_palette`
+
+A single detail card with larger chips and the palette description. Render this **before** the session state confirmation message.
+
+```html
+<div style="font-family:sans-serif;padding:16px;max-width:520px">
+  <h2 style="margin:0 0 4px;font-size:18px">Ocean Breeze</h2>
+  <p style="margin:0 0 10px;color:#555;font-size:13px">A cool ocean-inspired palette.</p>
+  <div style="font-size:11px;color:#888;margin-bottom:14px">
+    OKLCH &middot; Material &middot; Light + Dark &middot; v3 &middot; [private]
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <div style="text-align:center">
+      <div style="width:56px;height:56px;background:#2563EB;border-radius:6px"></div>
+      <div style="font-size:10px;margin-top:4px">primary</div>
+      <div style="font-size:9px;color:#888">#2563EB</div>
+    </div>
+    <div style="text-align:center">
+      <div style="width:56px;height:56px;background:#6B7280;border-radius:6px"></div>
+      <div style="font-size:10px;margin-top:4px">neutral</div>
+      <div style="font-size:9px;color:#888">#6B7280</div>
+    </div>
+    <!-- repeat per colors[] entry -->
+  </div>
+  <div style="margin-top:14px;font-size:10px;color:#bbb">ID: abc123</div>
+</div>
+```
+
+#### Text fallback
+
+If HTML cannot be rendered, show a compact list:
+
+```
+Ocean Breeze -- OKLCH - Material - Light + Dark - v3 - [private]
+  primary   #2563EB
+  neutral   #6B7280
+  success   #16A34A
+ID: abc123
+```
+
+---
 
 ## Arguments
 

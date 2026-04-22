@@ -12,7 +12,24 @@ The output of this skill is a set of `ColorConfiguration` objects (role name + h
 
 ---
 
-## Step 0 — Choose a source mode
+## Step 0 — Check for existing SourceColors
+
+**Before asking anything**, check whether a `SourceColors` slot is already populated in the conversation context.
+
+If `SourceColors` exists, send:
+
+> I already have these source colors from earlier in this session:
+>
+> - `primary` — #3B82F6
+> - `neutral` — #6B7280
+>
+> Do you want to **reuse them**, **add more colors**, or **start fresh**?
+
+Stop and wait for the reply. Only proceed to source mode selection if the user chooses to start fresh or add more.
+
+---
+
+## Step 1 — Choose a source mode
 
 If the mode is not already clear from context, send:
 
@@ -165,6 +182,8 @@ Source colors ready:
   neutral   #6B7280
   accent    #F59E0B
 ```
+
+**Session state**: Store this result as the `SourceColors` slot. It will be reused automatically by `ui-color-palette-scale-palette` — the user will not need to re-enter the colors.
 
 Then hand off to `ui-color-palette-scale-palette` to build the full palette.
 

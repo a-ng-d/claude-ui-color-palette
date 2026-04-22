@@ -140,6 +140,25 @@ If the user wants to manage a published palette, send:
 7. **Format awareness**: When exporting code, confirm the target framework. Prefer Tailwind v4 for new projects, DTCG for design token interoperability.
 8. **PaletteData persistence**: Once `get_full_palette` has been called and `PaletteData` is in context, treat it as the active palette for all subsequent steps (code export, design tool sync, audit, publish). Never call `get_full_palette` again unless the user explicitly asks to rebuild or change the palette.
 
+## Session state
+
+The conversation context acts as a lightweight session store. Three named slots are maintained across the full workflow:
+
+| Slot | Set by | Type | Used by |
+| ---- | ------ | ---- | ------- |
+| `SourceColors` | `ui-color-palette-generate-source-colors` | `ColorConfiguration[]` | `ui-color-palette-scale-palette` |
+| `PublishedPaletteConfig` | `ui-color-palette-manage-palettes` | stored palette config (colors, preset, themes, color_space, algorithm_version) | `ui-color-palette-scale-palette` — auto-fills all Step 0 parameters |
+| `PaletteData` | `ui-color-palette-scale-palette` | `PaletteData` object | `generate-code`, `figma`, `penpot`, `framer`, `sketch`, `audit`, `manage` |
+| `GeneratedCode[format]` | `ui-color-palette-generate-code` | string per format | re-display without re-calling |
+
+**Recycling rule**: Before calling any MCP tool, check whether the relevant slot is already populated in context. If it is, reuse the existing value. Only regenerate if:
+- the user explicitly asks to rebuild or change the palette
+- the user changes a parameter (color, preset, format, color space)
+- the previous output is no longer valid (e.g. source colors were updated)
+
+When reusing a slot, confirm to the user:
+> Using the palette already built in this session. Let me know if you want to change anything.
+
 ## Delegation rules
 
 Delegate to `palette-auditor` when:
@@ -188,11 +207,17 @@ Keep the task in this orchestrator when the work is mainly:
 
 ### Palette display rules
 
-Never show raw `PaletteData` JSON to the user. The payload must be passed opaquely to MCP tools.
+Never show raw palette JSON to the user. Any palette payload must be passed opaquely to MCP tools.
 
-When a palette step completes, **always generate an HTML swatch preview** before asking what to do next. This lets the user see and validate the palette visually before any deployment step.
+**Always generate an HTML artifact** after any palette operation — generation, retrieval, or listing — before asking what to do next. The format differs by source:
 
-#### HTML swatch preview
+- **Full palette** (`PaletteData` from `scale-palette`): shade ramp grid — one row per color family, one cell per shade with name and hex
+- **Published palette list** (`list_published_palettes`, `list_my_published_palettes`): one card per palette with source color chips, color space, preset, theme count, and visibility badge
+- **Published palette detail** (`get_published_palette`): single detail card with larger chips, description, and metadata
+
+See `ui-color-palette-manage-palettes` for the list and detail HTML templates.
+
+#### HTML swatch preview (full palette)
 
 Generate a self-contained HTML artifact with inline styles. Structure:
 

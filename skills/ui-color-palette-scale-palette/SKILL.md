@@ -12,6 +12,58 @@ Code export is handled by `ui-color-palette-generate-code`. Design tool deployme
 
 ---
 
+## Pre-flight — Check session state
+
+Before asking any questions, check the conversation context for existing slots.
+
+### If `PaletteData` is already in context
+
+Send:
+
+> I already have a palette built in this session (**Palette name** — OKLCH — Material scale).
+> Do you want to **reuse it**, **adjust parameters and rebuild**, or **start from scratch**?
+
+Stop and wait. If the user chooses to reuse, skip all steps and go directly to the visual preview and the next-phase question.
+
+### If `PublishedPaletteConfig` is already in context
+
+The user has loaded a published palette. Its configuration contains all the parameters needed for `get_full_palette`. **Skip Step 0 entirely** and go straight to Step 1.
+
+Send:
+
+> I have the published palette “**Name**” loaded. Building the full shade scale now…
+
+Map the `PublishedPaletteConfig` fields to the `get_full_palette` input:
+
+| `PublishedPaletteConfig` field | maps to |
+| ------------------------------ | ------- |
+| `name` | `base.name` |
+| `description` | `base.description` |
+| `preset` | `base.preset` |
+| `shift` | `base.shift` |
+| `are_source_colors_locked` | `base.areSourceColorsLocked` |
+| `colors` | `base.colors` |
+| `color_space` | `base.colorSpace` |
+| `algorithm_version` | `base.algorithmVersion` |
+| `themes` | `themes` |
+
+Call `get_full_palette` immediately with these mapped values.
+
+---
+
+### If `SourceColors` is already in context
+
+The source colors step is already done. At **Step 0**, skip question 2 (source colors) and display the existing colors for confirmation:
+
+> I already have these source colors:
+>
+> - `primary` — #3B82F6
+> - `neutral` — #6B7280
+>
+> I’ll use these for the palette. Do you want to keep them or change any?
+
+---
+
 ## Step 0 — Gather parameters
 
 **Ask these questions before calling `get_full_palette`.** Do not call the tool until all required answers are collected. Stop after each question if the user hasn’t answered it yet.
@@ -245,6 +297,7 @@ If direct write-back tooling is available for the target design tool, use it. Ot
 1. Collect source colors from the user or from a previous **generate-source-colors** step.
 2. Call `get_full_palette` with a `BaseConfiguration` and at least one `ThemeConfiguration` to generate the full palette with scales.
 3. **Do NOT read or summarize the full `PaletteData` result.** The response is a large JSON object with many color values — reading it wastes tokens.
+   **Session state**: Store the result as the `PaletteData` slot. All subsequent skills (`generate-code`, `figma`, `penpot`, `framer`, `sketch`, `audit`, `manage`) will reuse it without calling `get_full_palette` again.
 4. If the user asks for a visual preview, design handoff, or document generation, extract only the fields needed for a swatch matrix:
   - `theme.name`
   - `color.name`

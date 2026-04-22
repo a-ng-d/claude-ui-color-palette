@@ -20,6 +20,18 @@ For design token formats (DTCG, Style Dictionary, etc.), use `ui-color-palette-g
 - `SKILL.md` at the root is the platform index
 - `references/` contains the detailed operational sub-skills
 
+## Reuse rule
+
+**Before calling any MCP tool**, check whether `PaletteData` is already present in the conversation context.
+
+If it is, use it directly — **never call `get_full_palette` again**. Confirm to the user:
+
+> Using the palette already built in this session. Generating Figma artifacts now.
+
+Only rebuild the palette if the user explicitly asks to change colors, preset, or themes.
+
+---
+
 ## Structure-first rule
 
 This platform skill is primarily a routing and orchestration layer.

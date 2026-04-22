@@ -36,15 +36,13 @@ When an action requires authentication, do not assume a token already exists.
 
 ## Output contract
 
-Return:
+Never show raw JSON palette responses to the user.
 
-- operation performed
-- palette ID when relevant
-- publication or visibility state
-- changed fields when updating
-- any prerequisite still missing
+- **For list operations** (`list_published_palettes`, `list_my_published_palettes`): generate an HTML artifact — one card per palette with source color chips, color space, preset, theme count, and visibility badge.
+- **For get operations** (`get_published_palette`): generate an HTML detail card with larger chips and the description, then follow with the session state confirmation.
+- **For other operations**: return a concise summary with palette ID, visibility state, changed fields, and any missing prerequisite.
 
-Prefer concise operational summaries over raw API dumps.
+Follow the HTML templates defined in `ui-color-palette-manage-palettes` exactly. Use the text fallback only when HTML cannot be rendered.
 
 ## Constraints
 
