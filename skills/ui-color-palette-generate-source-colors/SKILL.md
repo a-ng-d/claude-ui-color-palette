@@ -80,7 +80,8 @@ Then send:
 ### Step A5 — Normalize to ColorConfiguration
 
 Convert each kept color to a `ColorConfiguration` object:
-- `id` and `name` = the role name the user provided
+- `id` = omit — the server generates it automatically via `uid()`
+- `name` = the role name the user provided
 - `rgb` = divide each 0–255 channel by 255 → `{ r: R/255, g: G/255, b: B/255 }`
 - Apply defaults: `hue: { shift: 0, isLocked: false }`, `chroma: { shift: 100, isLocked: false }`, `alpha: { isEnabled: false, backgroundColor: "#FFFFFF" }`
 
