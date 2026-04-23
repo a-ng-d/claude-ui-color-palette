@@ -138,7 +138,8 @@ If the user wants to manage a published palette, send:
 5. **Platform routing**: When pushing colors to a design tool, go through the matching `ui-color-palette-<tool>` skill after the palette structure is ready.
 6. **Suggest improvements**: If contrast fails, suggest alternative shades. If a palette lacks enough variation, suggest adding tints/shades.
 7. **Format awareness**: When exporting code, confirm the target framework. Prefer Tailwind v4 for new projects, DTCG for design token interoperability.
-8. **PaletteData persistence**: Once `get_full_palette` has been called and `PaletteData` is in context, treat it as the active palette for all subsequent steps (code export, design tool sync, audit, publish). Never call `get_full_palette` again unless the user explicitly asks to rebuild or change the palette.
+8. **PaletteData persistence**: Once `get_full_palette` has been called and `PaletteData` is in context, treat it as the active palette for all subsequent steps (code export, design tool sync, audit). Never call `get_full_palette` again unless the user explicitly asks to rebuild or change the palette.
+9. **Scale is on-demand**: `ui-color-palette-scale-palette` is only needed when the user wants code export, design tool variables/tokens/styles, or an accessibility audit. Publishing a palette does **not** require scaling — `publish_palette` takes source colors and config directly.
 
 ## Session state
 
@@ -146,7 +147,7 @@ The conversation context acts as a lightweight session store. Three named slots 
 
 | Slot | Set by | Type | Used by |
 | ---- | ------ | ---- | ------- |
-| `SourceColors` | `ui-color-palette-generate-source-colors` | `ColorConfiguration[]` | `ui-color-palette-scale-palette` |
+| `SourceColors` | `ui-color-palette-generate-source-colors` | `ColorConfiguration[]` | `ui-color-palette-scale-palette`, `ui-color-palette-manage-palettes` (publish) |
 | `PublishedPaletteConfig` | `ui-color-palette-manage-palettes` | stored palette config (colors, preset, themes, color_space, algorithm_version) | `ui-color-palette-scale-palette` — auto-fills all Step 0 parameters |
 | `PaletteData` | `ui-color-palette-scale-palette` | `PaletteData` object | `generate-code`, `figma`, `penpot`, `framer`, `sketch`, `audit`, `manage` |
 | `GeneratedCode[format]` | `ui-color-palette-generate-code` | string per format | re-display without re-calling |

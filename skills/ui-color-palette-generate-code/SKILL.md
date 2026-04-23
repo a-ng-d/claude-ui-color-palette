@@ -1,16 +1,16 @@
 ---
 name: ui-color-palette-generate-code
-description: Export a PaletteData object as code or design tokens via the generate_code MCP tool. Supports CSS, SCSS, Less, Tailwind v3/v4, SwiftUI, UIKit, Compose, Android resources, DTCG, Style Dictionary, CSV, and more.
-argument-hint: <format> [color-space]
+description: Export palette configuration as code or design tokens via the generate_code MCP tool using base and themes. Supports CSS, SCSS, Less, Tailwind v3/v4, SwiftUI, UIKit, Compose, Android resources, DTCG, Style Dictionary, CSV, and more.
+argument-hint: <format> [color-space] [base+themes]
 ---
 
 # Export Palette as Code
 
-Use the **ui-color-palette** MCP tool `generate_code` to export a `PaletteData` JSON into the requested format.
+Use the **ui-color-palette** MCP tool `generate_code` to export palette configuration into the requested format.
 
-The `PaletteData` JSON comes from a previous `get_full_palette` call. It must be passed **as-is** — do not read, summarize, or transform it.
+`generate_code` now expects `base` and `themes` directly. A prior `get_full_palette` call is not required.
 
-**Reuse rule — PaletteData**: If `PaletteData` is already present in the conversation context from a prior palette build step, use it directly. **Never call `get_full_palette` again** just to obtain it — regenerating the palette is expensive and may produce different results.
+**Reuse rule — Palette Inputs**: If `base` and `themes` are already present in the conversation context, reuse them directly. Never regenerate the palette just to call `generate_code`.
 
 **Reuse rule — GeneratedCode**: If code has already been generated for the requested format in this session, display it directly without calling `generate_code` again. Only regenerate if the user explicitly asks for a fresh export or changes a parameter (format, color space).
 
@@ -20,7 +20,8 @@ The `PaletteData` JSON comes from a previous `get_full_palette` call. It must be
 
 | Parameter | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `paletteData` | object | Yes | The `PaletteData` JSON from `get_full_palette` |
+| `base` | object | Yes | Base palette configuration |
+| `themes` | array | Yes | Theme configurations (light/dark or other modes) |
 | `format` | enum | No | Output format (default: `css`) |
 | `colorSpace` | enum | No | Color space for output values (default: `RGB`) |
 
@@ -50,11 +51,12 @@ The `PaletteData` JSON comes from a previous `get_full_palette` call. It must be
 ## Workflow
 
 1. Ask which `format` (and `colorSpace` if applicable) if not already specified.
-2. Call `generate_code` with the `PaletteData` and chosen parameters.
-3. Present the output in a fenced code block, then offer to write it to a file or open a PR via `gh-cli` / `gitlab-cli-skills`.
+2. Confirm `base` and `themes` are available. If missing, ask for them or recover them from prior palette configuration context.
+3. Call `generate_code` with `base`, `themes`, and chosen parameters.
+4. Present the output in a fenced code block, then offer to write it to a file or open a PR via `gh-cli` / `gitlab-cli-skills`.
 
 **Format hints**: prefer `tailwind-v4` over v3 for new projects — prefer `dtcg-tokens` for token interoperability.
 
 Delegate this skill to **`palette-codegen`** for multi-format or normalized projection workflows.
 
-- **`palette-codegen`** — normalizes `PaletteData`, selects the right projection, and generates code in the requested format
+- **`palette-codegen`** — validates `base` and `themes`, selects the right projection, and generates code in the requested format

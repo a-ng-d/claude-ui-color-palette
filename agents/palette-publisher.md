@@ -38,11 +38,9 @@ When an action requires authentication, do not assume a token already exists.
 
 Never show raw JSON palette responses to the user.
 
-- **For list operations** (`list_published_palettes`, `list_my_published_palettes`): generate an HTML artifact — one card per palette with source color chips, color space, preset, theme count, and visibility badge.
-- **For get operations** (`get_published_palette`): generate an HTML detail card with larger chips and the description, then follow with the session state confirmation.
+- **For list operations** (`list_published_palettes`, `list_my_published_palettes`): display palette names with ANSI source color blocks — follow the format defined in `ui-color-palette-manage-palettes`.
+- **For get operations** (`get_published_palette`): display ANSI source color blocks with full metadata, then follow with the session state confirmation.
 - **For other operations**: return a concise summary with palette ID, visibility state, changed fields, and any missing prerequisite.
-
-Follow the HTML templates defined in `ui-color-palette-manage-palettes` exactly. Use the text fallback only when HTML cannot be rendered.
 
 ## Constraints
 
@@ -52,13 +50,13 @@ Follow the HTML templates defined in `ui-color-palette-manage-palettes` exactly.
 
 ## Handoff guidance
 
-If the caller needs palette generation before publication:
+**Publishing does not require scaling.** The `publish_palette` payload takes source colors and configuration directly (`colors`, `preset`, `shift`, `themes`, `color_space`, `algorithm_version`) — no `PaletteData` or `get_full_palette` call is needed.
 
-- hand off to the generation workflow first
+Only hand off to other agents when the user explicitly requests it:
 
-If the caller needs audit or code generation before publication:
-
-- hand off to `palette-auditor` or `palette-codegen` before publishing
+- **Audit before publishing** — hand off to `palette-auditor` first
+- **Code or tokens before publishing** — hand off to `palette-codegen` first
+- **Scale (full shade ramp)** — only if the user asks to see or use the full palette; hand off to `ui-color-palette-scale-palette`
 
 ---
 
