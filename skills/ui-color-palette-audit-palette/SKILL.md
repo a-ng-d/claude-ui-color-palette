@@ -87,22 +87,15 @@ Controls the lightness scale distribution.
 | `isEnabled` | boolean | Whether the theme is active |
 | `type` | string | `"default theme"` or `"custom theme"` |
 
-**Returns**: A `PaletteData` object containing `name`, `description`, `themes` (with full color scales including contrast values), and `type`.
+**Returns**: A `PaletteData` object — large payload. **Read only the paths listed in the extraction budget below.** Discard all other fields immediately.
 
 ## Pre-computed contrast data
 
-Each shade in the palette data includes pre-computed contrast scores. **Do NOT recalculate contrast — just read the values from the response.**
+Each shade includes pre-computed scores. **Do NOT recalculate contrast — just read the values.**
 
-### `shade.contrast` — shade vs palette background
+**Do NOT read `shade.contrast`** (shade vs palette background) — this skill only uses `shade.textContrast` (light/dark text on shade).
 
-| Field | Path | Type | Description |
-| ----- | ---- | ---- | ----------- |
-| WCAG ratio | `contrast.wcag.ratio` | number | Contrast ratio (e.g. `4.52`) |
-| WCAG score | `contrast.wcag.score` | `"A"` \| `"AA"` \| `"AAA"` | WCAG level |
-| APCA Lc | `contrast.apca.lc` | number | Lightness contrast value |
-| APCA usage | `contrast.apca.recommendedUsage` | string | `"FLUENT_TEXT"`, `"BODY_TEXT"`, `"CONTENT_TEXT"`, `"HEADLINES"`, `"SPOT_TEXT"`, `"NON_TEXT"`, `"AVOID"`, `"UNKNOWN"` |
-
-### `shade.textContrast` — light & dark text on shade (optional, present when `textColorsTheme` is set)
+### `shade.textContrast` — light & dark text on shade (requires `textColorsTheme` set in theme)
 
 | Field | Path | Type | Description |
 | ----- | ---- | ---- | ----------- |
@@ -156,6 +149,22 @@ Light,primary,100,#E2E8F0,1.32,A,13.16,AAA,-11.5,AVOID,95.2,FLUENT_TEXT,DARK,tru
 
 This flattened representation is the preferred input for audit reasoning, summary statistics, and visualization.
 
+## Extraction budget
+
+**Maximum 6 fields read per shade. All other fields must be skipped.**
+
+| Field to read | JSON path |
+| ------------- | --------- |
+| Shade name | `shade.name` |
+| Shade hex | `shade.hex` |
+| Light WCAG ratio + score | `shade.textContrast.wcag.light.{ratio,score}` |
+| Dark WCAG ratio + score | `shade.textContrast.wcag.dark.{ratio,score}` |
+| Light APCA Lc + usage | `shade.textContrast.apca.light.{lc,recommendedUsage}` |
+| Dark APCA Lc + usage | `shade.textContrast.apca.dark.{lc,recommendedUsage}` |
+
+**Explicitly skip — do not read, do not store in context:**
+`shade.rgb` · `shade.lch` · `shade.oklch` · `shade.lab` · `shade.oklab` · `shade.hsl` · `shade.hsluv` · `shade.hsv` · `shade.cmyk` · `shade.p3` · `shade.gl` · `shade.contrast`
+
 ## Standards
 
 - **WCAG 2.1**: Contrast ratios — AA requires 4.5:1 for normal text, 3:1 for large text; AAA requires 7:1 / 4.5:1
@@ -163,19 +172,68 @@ This flattened representation is the preferred input for audit reasoning, summar
 
 ## Workflow
 
-1. Collect the palette colors from the user or from a previous generation step.
-2. Call `get_full_palette` with the palette configuration (ensure `textColorsTheme` is set in themes).
-3. **Do NOT read the full `PaletteData` JSON sequentially.** Use targeted extraction or search to read only `theme.name`, `color.name`, `shade.name`, `shade.hex`, and `shade.textContrast`.
-4. Immediately flatten the useful fields into the compact audit dataset described above. Once flattened, reason from the CSV-like rows instead of the original nested payload.
-5. For each shade, read the pre-computed scores directly — no need to recalculate:
-   - `shade.textContrast.wcag.light` / `shade.textContrast.wcag.dark` — WCAG ratio & score
-   - `shade.textContrast.apca.light` / `shade.textContrast.apca.dark` — APCA Lc & recommendation
-6. Build the **data visualization** from the flattened rows (see output format below).
-7. Compute the **global contrast score** as a consolidated percentage:
+### Step 0 — Check session state (free)
+
+**Before calling any tool**, check whether a `PaletteData` slot is already populated in the conversation context (e.g. produced by `ui-color-palette-scale-palette` in the same session).
+
+- If `PaletteData` is present → **skip to Step 3** (flatten directly). No API call needed.
+- If only `base` + `themes` are present (no `PaletteData`) → continue to Step 1.
+- If nothing is present → ask the user for the source (palette config, hex colors, or palette ID).
+
+### Step 1 — Scope the audit (before calling the API)
+
+Determine the minimum configuration required. Do not pass more themes than necessary.
+
+Ask (or infer from context):
+
+> Which theme do you want to audit?
+> - **Light** (recommended)
+> - **Dark**
+> - **Both**
+> If you do not answer, I will audit **Light** only.
+
+If the user has multiple color families and only cares about a subset, ask which ones — otherwise include all.
+
+**Important**: Pass only the scoped themes in the `themes` array. Removing unused themes significantly reduces the `get_full_palette` response size.
+
+### Step 2 — Call `get_full_palette` (targeted)
+
+Call `get_full_palette` with:
+- The full `base` configuration (unchanged)
+- Only the **selected theme(s)** in `themes` (not the full list if more exist)
+- Ensure every theme has `textColorsTheme` set (e.g. `{ lightColor: "#FFFFFF", darkColor: "#000000" }`) — required for `textContrast` to be populated
+
+### Step 3 — Stream-extract and flatten
+
+Do **not** load the full `PaletteData` into context. Traverse the response path by path and emit one CSV row per shade, then discard the raw data.
+
+Extraction pseudo-path:
+```
+for each theme in response.themes:
+  theme_name = theme.name
+  for each color in theme.colors:
+    color_name = color.name
+    for each shade in color.shades:
+      emit row: theme_name, color_name,
+                shade.name, shade.hex,
+                shade.textContrast.wcag.light.{ratio,score},
+                shade.textContrast.wcag.dark.{ratio,score},
+                shade.textContrast.apca.light.{lc,recommendedUsage},
+                shade.textContrast.apca.dark.{lc,recommendedUsage}
+      → compute best_text, wcag_pass, apca_pass, global_pass
+      → STOP reading this shade. Do not access any other field.
+```
+
+Once all rows are emitted, the raw response is no longer needed — reason only from the CSV rows.
+
+### Step 4 — Analyze and output
+
+1. Build the **data visualization** from the flattened rows (see output format below).
+2. Compute the **global contrast score** as a consolidated percentage:
    - **WCAG pass rate** = (shades where at least one of light/dark passes AA) / total shades × 100
    - **APCA pass rate** = (shades where at least one of light/dark has |Lc| ≥ 60) / total shades × 100
    - **Global score** = average of WCAG pass rate and APCA pass rate, displayed as `XX%`
-8. Flag failing pairs and provide actionable recommendations.
+3. Flag failing pairs and provide actionable recommendations.
 
 ## Arguments
 
@@ -242,13 +300,12 @@ End with the global score and recommendations.
 
 ## Tips
 
-- **Contrast data is pre-computed**: The `textContrast` field on each shade already contains WCAG and APCA scores for both light and dark text. Never instantiate `Contrast` yourself — just read the values.
-- **Extract only what you need**: When parsing the `get_full_palette` response, skip `rgb`, `gl`, `lch`, `oklch`, `lab`, `oklab`, `hsl`, `hsluv`, `hsv`, `cmyk`. Only read `name`, `hex`, `contrast`, and `textContrast`.
-- **Flatten early**: Convert the nested palette into compact rows as soon as possible. The audit should be driven by the flattened dataset, not by repeated traversal of `PaletteData`.
-- **Search is enough**: A targeted search/extraction pass on `hex`, `name`, and `textContrast` is sufficient. Do not load every shade property into context.
-- **Hex to rgb conversion**: Divide each 0–255 channel by 255 to get the 0–1 value. E.g. `#3B82F6` → `r: 59/255 = 0.23`, `g: 130/255 = 0.51`, `b: 246/255 = 0.96` → `{ r: 0.23, g: 0.51, b: 0.96 }`.
-- Ensure `textColorsTheme` is set in each theme (e.g. `{ lightColor: "#FFFFFF", darkColor: "#000000" }`) — otherwise `textContrast` will be `undefined`.
-- For quick audits of two colors, compute WCAG ratio locally instead of calling the full palette generation.
+- **6 fields max per shade**: Follow the extraction budget strictly. Never read `shade.contrast`, `shade.rgb`, `shade.lch`, `shade.oklch`, `shade.lab`, `shade.oklab`, `shade.hsl`, `shade.hsluv`, `shade.hsv`, `shade.cmyk`, `shade.gl` — they are not needed and inflate context size.
+- **Discard raw data immediately**: As soon as a shade's CSV row is produced, release the raw shade object. Reason exclusively from the flattened rows.
+- **Scope before calling**: Pass only the required theme(s) in the `themes` array. Each extra theme multiplies the response size.
+- **Re-use session state**: If `PaletteData` is already in context from a prior step, skip the API call entirely (Step 0).
+- **`textColorsTheme` is required**: Ensure every theme has `textColorsTheme` set (e.g. `{ lightColor: "#FFFFFF", darkColor: "#000000" }`) — otherwise `textContrast` will be absent and the audit cannot proceed.
+- **Hex to rgb conversion** (for `ColorConfiguration.rgb`): divide each 0–255 channel by 255. E.g. `#3B82F6` → `{ r: 0.23, g: 0.51, b: 0.96 }`.
 
 ---
 

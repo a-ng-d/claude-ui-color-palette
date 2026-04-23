@@ -10,9 +10,9 @@ Use the **ui-color-palette** MCP tools for palette lifecycle management.
 
 ## Authentication
 
-Tools marked **Auth: Yes** require a JWT access token. Obtain one by calling `start_authentication` first — it returns an `auth_url` the user must open in their browser plus tokens upon completion.
+Tools marked **Auth: Yes** require a valid OAuth 2.1 Bearer token. The MCP client handles authentication automatically via the discovery endpoint (`/.well-known/oauth-authorization-server`) — no manual token management is needed.
 
-Pass the `accessToken` as a parameter to every authenticated tool call.
+If an authenticated call fails with a 401, instruct the user to sign in through their MCP client before retrying.
 
 ---
 
@@ -46,7 +46,6 @@ List the authenticated user's own palettes.
 
 | Parameter | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `accessToken` | string | Yes | JWT from `start_authentication` |
 | `page` | number | No | Page number (default: 1) |
 | `limit` | number | No | Results per page, max 50 (default: 20) |
 | `search` | string | No | Filter palettes by name |
@@ -57,7 +56,6 @@ Publish a new palette.
 
 | Parameter | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `accessToken` | string | Yes | JWT from `start_authentication` |
 | `name` | string | Yes | Palette name |
 | `description` | string | No | Palette description |
 | `preset` | object | Yes | `PresetConfiguration` object |
@@ -75,7 +73,6 @@ Update an existing palette. All fields except `accessToken` and `paletteId` are 
 
 | Parameter | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `accessToken` | string | Yes | JWT from `start_authentication` |
 | `paletteId` | string | Yes | Unique palette identifier |
 | `name` | string | No | Updated name |
 | `description` | string | No | Updated description |
@@ -98,7 +95,6 @@ Make a palette publicly visible.
 
 | Parameter | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `accessToken` | string | Yes | JWT from `start_authentication` |
 | `paletteId` | string | Yes | Palette to share |
 
 ### `unshare_published_palette` (Auth: Yes)
@@ -107,7 +103,6 @@ Make a palette private (remove from community listing).
 
 | Parameter | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `accessToken` | string | Yes | JWT from `start_authentication` |
 | `paletteId` | string | Yes | Palette to unshare |
 
 ---
@@ -120,7 +115,6 @@ Permanently delete a palette.
 
 | Parameter | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `accessToken` | string | Yes | JWT from `start_authentication` |
 | `paletteId` | string | Yes | Palette to delete |
 
 ---
@@ -145,7 +139,7 @@ Permanently delete a palette.
 
 ### Publish a palette
 
-1. Call `start_authentication` if no token is available — instruct the user to open the returned `auth_url`.
+1. If no OAuth session is active, instruct the user to authenticate through their MCP client.
 2. Collect palette data (name, colors, themes, preset, shift, etc.).
 3. Call `publish_palette` with the full payload.
 4. Confirm publication and provide the palette ID.

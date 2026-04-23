@@ -13,6 +13,18 @@ Use this folder as the platform entry point for all **UI Color Palette → Penpo
 - `SKILL.md` at the root is the platform index
 - `references/` contains the detailed operational sub-skills
 
+## Reuse rule
+
+**Before calling any MCP tool**, check whether `PaletteData` is already present in the conversation context.
+
+If it is, use it directly — **never call `get_full_palette` again**. Confirm to the user:
+
+> Using the palette already built in this session. Generating Penpot artifacts now.
+
+Only rebuild the palette if the user explicitly asks to change colors, preset, or themes.
+
+---
+
 ## Structure-first rule
 
 This platform skill is primarily a routing and orchestration layer.

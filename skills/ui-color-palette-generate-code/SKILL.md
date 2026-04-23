@@ -44,7 +44,7 @@ Use the **ui-color-palette** MCP tool `generate_code` to export palette configur
 | `style-dictionary-v3` | Style Dictionary v3 | No |
 | `universal-json` | Universal JSON flat key/value | No |
 
-`colorSpace` applies only to `css`, `scss`, `less`, and `dtcg-tokens`. Values: `RGB` · `LCH` · `LAB` · `HSL` · `OKLCH` · `OKLAB` · `P3`
+`colorSpace` applies only to `css`, `scss`, `less`, and `dtcg-tokens`. Values: `RGB` · `LCH` · `OKLCH` · `LAB` · `OKLAB` · `HSL` · `HSLUV` · `HSV` · `CMYK` · `HEX` · `P3`
 
 ---
 

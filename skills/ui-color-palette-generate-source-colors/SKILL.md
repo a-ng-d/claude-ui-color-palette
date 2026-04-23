@@ -124,8 +124,8 @@ Convert each kept color to a `ColorConfiguration` object using the same mapping 
 
 | Parameter | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `baseColor` | object | Yes | A Channel object: `{ hue: number, saturation: number, lightness: number }` — HSL, hue 0–360, saturation and lightness 0–100 |
-| `type` | enum | No | `ALL`, `COMPLEMENTARY`, `SPLIT_COMPLEMENTARY`, `ANALOGOUS`, `TRIADIC`, `TETRADIC`, `SQUARE` (default: `ALL`) |
+| `baseColor` | array | Yes | An RGB Channel tuple: `[r, g, b]` — values 0–255 |
+| `type` | enum | No | `ALL`, `COMPLEMENTARY`, `ANALOGOUS`, `TRIADIC`, `TETRADIC`, `SQUARE`, `COMPOUND` (default: `ALL`) |
 | `analogousSpread` | number | No | Spread angle in degrees for analogous harmonies (default: 30) |
 | `returnFormat` | enum | No | `rgb`, `hex`, or `both` (default: `both`) |
 
@@ -135,10 +135,9 @@ If not already provided, send:
 
 > What is your base color? Provide a hex value (e.g. `#3B82F6`).
 
-Convert the hex to HSL to build the `baseColor` Channel object:
-- Parse hex → RGB (0–255)
-- Convert RGB → HSL using standard formula
-- Round to integers: `{ hue: H, saturation: S, lightness: L }`
+Convert the hex to an RGB Channel tuple:
+- Parse hex → `[r, g, b]` with values 0–255
+- Example: `#3B82F6` → `[59, 130, 246]`
 
 ### Step C2 — Choose harmony type
 
@@ -146,7 +145,7 @@ Send:
 
 > Which harmony type do you want?
 > - **Complementary** — opposite on the color wheel (2 colors)
-> - **Split-complementary** — base + two colors adjacent to its complement (3 colors)
+> - **Compound** — base + two colors adjacent to its complement (3 colors)
 > - **Analogous** — neighboring hues (3 colors)
 > - **Triadic** — evenly spaced by 120° (3 colors)
 > - **Tetradic** — two complementary pairs (4 colors)
@@ -192,8 +191,8 @@ Then hand off to `ui-color-palette-scale-palette` to build the full palette.
 ## Tips
 
 - **Multiple modes**: You can combine modes — for example, extract from an image and then generate a harmony from one of the extracted colors.
-- **Hex to HSL**: When converting for `baseColor`, use the standard formula. Round hue to nearest integer, saturation and lightness to one decimal.
-- **Hex to RGB 0–1**: Divide each 0–255 channel by 255. E.g. `#3B82F6` → `r: 59/255 ≈ 0.231`, `g: 130/255 ≈ 0.510`, `b: 246/255 ≈ 0.965`.
+- **Hex to RGB (Channel tuple for `baseColor`)**: Parse hex → `[r, g, b]` with values 0–255. E.g. `#3B82F6` → `[59, 130, 246]`.
+- **Hex to RGB 0–1 (for ColorConfiguration.rgb)**: Divide each 0–255 channel by 255. E.g. `#3B82F6` → `r: 59/255 ≈ 0.231`, `g: 130/255 ≈ 0.510`, `b: 246/255 ≈ 0.965`.
 - **Color count**: For most design systems, 2–5 source colors is ideal — one primary, one neutral, and up to three accents/semantics.
 - **Image URL**: The URL must be publicly accessible (no auth, no CORS restriction). Ask the user to upload the image somewhere public if needed.
 

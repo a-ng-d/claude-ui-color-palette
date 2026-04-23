@@ -330,7 +330,7 @@ If direct write-back tooling is available for the target design tool, use it. Ot
 - For design token workflows, prefer `dtcg-tokens` for interoperability or `style-dictionary-v3` for Style Dictionary pipelines.
 - Suggest `tailwind-v4` over `tailwind-v3` for new projects.
 - Use `OKLCH` or `P3` color spaces for wide-gamut displays.
-- The `paletteData` input to `generate_code` must be the full object from `get_full_palette` — it contains `name`, `description`, `themes` (with color scales), and `type`.
+- The `generate_code` tool takes `base` and `themes` directly — no `paletteData` input. Pass the same `base` and `themes` objects used to call `get_full_palette`.
 - This skill combines well with `ui-color-palette-generate-source-colors` (generate colors first, then build here), `ui-color-palette-audit-palette` (check readability after building), `ui-color-palette-generate-code` (export as code), and `ui-color-palette-manage-palettes` (publish after building).
 
 ---

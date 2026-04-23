@@ -69,7 +69,30 @@ Keep orchestration, routing, and multi-step coordination at this level.
 
 Walk the user through the workflow **one phase at a time**.
 
-**Critical rule**: at each phase boundary, **stop and send the question to the user**. Do not infer the answer. Do not proceed to the next phase until the user has replied. The questions below are the exact messages to send.
+**Critical rule**: ask a question only when the missing answer changes the next action. If a safe default exists, state it, apply it, and continue.
+
+### Question orchestration policy
+
+Use this decision protocol whenever information is missing:
+
+1. Ask only for decision-critical information (data required to execute, auth requirements, or branching choices with meaningful impact).
+2. Ask one question at a time. Prefer closed options with a recommended default.
+3. Include a fallback in the same message ("If you prefer, I can continue with X").
+4. If the user does not answer, proceed with the declared default and confirm the assumption.
+5. Do not re-ask questions already answered earlier in the session unless inputs changed.
+
+Question budget per step:
+
+- Default: maximum 2 blocking questions before execution.
+- If more details are optional, execute first and ask refinements afterward.
+
+Question template:
+
+> To continue I need: <missing input>
+> - **A (recommended)** — <option>
+> - **B** — <option>
+> - **C** — <option>
+> If you do not choose, I will continue with **A**.
 
 ### Phase 1 — Source
 
@@ -194,7 +217,7 @@ Keep the task in this orchestrator when the work is mainly:
 ## Standard orchestration flow
 
 1. identify which phase the user is in (Source / Palette / Deploy / Manage)
-2. ask the phase-appropriate question if the intent is ambiguous
+2. ask only the next decision-critical question if the intent is ambiguous
 3. resolve the current phase before moving to the next
 4. delegate deep specialization to the matching sub-agent when needed
 5. route to the correct skill for the current phase
