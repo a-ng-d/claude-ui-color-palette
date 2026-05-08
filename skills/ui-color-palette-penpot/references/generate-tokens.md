@@ -121,6 +121,51 @@ Behavior supported by the plugin:
 - updates token names, values, descriptions, themes, and sets
 - optionally removes orphan tokens/themes when deep sync is enabled
 
+## SystemData workflow (semantic token set)
+
+When `SystemData` is present in the conversation context, use this section instead of the standard palette workflow above.
+
+### Step 0 — ensure primitives exist
+
+Semantic tokens must reference existing primitive tokens. Before creating the semantic set:
+
+1. List all local token sets via `catalog.sets()`.
+2. Check whether the palette's primitive token sets already exist (named `paletteName` or `paletteName/themeName`).
+3. If they do **not** exist, run the full palette token sync (Cases A and B above) before continuing. This step is **mandatory** — references cannot be created without primitive tokens.
+
+### Step 1 — semantic token set(s)
+
+1. Name the set using the system schema name or a user-supplied label. Suggested pattern:
+   - No-theme: `systemName`
+   - Themed: one set per theme, `systemName/themeName`
+2. Find the existing set by name, or create it:
+   `catalog.addSet({ name: setName })`
+
+### Step 2 — semantic tokens with binding
+
+For each token in `SystemData.tokens`:
+
+1. **Skip** if `token.isExcluded === true`.
+2. Compute `tokenName`: `token.pathNames.filter(n => n !== '' && n !== 'None').join('.')`.
+3. For each theme at index `i`:
+   - `ref = token.refs[i]`
+   - **Skip** if `ref.shadeId === null` (unbound).
+   - Resolve the primitive token name from `ref.shadeId`: find the shade in `PaletteData` whose id matches `ref.shadeId`, then encode as `colorName_snake.shadeName` (same encoding as the primitive token workflow above).
+   - Set the semantic token value as a **reference** (the binding):
+     `{ type: 'color', value: '{primitiveTokenName}' }`
+4. If `token.description` is defined, set it on the token.
+
+### SystemData Penpot mapping
+
+| `SystemData` field | Penpot target |
+| --------------------------------------- | ----------------------------------------------- |
+| Schema name or user label | Semantic token set name |
+| `token.pathNames.filter(...).join('.')` | Semantic token name |
+| `token.refs[i].shadeId` → primitive token name | Token value: `{colorName_snake.shadeName}` |
+| `token.isExcluded === true` | Skip token entirely |
+| `ref.shadeId === null` | Skip this theme's value (leave unset) |
+| `token.description` | Token description |
+
 ## Penpot mapping
 
 | UI Color Palette data | Penpot target |

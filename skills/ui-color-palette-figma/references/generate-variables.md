@@ -115,6 +115,62 @@ Behavior supported by the plugin:
 - warns if Figma's mode limit is exceeded
 - optionally removes orphan variables and modes when deep sync is enabled
 
+## SystemData workflow (semantic variable collection)
+
+When `SystemData` is present in the conversation context, use this section instead of the standard palette workflow above.
+
+### Step 0 — ensure primitives exist
+
+Semantic variables must alias existing primitive variables. Before creating the semantic collection:
+
+1. List all local variable collections.
+2. Check whether the palette's primitive variable collection already exists (by stored `collectionId`).
+3. If it does **not** exist, run the full palette variable sync (Steps 1–3 above) before continuing. This step is **mandatory** — bindings cannot be created without primitive variables.
+
+### Step 1 — semantic collection
+
+1. Name the collection using the system schema name or a user-supplied label.
+2. Find an existing collection by stored `systemCollectionId`, or create it:
+   `figma.variables.createVariableCollection(collectionName)`
+3. Track `collection.id` and `collection.defaultModeId`.
+
+### Step 2 — modes
+
+Mirror the mode structure of the primitive collection:
+
+1. **No-theme palette** — leave the default mode unchanged (`'Mode 1'`).
+2. **Themed palette** — rename the default mode to the first theme name; call `collection.addMode(themeName)` for each subsequent theme.
+3. Track each `modeId` in theme order — this order must match `token.refs` index order.
+
+### Step 3 — semantic variables with binding
+
+For each token in `SystemData.tokens`:
+
+1. **Skip** if `token.isExcluded === true`.
+2. Compute `variableName`: `token.pathNames.filter(n => n !== '' && n !== 'None').join('/')`.
+3. Find the existing variable by stored id, or create it:
+   `figma.variables.createVariable(variableName, collection, 'COLOR')`
+4. For each mode at theme index `i`:
+   - `ref = token.refs[i]`
+   - **Skip this mode** if `ref.shadeId === null` (unbound).
+   - Find the primitive variable in the primitive collection whose id matches `ref.shadeId`.
+   - If the primitive variable is not found, skip with a warning.
+   - Set the value as a **variable alias** (the binding):
+     `variable.setValueForMode(modeId, { type: 'VARIABLE_ALIAS', id: primitiveVariable.id })`
+5. If `token.description` is defined, set `variable.description = token.description`.
+
+### SystemData Figma mapping
+
+| `SystemData` field | Figma target |
+| ------------------------------------------ | ------------------------------------------------------- |
+| Schema name or user label | Semantic variable collection name |
+| `token.pathNames.filter(...).join('/')` | Semantic variable name |
+| One mode per theme | Collection mode (mirroring primitive collection) |
+| `token.refs[i].shadeId` → primitive var id | `{ type: 'VARIABLE_ALIAS', id: primitiveVariable.id }` |
+| `token.isExcluded === true` | Skip token entirely |
+| `ref.shadeId === null` | Skip this mode's value (leave unset) |
+| `token.description` | Variable description |
+
 ## Expected input
 
 This skill assumes a palette already exists in the plugin state for the current Figma page.

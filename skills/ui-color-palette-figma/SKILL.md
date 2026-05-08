@@ -61,11 +61,12 @@ Choose the sub-skill by user intent:
 - "semantic tokens", "color system variables", "system variable collection", `SystemData` present in context → `references/generate-variables.md` — **new collection from `SystemData`**
 
 When routing a `SystemData`-based workflow to `references/generate-variables.md`, pass `SystemData` opaquely. The sub-skill maps it as follows:
-- Create one Figma variable collection named after the system schema (or a user-supplied name)
-- Add one **mode** per theme in `PaletteData`
+- **First**: ensure the palette's primitive variable collection exists — create it if missing (mandatory prerequisite before any binding)
+- Create one semantic Figma variable collection named after the system schema (or a user-supplied name)
+- Add one **mode** per theme, mirroring the primitive collection's mode structure
 - Add one **variable** per token in `SystemData.tokens`, named by joining `token.pathNames` with `/`
-- Set each variable's value per mode from `token.refs[themeIndex].shadeId` (resolved to the hex value from `PaletteData`)
-- Excluded tokens (`isExcluded: true`) and unbound tokens (`shadeId: null`) are skipped
+- Set each variable's value per mode as a **VariableAlias** pointing to the corresponding primitive variable (resolved via `token.refs[themeIndex].shadeId`)
+- Excluded tokens (`isExcluded: true`) and unbound refs (`shadeId: null`) are skipped
 
 If the user asks for "tokens" in the context of Figma, clarify that Figma does not have a native token format and route to variables instead. If they want exportable design tokens, route to `ui-color-palette-generate-code`.
 
