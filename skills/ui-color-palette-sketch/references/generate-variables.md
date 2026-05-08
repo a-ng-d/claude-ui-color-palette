@@ -56,9 +56,13 @@ Reduce `PaletteData` to a swatch-ready row model before execution:
 - `themeName`
 - `colorName`
 - `shadeName`
-- `swatchName`: `paletteName/themeName/colorName/shadeName`
-- `hex`
-- `description`
+- `swatchName` (full path, used as the single `name` field): segments joined with `/` (no spaces)
+  - no themes: `paletteName/colorName/shadeName`
+  - with themes: `paletteName/themeName/colorName/shadeName` (theme name falls back to localized default if empty)
+  - empty segments are filtered out
+- `hex`: raw hex string from `shade.hex`
+
+> Note: unlike Figma variables (which use GL + alpha + a collection/mode model) or Penpot tokens (sets + themes), Sketch swatches are simple name/hex pairs with no theme grouping or mode concept. Each themed shade becomes a separately named swatch.
 
 This normalized row model is the actual handoff from palette structure to Sketch swatch operations.
 
@@ -75,26 +79,43 @@ These plugin operations are only a reference implementation. An agent should be 
 
 When not relying on the plugin action, use the equivalent Sketch API flow:
 
-1. Read and flatten the palette into canonical swatch paths and hex values.
-2. Request the document swatches.
-3. For each shade path, find or create the swatch.
-4. Update swatch color when it changed.
-5. If deep sync is desired, remove orphan swatches.
-6. Persist document state after synchronization.
+**Case A — palette with no themes** (all shades have `id.includes('00000000000')`):
+
+1. Flatten the palette into shade rows (`colorName`, `shadeName`, `hex`).
+2. Request `Document.swatches`.
+3. For each shade row:
+   - Skip if `hex` is undefined.
+   - Compute `swatchName`: `[paletteName, colorName, shadeName].filter(s => s !== '').join('/')`
+   - Find an existing swatch by **name** (not by id): `localSwatches.find(s => s.name === swatchName)`. If not found, create: `new LocalVariable({ name: swatchName, hex })`.
+   - **No id is stored** — swatches are matched by name on every sync.
+4. Call `Settings.setDocumentSettingForKey(Document, 'ui_color_palettes', currentPalettes)` then `Document.save()`.
+
+**Case B — palette with themes** (shades without `'00000000000'` in id):
+
+1. Flatten the palette into theme rows (`themeName`, `colorName`, `shadeName`, `hex`).
+2. For each shade row:
+   - Skip if `hex` is undefined.
+   - Compute `swatchName`: `[paletteName, themeName, colorName, shadeName].filter(s => s !== '').join('/')` (theme name falls back to localized default if empty)
+   - Find or create as above (match by name).
+3. Persist as above.
 
 Behavior supported by the plugin:
 
+- deduplicates by swatch **name** (not by id — no id is persisted)
 - creates missing swatches
-- updates swatch colors when values change
-- optionally removes orphan swatches when deep sync is enabled
-- stores palette state in document settings
+- names swatches with `/` as group separator
+- sets color from `hex` only
+- skips shades where `hex` is undefined
+- persists palette state to document settings and calls `Document.save()`
 
 ## Sketch mapping
 
 | UI Color Palette data | Sketch target |
 | --------------------- | ------------- |
-| `paletteName/themeName/colorName/shadeName` | Swatch name |
-| Shade hex | Swatch color |
+| No-theme palette | `paletteName/colorName/shadeName` as swatch name |
+| Themed palette | `paletteName/themeName/colorName/shadeName` as swatch name |
+| `shade.hex` | Swatch color |
+| (no id stored) | Matched by name on each sync |
 
 ## Workflow
 

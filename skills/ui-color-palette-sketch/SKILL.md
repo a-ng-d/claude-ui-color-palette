@@ -17,7 +17,7 @@ Use this folder as the platform entry point for all **UI Color Palette → Sketc
 
 **Before calling any MCP tool**, check whether `PaletteData` is already present in the conversation context.
 
-If it is, use it directly — **never call `get_full_palette` again**. Confirm to the user:
+If it is, use it directly — **never call `get_palette` again**. Confirm to the user:
 
 > Using the palette already built in this session. Generating Sketch artifacts now.
 
