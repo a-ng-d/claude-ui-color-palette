@@ -47,11 +47,12 @@ Reduce `PaletteData` to a style-ready row model before execution:
 - `themeName`
 - `colorName`
 - `shadeName`
-- `stylePath`: `paletteName/themeName/colorName`
-- `styleName`: `shadeName`
-- `hex`
-- `alpha`
-- `description`
+- `styleName` (full Penpot color name, used as-is): segments joined with ` / ` (space-slash-space)
+  - no themes: `paletteName / colorName / shadeName`
+  - with themes: `paletteName / themeName / colorName / shadeName` (theme name falls back to localized default if empty)
+  - empty segments are filtered out
+- `hex`: 6-character hex string (first 7 chars of `shade.hex`, e.g. `'#RRGGBB'`)
+- `alpha`: opacity in `[0, 1]`
 
 This normalized row model is the actual handoff from palette structure to Penpot local style operations.
 
@@ -68,29 +69,41 @@ These plugin operations are only a reference implementation. An agent should be 
 
 When not relying on the plugin action, use the equivalent Penpot API flow:
 
-1. Read and flatten the palette into `paletteName`, `themeName`, `colorName`, `shadeName`, `hex`, and alpha.
-2. Request local library colors/styles.
-3. Build the canonical `path` and terminal style `name`.
-4. Find or create the local style.
-5. Update style path, style name, color, and opacity.
-6. If deep sync is desired, remove orphan local styles.
+**Case A — palette with no themes** (all shades have `id.includes('00000000000')`):
+
+1. Flatten the palette into shade rows (`colorName`, `shadeName`, `hex`, `alpha`).
+2. For each shade row:
+   - Skip the shade if `hex` is undefined.
+   - Compute `styleName`: `[paletteName, colorName, shadeName].filter(s => s !== '').join(' / ')`
+   - Find the existing style by stored `styleId` via `penpot.library.local.colors.find(s => s.id === styleId)`. If not found, create: `new LocalStyle({ name: styleName, hex: hex.substring(0, 7), alpha })`.
+   - Track the returned `libraryColor.id`.
+
+**Case B — palette with themes** (shades without `'00000000000'` in id):
+
+1. Flatten the palette into theme rows (`themeName`, `colorName`, `shadeName`, `hex`, `alpha`).
+2. For each shade row:
+   - Skip the shade if `hex` is undefined.
+   - Compute `styleName`: `[paletteName, themeName, colorName, shadeName].filter(s => s !== '').join(' / ')` (theme name falls back to localized default if empty)
+   - Find or create the style as above.
 
 Behavior supported by the plugin:
 
 - creates missing local styles
-- names styles using palette/theme/color/shade paths
-- updates style color and opacity
-- updates style path and style name
-- optionally removes orphan styles when deep sync is enabled
+- names styles using ` / ` (space-slash-space) as group separator
+- the full path including shade name is stored as the single `name` field on the color
+- color is set from `hex.substring(0, 7)` (strips alpha channel from 8-char hex if present)
+- opacity is set from `alpha` separately
+- skips shades where `hex` is undefined
+- saves palette back to plugin data directly (no size limit check for styles)
 
 ## Naming model
 
-Styles are stored with:
+Styles are stored as a single `name` string in Penpot, using ` / ` (space-slash-space) as the group separator:
 
-- `path`: `paletteName / themeName / colorName`
-- `name`: `shadeName`
+- no themes: `paletteName / colorName / shadeName`
+- with themes: `paletteName / themeName / colorName / shadeName`
 
-This gives Penpot a cleaner split between folder path and terminal style name.
+This is different from Figma which uses `/` without spaces. Penpot parses ` / ` to build the folder hierarchy.
 
 ## Workflow
 

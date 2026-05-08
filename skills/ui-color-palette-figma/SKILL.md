@@ -24,7 +24,7 @@ For design token formats (DTCG, Style Dictionary, etc.), use `ui-color-palette-g
 
 **Before calling any MCP tool**, check whether `PaletteData` is already present in the conversation context.
 
-If it is, use it directly — **never call `get_full_palette` again**. Confirm to the user:
+If it is, use it directly — **never call `get_palette` again**. Confirm to the user:
 
 > Using the palette already built in this session. Generating Figma artifacts now.
 
@@ -58,6 +58,14 @@ Choose the sub-skill by user intent:
 - "variables", "modes", "theme variables" → `references/generate-variables.md`
 - "paint styles", "local styles", "style library", "swatches" → `references/generate-styles.md`
 - "full handoff", "everything in Figma", "variables + styles + preview" → `references/generate-tokens.md`
+- "semantic tokens", "color system variables", "system variable collection", `SystemData` present in context → `references/generate-variables.md` — **new collection from `SystemData`**
+
+When routing a `SystemData`-based workflow to `references/generate-variables.md`, pass `SystemData` opaquely. The sub-skill maps it as follows:
+- Create one Figma variable collection named after the system schema (or a user-supplied name)
+- Add one **mode** per theme in `PaletteData`
+- Add one **variable** per token in `SystemData.tokens`, named by joining `token.pathNames` with `/`
+- Set each variable's value per mode from `token.refs[themeIndex].shadeId` (resolved to the hex value from `PaletteData`)
+- Excluded tokens (`isExcluded: true`) and unbound tokens (`shadeId: null`) are skipped
 
 If the user asks for "tokens" in the context of Figma, clarify that Figma does not have a native token format and route to variables instead. If they want exportable design tokens, route to `ui-color-palette-generate-code`.
 

@@ -58,9 +58,9 @@ Reduce `PaletteData` to a variable-ready row model before execution:
 - `themeName`
 - `colorName`
 - `shadeName`
-- `variableName`: `colorName/shadeName`
-- `rgba`
-- `alpha`
+- `variableName`: `colorName/shadeName` (slash-separated, empty segments filtered out)
+- `gl`: OpenGL-normalized RGB triple `[r, g, b]` in `[0, 1]` range (from `shade.gl`)
+- `alpha`: opacity in `[0, 1]`
 - `description`
 
 This normalized row model is the actual handoff from palette structure to Figma variable operations.
@@ -78,22 +78,41 @@ These plugin operations are only a reference implementation. An agent should be 
 
 When not relying on the plugin action, use the equivalent Figma API flow:
 
-1. Read the palette data and flatten it to the minimal variable payload: `themeName`, `colorName`, `shadeName`, RGBA, and description.
-2. Request local variable collections.
-3. Find the collection matching the palette name or create it.
-4. For each theme, find or create the corresponding mode.
-5. Request local variables scoped to that collection.
-6. For each `colorName/shadeName`, find or create the variable.
-7. Set or update the variable value for the target mode using RGBA.
-8. Update variable name and description when they changed.
-9. If deep sync is desired, remove orphan variables and orphan modes.
+**Step 1 — collection**
+
+1. List all local variable collections.
+2. Find the collection whose `id` matches the stored `collectionId`, or create a new one: `figma.variables.createVariableCollection(paletteName)`.
+3. Track `collection.id` and `collection.defaultModeId`.
+
+**Step 2 — variables (base shades, no-theme shades)**
+
+For each shade without themes (identified by `id.includes('00000000000')`):
+
+1. Compute `variableName`: `[colorName, shadeName].filter(n => n !== '' && n !== 'None').join('/')`
+2. Find the existing variable by `variableId` in the collection, or create it:
+   `figma.variables.createVariable(variableName, collection, 'COLOR')`
+3. Track `variable.id`.
+4. Set value for the default mode:
+   `variable.setValueForMode(collection.defaultModeId, { r, g, b, a })` using `gl[0]`, `gl[1]`, `gl[2]`, `alpha`.
+5. If the default mode is still named `'Mode 1'`, rename it to `'Mode 1'` (leave as-is for the base-only case).
+
+**Step 3 — modes and themed variable values**
+
+For each shade with themes (id does not include `'00000000000'`), iterate per unique theme in order:
+
+1. For the **first theme**: if the collection's default mode is still `'Mode 1'`, rename it to `themeName`. Track the `modeId`.
+2. For **subsequent themes**: call `collection.addMode(themeName)`. Track the returned `modeId`. (Figma limits the number of modes per plan — if `addMode` throws, emit a warning and stop adding modes.)
+3. For each shade in this theme, find the matching variable by `colorName/shadeName` path and call:
+   `variable.setValueForMode(modeId, { r, g, b, a })`
 
 Behavior supported by the plugin:
 
 - creates the collection if missing
-- creates variables if missing
-- creates/renames modes from theme names
-- updates variable values, names, and descriptions
+- creates variables from `colorName/shadeName` if missing
+- renames the default mode to the first theme name
+- adds one mode per additional theme
+- sets RGBA values per mode from `gl` + `alpha`
+- warns if Figma's mode limit is exceeded
 - optionally removes orphan variables and modes when deep sync is enabled
 
 ## Expected input
@@ -123,13 +142,14 @@ If no palette exists, first use the palette creation flow before attempting vari
 
 ## Figma mapping
 
-| UI Color Palette data | Figma target             |
-| --------------------- | ------------------------ |
-| `palette.base.name`   | Variable collection name |
-| Theme                 | Variable mode            |
-| `colorName/shadeName` | Variable name            |
-| Shade RGBA            | Variable value           |
-| Shade description     | Variable description     |
+| UI Color Palette data | Figma target |
+| --------------------- | ------------ |
+| `palette.base.name` | Variable collection name |
+| No-theme palette | Default mode (renamed `'Mode 1'` → left as-is) |
+| Themed palette | One mode per theme; first theme renames default mode, subsequent themes add new modes |
+| `colorName/shadeName` | Variable name (empty / `'None'` segments filtered) |
+| `shade.gl` + `shade.alpha` | Variable value: `{ r: gl[0], g: gl[1], b: gl[2], a: alpha }` |
+| `shade.description` | Variable description |
 
 ## When to use
 

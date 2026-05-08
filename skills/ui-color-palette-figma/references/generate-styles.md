@@ -47,9 +47,9 @@ Reduce `PaletteData` to a style-ready row model before execution:
 - `themeName`
 - `colorName`
 - `shadeName`
-- `stylePath`: `paletteName/themeName/colorName/shadeName`
-- `rgba`
-- `alpha`
+- `styleName` (full Figma style path, used as both path and name): `paletteName/colorName/shadeName` (no themes) or `paletteName/themeName/colorName/shadeName` (with themes) — empty segments filtered out
+- `gl`: OpenGL-normalized RGB triple `[r, g, b]` in `[0, 1]` range (from `shade.gl`)
+- `alpha`: opacity in `[0, 1]`
 - `description`
 
 This normalized row model is the actual handoff from palette structure to Figma paint style operations.
@@ -67,27 +67,45 @@ These plugin operations are only a reference implementation. An agent should be 
 
 When not relying on the plugin action, use the equivalent Figma API flow:
 
-1. Read the palette data and flatten it to `paletteName`, `themeName`, `colorName`, `shadeName`, RGBA, alpha, and description.
-2. Request local paint styles.
-3. For each palette shade, build the canonical style path.
-4. Find an existing style by ID or canonical path; otherwise create a new paint style.
-5. Update style name, description, fill color, and opacity.
-6. If deep sync is desired, remove orphan local paint styles.
+**Case A — palette with no themes** (all shades identified by `id.includes('00000000000')`):
+
+1. List all local paint styles.
+2. For each shade row, compute `styleName`:
+   ```
+   [paletteName, colorName, shadeName].filter(s => s !== '').join('/')
+   ```
+3. Skip the shade if `gl` is undefined.
+4. Find the existing paint style by stored `styleId`; if not found, create a new one: `figma.createPaintStyle()`.
+5. Set `style.name = styleName`.
+6. Set `style.description`.
+7. Set fills: `[{ type: 'SOLID', color: { r: gl[0], g: gl[1], b: gl[2] }, opacity: alpha }]`.
+8. Track the returned `style.id`.
+
+**Case B — palette with themes** (shades without `'00000000000'` in id):
+
+1. Same as Case A but compute `styleName` as:
+   ```
+   [paletteName, themeName, colorName, shadeName].filter(s => s !== '').join('/')
+   ```
+   where `themeName` falls back to a default label when empty.
+2. Otherwise identical to Case A.
+
+3. If deep sync is desired, remove orphan local paint styles.
 
 Behavior supported by the plugin:
 
 - creates missing local paint styles
-- names styles using palette/theme/color/shade paths
-- updates fill color, opacity, name, and description
+- names styles using the full hierarchical path as a single `style.name` string (Figma parses `/` as groups)
+- sets fill color from `gl` (OpenGL normalized) + `alpha`
+- skips shades where `gl` is undefined
 - optionally removes orphan styles when deep sync is enabled
 
 ## Naming model
 
-Styles are generated using a hierarchical path:
+Figma interprets `/` in a paint style name as a group separator. The full style path is set as a single `style.name` string:
 
-`paletteName/themeName/colorName/shadeName`
-
-For palettes without explicit theme splitting, the theme segment may be omitted.
+- no themes: `paletteName/colorName/shadeName`
+- with themes: `paletteName/themeName/colorName/shadeName`
 
 ## Workflow
 

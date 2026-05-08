@@ -58,6 +58,22 @@ Reduce `PaletteData` to two reusable row models before execution:
 - `tokenRows`: `paletteName`, `themeName`, `colorName`, `shadeName`, `tokenSetName`, `tokenName`, `hex`, `description`
 - `previewRows`: `paletteName`, `themeName`, `colorName`, `shadeName`, `displayLabel`, `hex`, `description`
 
+Token name encoding (exact logic from implementation):
+1. Apply `doSnakeCase()` to `colorName` (e.g. `Primary Blue` → `primary_blue`)
+2. On each segment (`[colorNameSnake, shadeName]`), replace remaining spaces with `-`
+3. Filter out empty strings and `'None'`
+4. Join with `.` → `colorName_snake.shadeName`
+5. Replace `・` with `_` on the resulting string
+6. Fallback: if `colorName` is empty, use the localized default color name (snake-cased)
+
+Example: color `Primary Blue`, shade `500` → `primary_blue.500`
+
+Set name encoding:
+- **no themes**: one set named `palette.base.name` (falls back to localized default if empty)
+- **with themes**: one set per theme named `palette.base.name/themeName` (theme name falls back to localized default if empty)
+
+Token value: `shade.hex ?? '#000000'` (raw hex string; fallback to black if undefined)
+
 These normalized row models are the actual handoff from palette structure to Penpot token and preview generation.
 
 ## Backing operations
@@ -74,30 +90,48 @@ These plugin operations are only a reference implementation. An agent should be 
 
 When not relying on the plugin action, use the equivalent Penpot API flow:
 
-1. Read and flatten the palette into `themeName`, `colorName`, `shadeName`, `hex`, and description rows.
-2. Request the local token catalog.
-3. Find or create token sets for the palette and per-theme sets when themes exist.
-4. Find or create theme groups for themed palettes.
-5. For each shade, find or create the token and update its name, value, and description.
-6. If deep sync is desired, remove orphan tokens, orphan themed sets, and orphan themes.
-7. If the user wants a preview, create or update a board/document with grouped swatches.
+**Case A — palette with no themes** (all shades belong to a single base group):
+
+1. Flatten the palette into shade rows (`colorName`, `shadeName`, `hex`, `description`).
+2. Get or create one token set: `catalog.addSet({ name: paletteName })`.
+3. For each shade row:
+   - Compute `tokenName`: `Case(colorName).doSnakeCase().replace(/\s+/g, '-') + '.' + shadeName`
+   - Call `tokenSet.addToken({ type: 'color', name: tokenName, value: hex, description })`
+   - Track the returned `token.id` for future updates.
+
+**Case B — palette with themes**:
+
+1. Flatten the palette into theme rows (`themeName`, `colorName`, `shadeName`, `hex`, `description`).
+2. For each unique theme:
+   - Get or create a token set: `catalog.addSet({ name: paletteName + '/' + themeName })`
+   - Get or create a theme group: `catalog.addTheme({ group: paletteName, name: themeName })`
+   - Track returned `set.id` and `theme.id` for future updates.
+3. For each shade row within a theme:
+   - Compute `tokenName` as above.
+   - Call `themeSet.addToken({ type: 'color', name: tokenName, value: hex, description })`
+   - Track the returned `token.id`.
+4. If deep sync is desired, remove orphan tokens, orphan themed sets, and orphan themes.
+5. If the user wants a preview, create or update a board/document with grouped swatches.
 
 Behavior supported by the plugin:
 
 - creates token sets when missing
 - creates theme groups when themes exist
-- creates tokens from `colorName.shadeName`
+- creates tokens from `colorName_snake.shadeName`
 - updates token names, values, descriptions, themes, and sets
 - optionally removes orphan tokens/themes when deep sync is enabled
 
 ## Penpot mapping
 
-| UI Color Palette data | Penpot target                     |
-| --------------------- | --------------------------------- |
-| `palette.base.name`   | Token set base name / theme group |
-| Theme                 | Penpot theme + themed set         |
-| `colorName.shadeName` | Token name                        |
-| Shade hex             | Token value                       |
+| UI Color Palette data | Penpot target |
+| --------------------- | ------------- |
+| `palette.base.name` | Token set name (no themes) / set prefix + theme group name (with themes) |
+| No-theme palette | Single set: `paletteName` |
+| Themed palette | One set per theme: `paletteName/themeName` + one theme: `{ group: paletteName, name: themeName }` |
+| `colorName` (snake_case, spaces → `-`) | First segment of token name (before `.`) |
+| `shadeName` | Second segment of token name (after `.`) |
+| `shade.hex` | Token value |
+| `shade.description` | Token description |
 | Shade description     | Token description                 |
 
 ## Workflow

@@ -17,7 +17,7 @@ Use this folder as the platform entry point for all **UI Color Palette → Penpo
 
 **Before calling any MCP tool**, check whether `PaletteData` is already present in the conversation context.
 
-If it is, use it directly — **never call `get_full_palette` again**. Confirm to the user:
+If it is, use it directly — **never call `get_palette` again**. Confirm to the user:
 
 > Using the palette already built in this session. Generating Penpot artifacts now.
 
@@ -49,8 +49,13 @@ Choose the sub-skill by user intent:
 
 - “tokens”, “semantic colors”, “theme tokens”, “Penpot token sets” → `references/generate-tokens.md`
 - “styles”, “local colors”, “style library”, “swatches” → `references/generate-styles.md`
-- “preview”, “board”, “document review” → usually start with `references/generate-tokens.md`, then generate/update the document preview
+- “preview”, “board”, “document review” → usually start with `references/generate-tokens.md`, then generate/update the document preview- "semantic tokens", "color system tokens", "system token set", `SystemData` present in context → `references/generate-tokens.md` — **new token set from `SystemData`**
 
+When routing a `SystemData`-based workflow to `references/generate-tokens.md`, pass `SystemData` opaquely. The sub-skill maps it as follows:
+- Create one Penpot token set per theme in `PaletteData`, named after the theme
+- Add one **token** per entry in `SystemData.tokens`, named by joining `token.pathNames` with `/`
+- Each token value is resolved from `token.refs[themeIndex].shadeId` → hex from `PaletteData` for the matching theme set
+- Excluded tokens (`isExcluded: true`) and unbound tokens (`shadeId: null`) are skipped
 ## Platform API references
 
 An agent should think in terms of the Penpot plugin/API surface, not only the plugin wrapper:
