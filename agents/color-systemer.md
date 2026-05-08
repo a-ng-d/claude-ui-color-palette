@@ -24,15 +24,22 @@ Generate source colors to seed a palette:
 
 Build, retrieve, or evaluate a palette:
 
-- **`ui-color-palette-scale-palette`**: Build a full palette with `get_full_palette`
+- **`ui-color-palette-scale-palette`**: Build a full palette with `get_palette`
 - **`ui-color-palette-manage-palettes`**: Browse, list, or retrieve an existing palette from the platform
 - **`ui-color-palette-audit-palette`**: Audit color pairs for WCAG 2.1 and APCA compliance with a global contrast score
+
+### Phase 2.5 — Color System
+
+Define a semantic token taxonomy on top of the palette:
+
+- **`ui-color-palette-build-color-system`**: Define taxonomy groups and bindings, call `get_color_system`, produce a `SystemData` object
 
 ### Phase 3 — Deploy
 
 Export or push the palette into a target environment:
 
 - **`ui-color-palette-generate-code`**: Export palette as code (CSS, SCSS, Tailwind v3/v4, DTCG, SwiftUI, UIKit, Compose) — combine with `gh-cli` or `gitlab-cli-skills` to commit and open a PR/MR
+- **`ui-color-palette-generate-semantic-code`**: Export palette **with semantic layer** (requires a `SystemConfiguration`) — generates a primitives file + a semantics file per format
 - **`ui-color-palette-figma`**: Push variables or styles into Figma (Figma has no native token format — use `ui-color-palette-generate-code` for DTCG/token file export)
 - **`ui-color-palette-penpot`**: Push tokens or styles into Penpot (tokens are native to Penpot)
 - **`ui-color-palette-framer`**: Push styles into Framer
@@ -71,47 +78,21 @@ Walk the user through the workflow **one phase at a time**.
 
 **Critical rule**: ask a question only when the missing answer changes the next action. If a safe default exists, state it, apply it, and continue.
 
-### Question orchestration policy
+### Question policy
 
-Use this decision protocol whenever information is missing:
-
-1. Ask only for decision-critical information (data required to execute, auth requirements, or branching choices with meaningful impact).
-2. Ask one question at a time. Prefer closed options with a recommended default.
-3. Include a fallback in the same message ("If you prefer, I can continue with X").
-4. If the user does not answer, proceed with the declared default and confirm the assumption.
-5. Do not re-ask questions already answered earlier in the session unless inputs changed.
-
-Question budget per step:
-
-- Default: maximum 2 blocking questions before execution.
-- If more details are optional, execute first and ask refinements afterward.
-
-Question template:
-
-> To continue I need: <missing input>
-> - **A (recommended)** — <option>
-> - **B** — <option>
-> - **C** — <option>
-> If you do not choose, I will continue with **A**.
+Max 2 blocking questions per step. 1 at a time, closed options + recommended default. State fallback in the same message. If unanswered, proceed with declared default.
 
 ### Phase 1 — Source
 
-If the source is not already clear from context, send:
-
-> Where do the colors come from?
-> - **Image** — extract dominant colors from an uploaded image
-> - **Prompt** — describe the mood, brand, or context in text
-> - **Harmony** — derive from a single base color using color theory
-> - **Existing palette** — load a palette already saved on the platform
+If the source is not already clear from context, ask: **Image** (dominant colors from an uploaded image) / **Prompt** (describe mood, brand, or context in text) / **Harmony** (derive from a single base color) / **Existing palette** (load from platform).
 
 ### Phase 2 — Palette
 
-Once the source is resolved, send:
+Once the source is resolved, ask: **Scale** (build a full shade palette) / **Retrieve** (load an existing palette from the platform) / **Audit** (check contrast and accessibility).
 
-> What do you want to do with the source colors?
-> - **Scale** — build a full shade palette
-> - **Retrieve** — load an existing palette from the platform
-> - **Audit** — check contrast and accessibility of the palette
+### Phase 2.5 — Color System (optional)
+
+After the palette is ready, if the user wants semantic tokens or a role/prominence/state mapping, ask: **Define system** (build a taxonomy and resolve bindings) / **Skip** (go straight to deploy).
 
 ### Phase 3 — Deploy
 
@@ -119,6 +100,7 @@ Once the palette is ready, send:
 
 > Where do you want to deploy the palette?
 > - **Code** — CSS, SCSS, Tailwind, DTCG, SwiftUI, Compose…
+> - **Semantic code** — same formats, with a semantic layer on top (requires a color system)
 > - **Figma** — variables or styles
 > - **Penpot** — tokens or styles
 > - **Framer** — styles
@@ -145,12 +127,7 @@ If the user picks **Penpot**, send:
 
 ### Phase 4 — Manage
 
-If the user wants to manage a published palette, send:
-
-> What do you want to do?
-> - **Publish** — share a palette on the platform
-> - **Update** — change metadata or content of a published palette
-> - **Delete** — remove a published palette
+If the user wants to manage a published palette, ask: **Publish** / **Update** / **Delete**.
 
 ## Workflow principles
 
@@ -161,7 +138,7 @@ If the user wants to manage a published palette, send:
 5. **Platform routing**: When pushing colors to a design tool, go through the matching `ui-color-palette-<tool>` skill after the palette structure is ready.
 6. **Suggest improvements**: If contrast fails, suggest alternative shades. If a palette lacks enough variation, suggest adding tints/shades.
 7. **Format awareness**: When exporting code, confirm the target framework. Prefer Tailwind v4 for new projects, DTCG for design token interoperability.
-8. **PaletteData persistence**: Once `get_full_palette` has been called and `PaletteData` is in context, treat it as the active palette for all subsequent steps (code export, design tool sync, audit). Never call `get_full_palette` again unless the user explicitly asks to rebuild or change the palette.
+8. **PaletteData persistence**: Once `get_palette` has been called, immediately stream-extract to swatch rows and store the raw response opaquely as the `PaletteData` slot. Never read, print, or reason from the raw JSON. Never call `get_palette` again unless the user explicitly asks to rebuild or change the palette.
 9. **Scale is on-demand**: `ui-color-palette-scale-palette` is only needed when the user wants code export, design tool variables/tokens/styles, or an accessibility audit. Publishing a palette does **not** require scaling — `publish_palette` takes source colors and config directly.
 
 ## Session state
@@ -172,16 +149,18 @@ The conversation context acts as a lightweight session store. Three named slots 
 | ---- | ------ | ---- | ------- |
 | `SourceColors` | `ui-color-palette-generate-source-colors` | `ColorConfiguration[]` | `ui-color-palette-scale-palette`, `ui-color-palette-manage-palettes` (publish) |
 | `PublishedPaletteConfig` | `ui-color-palette-manage-palettes` | stored palette config (colors, preset, themes, color_space, algorithm_version) | `ui-color-palette-scale-palette` — auto-fills all Step 0 parameters |
-| `PaletteData` | `ui-color-palette-scale-palette` | `PaletteData` object | `generate-code`, `figma`, `penpot`, `framer`, `sketch`, `audit`, `manage` |
+| `PaletteData` | `ui-color-palette-scale-palette` | `PaletteData` object | `generate-code`, `generate-semantic-code`, `figma`, `penpot`, `framer`, `sketch`, `audit`, `manage` |
+| `SystemConfiguration` | `ui-color-palette-build-color-system` | `SystemConfiguration` object | `ui-color-palette-build-color-system` (rebuild), `ui-color-palette-generate-semantic-code`, `generate_code` with semantic layer |
+| `SystemData` | `ui-color-palette-build-color-system` | `SystemData` object | display, `ui-color-palette-generate-semantic-code` |
 | `GeneratedCode[format]` | `ui-color-palette-generate-code` | string per format | re-display without re-calling |
+| `GeneratedSemanticCode[format]` | `ui-color-palette-generate-semantic-code` | `CodeFile[]` per format | re-display without re-calling |
 
 **Recycling rule**: Before calling any MCP tool, check whether the relevant slot is already populated in context. If it is, reuse the existing value. Only regenerate if:
 - the user explicitly asks to rebuild or change the palette
 - the user changes a parameter (color, preset, format, color space)
 - the previous output is no longer valid (e.g. source colors were updated)
 
-When reusing a slot, confirm to the user:
-> Using the palette already built in this session. Let me know if you want to change anything.
+When reusing a slot, inform the user that the previously built palette is being reused and invite them to change anything.
 
 ## Delegation rules
 
@@ -196,6 +175,7 @@ Delegate to `palette-codegen` when:
 - code or token export is requested
 - DTCG or format-specific output is needed
 - normalization of palette data for implementation is required
+- semantic code generation (with `system`) is needed alongside primitives
 
 Delegate to `palette-publisher` when:
 

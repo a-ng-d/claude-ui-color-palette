@@ -9,7 +9,7 @@ A [Claude Code](https://code.claude.com/) plugin that brings color palette desig
 | Skill                        | Description                                                                                               |
 | ---------------------------- | --------------------------------------------------------------------------------------------------------- |
 | `generate-source-colors`     | Generate source colors from an image (k-means), a text prompt (AI), or a base color (harmony)             |
-| `scale-palette`              | Build a full palette with `get_full_palette` and export as code/tokens (CSS, Tailwind, SwiftUI, DTCG, …)  |
+| `scale-palette`              | Build a full palette with `get_palette` and export as code/tokens (CSS, Tailwind, SwiftUI, DTCG, …)  |
 | `manage-palettes`            | Browse, publish, share, update, and delete palettes on the platform                                       |
 | `audit-palette`              | Audit color pairs for WCAG 2.1 and APCA compliance with a global contrast score                           |
 
