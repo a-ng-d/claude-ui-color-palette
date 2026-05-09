@@ -30,11 +30,7 @@ Browse public community palettes.
 
 ### `get_published_palette` (Auth: No)
 
-Fetch a specific palette by ID.
-
-| Parameter | Type | Required | Description |
-| --------- | ---- | -------- | ----------- |
-| `paletteId` | string | Yes | Unique palette identifier |
+Fetch a specific palette by ID. Parameters: `paletteId` (string, required).
 
 ---
 
@@ -91,19 +87,11 @@ Update an existing palette. All fields except `accessToken` and `paletteId` are 
 
 ### `share_published_palette` (Auth: Yes)
 
-Make a palette publicly visible.
-
-| Parameter | Type | Required | Description |
-| --------- | ---- | -------- | ----------- |
-| `paletteId` | string | Yes | Palette to share |
+Make a palette publicly visible. Parameters: `paletteId` (string, required).
 
 ### `unshare_published_palette` (Auth: Yes)
 
-Make a palette private (remove from community listing).
-
-| Parameter | Type | Required | Description |
-| --------- | ---- | -------- | ----------- |
-| `paletteId` | string | Yes | Palette to unshare |
+Remove a palette from the community listing. Parameters: `paletteId` (string, required).
 
 ---
 
@@ -111,11 +99,7 @@ Make a palette private (remove from community listing).
 
 ### `unpublish_palette` (Auth: Yes)
 
-Permanently delete a palette.
-
-| Parameter | Type | Required | Description |
-| --------- | ---- | -------- | ----------- |
-| `paletteId` | string | Yes | Palette to delete |
+Permanently delete a palette. Parameters: `paletteId` (string, required).
 
 ---
 
@@ -130,7 +114,7 @@ Permanently delete a palette.
 
 1. Call `get_published_palette` with the `paletteId`.
 2. Generate an HTML detail card (see **Visual display** below).
-3. **Session state**: store the result as the `PublishedPaletteConfig` slot. It contains `colors`, `preset`, `shift`, `themes`, `color_space`, and `algorithm_version` — all the parameters needed to call `get_full_palette`.
+3. **Session state**: store the result as the `PublishedPaletteConfig` slot. It contains `colors`, `preset`, `shift`, `themes`, `color_space`, and `algorithm_version` — all the parameters needed to call `get_palette`.
 4. Confirm to the user:
 
    > Palette **"Name"** loaded. You can now scale it, export code, or push it to a design tool — I'll use this configuration automatically.
@@ -214,7 +198,7 @@ ID: abc123
 
 - Palettes are private by default after publication — the user must explicitly `share_published_palette` to make them public.
 - Use `list_my_published_palettes` to find palette IDs for update/delete operations.
-- The `preset`, `shift`, `colors`, and `themes` fields match the structures used by `get_full_palette`.
+- The `preset`, `shift`, `colors`, and `themes` fields match the structures used by `get_palette`.
 
 ---
 

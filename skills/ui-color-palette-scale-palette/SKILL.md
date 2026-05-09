@@ -1,12 +1,12 @@
 ---
 name: ui-color-palette-scale-palette
-description: Build a full color palette from source colors. Uses get_full_palette to generate scales and themes, then previews the result visually. Use when the user wants to create a complete palette before auditing, exporting, or deploying it.
+description: Build a full color palette from source colors. Uses get_palette to generate scales and themes, then previews the result visually. Use when the user wants to create a complete palette before auditing, exporting, or deploying it.
 argument-hint: <color-space>
 ---
 
 # Build Palette
 
-Use the **ui-color-palette** MCP tool `get_full_palette` to build a complete palette, then preview it visually.
+Use the **ui-color-palette** MCP tool `get_palette` to build a complete palette, then preview it visually.
 
 Code export is handled by `ui-color-palette-generate-code`. Design tool deployment is handled by `ui-color-palette-figma`, `ui-color-palette-penpot`, `ui-color-palette-framer`, and `ui-color-palette-sketch`.
 
@@ -18,22 +18,13 @@ Before asking any questions, check the conversation context for existing slots.
 
 ### If `PaletteData` is already in context
 
-Send:
-
-> I already have a palette built in this session (**Palette name** — OKLCH — Material scale).
-> Do you want to **reuse it**, **adjust parameters and rebuild**, or **start from scratch**?
-
-Stop and wait. If the user chooses to reuse, skip all steps and go directly to the visual preview and the next-phase question.
+Inform the user of the existing palette (name, color space, preset) and ask: reuse, rebuild, or start from scratch. Wait for reply — if reuse, skip to visual preview.
 
 ### If `PublishedPaletteConfig` is already in context
 
-The user has loaded a published palette. Its configuration contains all the parameters needed for `get_full_palette`. **Skip Step 0 entirely** and go straight to Step 1.
+**Skip Step 0 entirely** and go straight to Step 1. Inform the user: building from the loaded palette now.
 
-Send:
-
-> I have the published palette “**Name**” loaded. Building the full shade scale now…
-
-Map the `PublishedPaletteConfig` fields to the `get_full_palette` input:
+Map the `PublishedPaletteConfig` fields to the `get_palette` input:
 
 | `PublishedPaletteConfig` field | maps to |
 | ------------------------------ | ------- |
@@ -47,59 +38,31 @@ Map the `PublishedPaletteConfig` fields to the `get_full_palette` input:
 | `algorithm_version` | `base.algorithmVersion` |
 | `themes` | `themes` |
 
-Call `get_full_palette` immediately with these mapped values.
+Call `get_palette` immediately with these mapped values.
 
 ---
 
 ### If `SourceColors` is already in context
 
-The source colors step is already done. At **Step 0**, skip question 2 (source colors) and display the existing colors for confirmation:
-
-> I already have these source colors:
->
-> - `primary` — #3B82F6
-> - `neutral` — #6B7280
->
-> I’ll use these for the palette. Do you want to keep them or change any?
+Skip question 2 of Step 0. Show the existing colors (name + hex) and ask the user to confirm or change them.
 
 ---
 
 ## Step 0 — Gather parameters
 
-**Ask these questions before calling `get_full_palette`.** Do not call the tool until all required answers are collected. Stop after each question if the user hasn’t answered it yet.
+**Ask these questions before calling `get_palette`.** Do not call the tool until all required answers are collected. Stop after each question if the user hasn’t answered it yet.
 
 ### Required
 
-**1. Palette name**
-> What should this palette be called?
+**1. Palette name** — ask for a name.
 
-**2. Source colors**
-> List the colors to include. For each one, provide:
-> - A role name (e.g. `primary`, `neutral`, `accent`, `error`)
-> - A hex value (e.g. `#3B82F6`)
->
-> You can add as many colors as you like.
+**2. Source colors** — ask for role + hex per color (e.g. `primary #3B82F6`). Multiple colors allowed.
 
-**3. Color space**
-> Which color space should be used to compute the shades?
-> - **OKLCH** — perceptually uniform, recommended for modern systems
-> - **LCH** — perceptually uniform, wider browser support
-> - **OKLAB** — perceptually uniform, no hue rotation
-> - **HSL** — classic HSL (not perceptually uniform)
-> - **P3** — wide-gamut Display P3
+**3. Color space** — ask to choose: `OKLCH` (recommended), `LCH`, `OKLAB`, `HSL`, `P3`, or other.
 
-**4. Scale preset**
-> Which stop structure should be used?
-> - **Material** — 50–1000, 10 stops
-> - **Tailwind** — 50–950, 11 stops
-> - **Ant Design** — 1–10, 10 stops
-> - **Radix** — 1–12, 12 stops
+**4. Scale preset** — ask to choose: `MATERIAL` (50–900, 10 stops), `TAILWIND` (50–950, 11 stops), `ANT` (1–10), `RADIX` (1–12).
 
-**5. Themes**
-> How many themes do you need?
-> - **Light only**
-> - **Light + Dark**
-> - **Custom** — describe the themes you want
+**5. Themes** — ask: Light only, Light + Dark, or Custom.
 
 ### Optional (use defaults if not specified)
 
@@ -110,13 +73,13 @@ The source colors step is already done. At **Step 0**, skip question 2 (source c
 | Hue shift | `0` (no rotation) |
 | Source colors locked | `false` |
 
-Once all required answers are collected, build the `get_full_palette` input and proceed to Step 1.
+Once all required answers are collected, build the `get_palette` input and proceed to Step 1.
 
 ---
 
 ## Step 1 — Build the palette
 
-**Tool**: `get_full_palette`
+**Tool**: `get_palette`
 
 | Parameter | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
@@ -238,12 +201,12 @@ When the user mentions Figma, FigJam, Penpot, Sketch, design board, palette boar
 
 If direct write-back tooling is available for the target design tool, use it. Otherwise:
 
-1. build the palette with `get_full_palette`
+1. build the palette with `get_palette`
 2. extract only `theme.name`, `color.name`, `shade.name`, `shade.hex`, and preferred text color
 3. create a compact swatch matrix spec
 4. hand that spec off to the relevant design workflow/tool
 
-### Example `get_full_palette` input
+### Example `get_palette` input
 
 ```json
 {
@@ -295,9 +258,15 @@ If direct write-back tooling is available for the target design tool, use it. Ot
 ## Workflow
 
 1. Collect source colors from the user or from a previous **generate-source-colors** step.
-2. Call `get_full_palette` with a `BaseConfiguration` and at least one `ThemeConfiguration` to generate the full palette with scales.
-3. **Do NOT read or summarize the full `PaletteData` result.** The response is a large JSON object with many color values — reading it wastes tokens.
-   **Session state**: Store the result as the `PaletteData` slot. All subsequent skills (`generate-code`, `figma`, `penpot`, `framer`, `sketch`, `audit`, `manage`) will reuse it without calling `get_full_palette` again.
+2. Call `get_palette` with a `BaseConfiguration` and at least one `ThemeConfiguration`. The response is a **flat array** of shade rows (compact mode is on by default).
+3. **NEVER read, print, or reason from the full array.** Immediately apply the stream-extract below and discard everything else:
+   ```
+   for each row in response:
+     keep: row.theme, row.color, row.shade, row.hex
+     STOP — do not read any other field on this row
+   ```
+   Store the raw response opaquely as the `PaletteData` slot (passed as-is to downstream tools that need it). Reason only from the extracted swatch rows.
+   If a downstream tool explicitly needs raw color space values (rgb, lch, etc.), recall `get_palette` with `compact: false` for that specific purpose.
 4. If the user asks for a visual preview, design handoff, or document generation, extract only the fields needed for a swatch matrix:
   - `theme.name`
   - `color.name`
@@ -321,17 +290,11 @@ If direct write-back tooling is available for the target design tool, use it. Ot
 
 ## Tips
 
-- **Token efficiency**: Never read, print, or summarize the `PaletteData` JSON. It contains dozens of color shades with multiple color-space values each. Pass it opaquely to downstream skills.
-- **Visual preview efficiency**: For previews, extract only `theme.name`, `color.name`, `shade.name`, and `shade.hex`, plus preferred text color when available.
-- **Hex to rgb conversion**: Divide each 0–255 channel by 255 to get the 0–1 value. E.g. `#3B82F6` → `r: 59/255 = 0.23`, `g: 130/255 = 0.51`, `b: 246/255 = 0.96` → `{ r: 0.23, g: 0.51, b: 0.96 }`.
-- **Scale computation**: If the user doesn't provide a `scale` object, compute it from the preset: distribute lightness values between `min` (darkest) and `max` (lightest) across `stops` using the `easing` function. First stop → `max`, last stop → `min`.
-- **Design-first requests**: If the user asks for a board, canvas, style tiles, swatches, or a document preview, prioritize the visual/design-tool route before code export.
-- When the user mentions a specific framework, pick the matching format automatically.
-- For design token workflows, prefer `dtcg-tokens` for interoperability or `style-dictionary-v3` for Style Dictionary pipelines.
-- Suggest `tailwind-v4` over `tailwind-v3` for new projects.
-- Use `OKLCH` or `P3` color spaces for wide-gamut displays.
-- The `generate_code` tool takes `base` and `themes` directly — no `paletteData` input. Pass the same `base` and `themes` objects used to call `get_full_palette`.
-- This skill combines well with `ui-color-palette-generate-source-colors` (generate colors first, then build here), `ui-color-palette-audit-palette` (check readability after building), `ui-color-palette-generate-code` (export as code), and `ui-color-palette-manage-palettes` (publish after building).
+- **PaletteData**: Never read, print, or summarize the full JSON — the response is huge. Immediately stream-extract to swatch rows (`theme.name`, `color.name`, `shade.name`, `shade.hex`) and pass the raw object opaquely to downstream skills.
+- **Hex → rgb 0–1**: divide each 0–255 channel by 255. E.g. `#3B82F6` → `{ r: 0.23, g: 0.51, b: 0.96 }`.
+- **Scale without user input**: distribute lightness between `min` (last stop) and `max` (first stop). First stop → `max`, last → `min`.
+- **Design-first requests**: board, canvas, swatches, style tiles → route to design tool skill first.
+- **Code**: `generate_code` takes `base`+`themes` directly; prefer `dtcg-tokens`, `tailwind-v4`; `OKLCH`/`P3` for wide-gamut.
 
 ---
 

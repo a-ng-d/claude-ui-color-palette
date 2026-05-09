@@ -8,7 +8,7 @@ argument-hint: <format> [color-space] [base+themes]
 
 Use the **ui-color-palette** MCP tool `generate_code` to export palette configuration into the requested format.
 
-`generate_code` now expects `base` and `themes` directly. A prior `get_full_palette` call is not required.
+`generate_code` now expects `base` and `themes` directly. A prior `get_palette` call is not required.
 
 **Reuse rule — Palette Inputs**: If `base` and `themes` are already present in the conversation context, reuse them directly. Never regenerate the palette just to call `generate_code`.
 
@@ -53,7 +53,8 @@ Use the **ui-color-palette** MCP tool `generate_code` to export palette configur
 1. Ask which `format` (and `colorSpace` if applicable) if not already specified.
 2. Confirm `base` and `themes` are available. If missing, ask for them or recover them from prior palette configuration context.
 3. Call `generate_code` with `base`, `themes`, and chosen parameters.
-4. Present the output in a fenced code block, then offer to write it to a file or open a PR via `gh-cli` / `gitlab-cli-skills`.
+4. **Do not read or analyze the returned code.** Present it directly in a fenced code block as returned by the tool. Do not parse, summarize, or reason over its content — the output can be very large.
+5. Offer to write it to a file or open a PR via `gh-cli` / `gitlab-cli-skills`.
 
 **Format hints**: prefer `tailwind-v4` over v3 for new projects — prefer `dtcg-tokens` for token interoperability.
 

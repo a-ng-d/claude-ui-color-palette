@@ -16,29 +16,13 @@ The output of this skill is a set of `ColorConfiguration` objects (role name + h
 
 **Before asking anything**, check whether a `SourceColors` slot is already populated in the conversation context.
 
-If `SourceColors` exists, send:
-
-> I already have these source colors from earlier in this session:
->
-> - `primary` — #3B82F6
-> - `neutral` — #6B7280
->
-> Do you want to **reuse them**, **add more colors**, or **start fresh**?
-
-Stop and wait for the reply. Only proceed to source mode selection if the user chooses to start fresh or add more.
+If `SourceColors` exists, show the existing colors (name + hex) and ask: reuse, add more, or start fresh. Wait for reply before proceeding.
 
 ---
 
 ## Step 1 — Choose a source mode
 
-If the mode is not already clear from context, send:
-
-> How do you want to generate source colors?
-> - **Image** — extract dominant colors from a photo or logo (requires a public image URL)
-> - **Prompt** — describe the mood, brand, or context in plain language
-> - **Harmony** — derive a color set from a single base color using color theory
-
-Stop and wait for the user's answer before proceeding.
+If the mode is not already clear from context, ask: **Image** (dominant colors from a photo, requires public URL), **Prompt** (describe mood/brand in natural language), or **Harmony** (derive from a single base color). Wait for reply.
 
 ---
 
@@ -56,26 +40,19 @@ Stop and wait for the user's answer before proceeding.
 
 ### Step A1 — Collect the image URL
 
-If the user hasn't provided a URL, send:
+Ask for a public JPEG or PNG URL if not already provided.
 
-> Please share a public URL to the image (JPEG or PNG).
+### Step A2 — Color count (optional)
 
-### Step A2 — Ask for color count (optional)
-
-> How many dominant colors do you want to extract? (default: 5)
+Ask how many dominant colors to extract (default: 5).
 
 ### Step A3 — Call `extract_dominant_colors`
 
 Call the tool with the URL and parameters. The tool returns colors as hex and/or RGB (0–255 per channel).
 
-### Step A4 — Show results and ask for role names
+### Step A4 — Show results and assign roles
 
-Present the extracted colors as swatches (hex + a small color preview if possible).
-
-Then send:
-
-> Here are the extracted colors. Assign a role name to each one you want to keep — for example `primary`, `neutral`, `accent`, `error`.
-> Remove any colors you don't want in the palette.
+Show the extracted colors as swatches (hex + preview). Ask the user to assign a role name (`primary`, `neutral`, `accent`, `error`) to each color they want to keep, and discard the rest.
 
 ### Step A5 — Normalize to ColorConfiguration
 
@@ -97,21 +74,15 @@ Convert each kept color to a `ColorConfiguration` object:
 
 ### Step B1 — Collect the prompt
 
-If not already provided, send:
-
-> Describe the palette you have in mind. You can mention a mood, a brand, a context, or specific colors.
-> Example: *"a calm fintech app with deep blues and warm neutrals"*
+Ask for a natural language description if not already provided (mood, brand, context, or specific colors; e.g. "a calm fintech app with deep blues and warm neutrals").
 
 ### Step B2 — Call `generate_colors_from_prompt`
 
 Call the tool with the prompt string. The tool uses AI (Mistral) to return a set of colors.
 
-### Step B3 — Show results and ask for role names
+### Step B3 — Show results and assign roles
 
-Present the generated colors as swatches. Then send:
-
-> Here are the suggested colors. Assign a role to each one you want to keep — for example `primary`, `neutral`, `accent`, `error`.
-> Feel free to adjust or discard any.
+Show the suggested colors as swatches. Ask the user to assign a role name to each color they want to keep and discard the rest.
 
 ### Step B4 — Normalize to ColorConfiguration
 
@@ -132,38 +103,21 @@ Convert each kept color to a `ColorConfiguration` object using the same mapping 
 
 ### Step C1 — Collect the base color
 
-If not already provided, send:
-
-> What is your base color? Provide a hex value (e.g. `#3B82F6`).
-
-Convert the hex to an RGB Channel tuple:
+Ask for a hex base color if not already provided. Convert to an RGB Channel tuple:
 - Parse hex → `[r, g, b]` with values 0–255
 - Example: `#3B82F6` → `[59, 130, 246]`
 
 ### Step C2 — Choose harmony type
 
-Send:
-
-> Which harmony type do you want?
-> - **Complementary** — opposite on the color wheel (2 colors)
-> - **Compound** — base + two colors adjacent to its complement (3 colors)
-> - **Analogous** — neighboring hues (3 colors)
-> - **Triadic** — evenly spaced by 120° (3 colors)
-> - **Tetradic** — two complementary pairs (4 colors)
-> - **Square** — four evenly spaced hues (4 colors)
-> - **All** — return all harmony types at once
+Ask which harmony type: Complementary (2 colors), Compound (3), Analogous (3), Triadic (3), Tetradic (4), Square (4), or All.
 
 ### Step C3 — Call `create_color_harmony`
 
 Call the tool with the Channel object, selected type, and `returnFormat: "both"`.
 
-### Step C4 — Show results and ask for role names
+### Step C4 — Show results and assign roles
 
-Present the harmony colors as swatches, grouped by harmony type if `ALL` was selected.
-
-Then send:
-
-> Here are the harmony colors. Pick the ones you want and assign a role name to each — for example `primary`, `secondary`, `accent`.
+Show harmony colors as swatches (grouped by type if `ALL`). Ask the user to pick and assign a role name to each color they want to keep.
 
 ### Step C5 — Normalize to ColorConfiguration
 
@@ -191,11 +145,9 @@ Then hand off to `ui-color-palette-scale-palette` to build the full palette.
 
 ## Tips
 
-- **Multiple modes**: You can combine modes — for example, extract from an image and then generate a harmony from one of the extracted colors.
-- **Hex to RGB (Channel tuple for `baseColor`)**: Parse hex → `[r, g, b]` with values 0–255. E.g. `#3B82F6` → `[59, 130, 246]`.
-- **Hex to RGB 0–1 (for ColorConfiguration.rgb)**: Divide each 0–255 channel by 255. E.g. `#3B82F6` → `r: 59/255 ≈ 0.231`, `g: 130/255 ≈ 0.510`, `b: 246/255 ≈ 0.965`.
-- **Color count**: For most design systems, 2–5 source colors is ideal — one primary, one neutral, and up to three accents/semantics.
-- **Image URL**: The URL must be publicly accessible (no auth, no CORS restriction). Ask the user to upload the image somewhere public if needed.
+- **Combine modes**: e.g. extract from an image, then harmonize one of the extracted colors.
+- **Hex conversions**: Channel tuple → `[r, g, b]` 0–255 (e.g. `#3B82F6` → `[59, 130, 246]`); rgb 0–1 → divide by 255 (e.g. `{ r: 0.23, g: 0.51, b: 0.96 }`).
+- **Color count**: 2–5 ideal (1 primary, 1 neutral, ≤3 accents/semantics). Image URL must be publicly accessible (no auth, no CORS).
 
 ## Arguments
 
