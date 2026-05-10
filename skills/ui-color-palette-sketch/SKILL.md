@@ -43,6 +43,7 @@ Do not start from raw API calls. Start from the workflow structure.
 - `references/generate-variables.md` — generate or sync Sketch swatches as the variable-like layer
 - `references/generate-styles.md` — generate or sync Sketch shared layer styles
 - `references/generate-tokens.md` — orchestrate swatches, styles, and document preview together
+- `references/generate-preview.md` — draw the palette as a swatch board on the Sketch canvas (canvas rendering only, not swatch/style export)
 
 ## Routing
 
@@ -51,8 +52,7 @@ Choose the sub-skill by user intent:
 - “variables”, “swatches”, “color variables” → `references/generate-variables.md`
 - “styles”, “shared styles”, “reusable fills” → `references/generate-styles.md`
 - “full Sketch setup”, “tokens”, “preview + styles + swatches” → `references/generate-tokens.md`
-
-## Platform API references
+- "preview", "swatch board", "canvas rendering", "visual board" → `references/generate-preview.md`
 
 An agent should think in terms of the Sketch plugin/document API surface, not only the plugin wrapper:
 

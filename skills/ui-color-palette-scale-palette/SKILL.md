@@ -192,35 +192,16 @@ If the user has a design tool connected (Figma, Penpot, Sketch, Framer), offer t
 
 Use the design tool's MCP API to create the shapes directly. Do not invoke `ui-color-palette-figma`, `ui-color-palette-penpot`, `ui-color-palette-framer`, or `ui-color-palette-sketch` — those skills are for token/style/variable export, not canvas rendering.
 
-##### Target visual structure (consistent across all tools)
+For the exact layer hierarchy, layout primitives, swatch dimensions, and text specs, read the matching reference file before generating:
 
-Produce the same visual result regardless of tool:
+| Tool | Reference |
+|---|---|
+| Figma | `ui-color-palette-figma/references/generate-preview.md` |
+| Penpot | `ui-color-palette-penpot/references/generate-preview.md` |
+| Sketch | `ui-color-palette-sketch/references/generate-preview.md` |
+| Framer | `ui-color-palette-framer/references/generate-preview.md` |
 
-- One **root container** per theme, labeled with the theme name
-- Inside: one **row container** per color, labeled with the color name on the left
-- Inside each row: one **swatch** per shade — a filled rectangle labeled with the shade name and hex value
-- Text on each swatch uses the contrasted color (light or dark) based on the shade's luminance
-
-```
-╔══════════════════════════════════════════════╗
-║ Light                                         ║
-║  Primary  [ 50 ][ 100 ][ 200 ][ 500 ][ 900 ] ║
-║  Neutral  [ 50 ][ 100 ][ 200 ][ 500 ][ 900 ] ║
-╚══════════════════════════════════════════════╝
-```
-
-Swatch dimensions: **64 × 80 px**. Color label column: **88 px** wide. Gap between swatches: **0** (flush). Gap between rows: **4 px**.
-
-##### Layout primitives per tool
-
-| | Figma | Penpot | Sketch | Framer |
-|---|---|---|---|---|
-| Row container | Frame + **Auto Layout** (horizontal) | Frame + **Flex Layout** (row) | Group + **Stack** (horizontal) | Frame + **Layout** (horizontal) |
-| Theme container | Frame + **Auto Layout** (vertical) | Frame + **Flex Layout** (column) | Group + **Stack** (vertical) | Frame + **Layout** (vertical) |
-| Swatch | Frame, fill = hex | Rectangle, fill = hex | Rectangle, fill = hex | Frame, fill = hex |
-| Swatch label | Text layer inside swatch frame | Text layer inside swatch frame | Text layer inside swatch group | Text layer inside swatch frame |
-
-All containers use `hug contents` / `fit` sizing so they expand to fit their children automatically.
+The visual output is identical across all tools: same swatch dimensions (64×80 px), same label layout (shade name + hex, plus optional contrast scores), same color hierarchy (root → theme → color row → swatches). Only the layout primitive names differ per tool (Auto Layout / Flex Layout / Stack / Layout).
 
 #### 3. MCP preview image (fallback)
 

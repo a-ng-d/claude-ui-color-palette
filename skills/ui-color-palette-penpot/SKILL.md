@@ -42,6 +42,7 @@ Do not start from raw API calls. Start from the workflow structure.
 
 - `references/generate-tokens.md` — generate or sync Penpot local tokens and themed sets
 - `references/generate-styles.md` — generate or sync Penpot local color styles
+- `references/generate-preview.md` — draw the palette as a swatch board on the Penpot canvas (canvas rendering only, not token/style export)
 
 ## Routing
 
@@ -49,7 +50,9 @@ Choose the sub-skill by user intent:
 
 - “tokens”, “semantic colors”, “theme tokens”, “Penpot token sets” → `references/generate-tokens.md`
 - “styles”, “local colors”, “style library”, “swatches” → `references/generate-styles.md`
-- “preview”, “board”, “document review” → usually start with `references/generate-tokens.md`, then generate/update the document preview- "semantic tokens", "color system tokens", "system token set", `SystemData` present in context → `references/generate-tokens.md` — **new token set from `SystemData`**
+- "preview", "board", "document review" → usually start with `references/generate-tokens.md`, then generate/update the document preview
+- "preview", "swatch board", "canvas rendering", "visual board" → `references/generate-preview.md`
+- "semantic tokens", "color system tokens", "system token set", `SystemData` present in context → `references/generate-tokens.md` — **new token set from `SystemData`**
 
 When routing a `SystemData`-based workflow to `references/generate-tokens.md`, pass `SystemData` opaquely. The sub-skill maps it as follows:
 - **First**: ensure the palette's primitive token sets exist — create them if missing (mandatory prerequisite before any binding)

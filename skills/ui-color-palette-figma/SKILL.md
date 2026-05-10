@@ -50,6 +50,7 @@ Do not start from raw API calls. Start from the workflow structure.
 - `references/generate-variables.md` — generate or sync Figma local variables and modes
 - `references/generate-styles.md` — generate or sync Figma local paint styles
 - `references/generate-tokens.md` — orchestrate variables, styles, and document preview together
+- `references/generate-preview.md` — draw the palette as a swatch board on the Figma canvas (canvas rendering only, not variable/style export)
 
 ## Routing
 
@@ -59,6 +60,7 @@ Choose the sub-skill by user intent:
 - "paint styles", "local styles", "style library", "swatches" → `references/generate-styles.md`
 - "full handoff", "everything in Figma", "variables + styles + preview" → `references/generate-tokens.md`
 - "semantic tokens", "color system variables", "system variable collection", `SystemData` present in context → `references/generate-variables.md` — **new collection from `SystemData`**
+- "preview", "swatch board", "canvas rendering", "visual board" → `references/generate-preview.md`
 
 When routing a `SystemData`-based workflow to `references/generate-variables.md`, pass `SystemData` opaquely. The sub-skill maps it as follows:
 - **First**: ensure the palette's primitive variable collection exists — create it if missing (mandatory prerequisite before any binding)
