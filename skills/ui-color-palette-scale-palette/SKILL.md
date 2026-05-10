@@ -158,46 +158,111 @@ Controls the lightness scale distribution.
 
 ---
 
-## Visual preview
+## Step 2 — Visual preview
 
-After generating a palette, do not assume the next step is code export. A palette is often easier to validate visually first.
+After `get_palette` returns, always ask:
 
-At minimum, produce a compact visual preview using the generated shades:
+> Do you want to see a visual preview of the palette?
+> - **Yes** — show a preview
+> - **No** — skip to next step
 
-- one section per theme
-- one row per color family
-- one swatch per shade
-- each swatch labeled with its `shade.name` and `hex`
-- when `textColorsTheme` is available, show the preferred text color (`light` or `dark`) on top of each swatch
+### Priority order
 
-### Preview layout
+Apply the following priority — stop at the first option that works:
 
-Prefer this structure for a quick visual audit:
+#### 1. Native UI preview (preferred)
 
-| Theme | Color | Swatches |
-| ----- | ----- | -------- |
-| Light | primary | `50 100 200 300 400 500 600 700 800 900` |
+Render the palette directly in the conversation without any external call. Produce a markdown table with one column per shade and one row per color, using the `hex` values from the compact cells:
 
-And render the swatches conceptually like this:
-
-```text
-Light / primary
-[ 50  #F8FAFC ][ 100 #E2E8F0 ][ 200 #CBD5E1 ][ 300 #94A3B8 ]
-[ 400 #64748B ][ 500 #475569 ][ 600 #334155 ][ 700 #1E293B ]
-[ 800 #0F172A ][ 900 #020617 ]
+```
+Light — Primary
+| 50 | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900 |
+|#f0f4ff|#e8eeff|...|
 ```
 
-The goal is not pixel-perfect rendering in chat, but a readable, visual summary of the generated palette.
+If the chat interface supports HTML artifacts or rich rendering (Claude.ai, Jupyter, VS Code), prefer a richer layout. This requires no external tool call and works everywhere.
 
-### Design tool handoff
+**Only proceed to option 2 if** the user explicitly says the native rendering is insufficient, or if they already mentioned a design tool in context.
 
-If the user wants the palette generated inside a design document, prefer routing to design tools instead of only exporting code:
+#### 2. Design tool canvas
 
-- **Figma**: propose generating the palette in the current file as swatches, variables, or local styles
-- **Penpot**: propose generating a palette board or style set for review
-- **Sketch**: propose generating a palette page, symbol sheet, or token handoff artifact
+If the user has a design tool connected (Figma, Penpot, Sketch, Framer), offer to draw the palette directly into the current document as a visual swatch board. This is a **canvas rendering**, not a token/style/variable export:
 
-When the user mentions Figma, FigJam, Penpot, Sketch, design board, palette board, style tiles, or visual preview in a document, treat that as a **design-generation** request first, not a code-export request.
+> I can draw the palette directly in your document as a swatch board.
+
+Use the design tool's MCP API to create the shapes directly. Do not invoke `ui-color-palette-figma`, `ui-color-palette-penpot`, `ui-color-palette-framer`, or `ui-color-palette-sketch` — those skills are for token/style/variable export, not canvas rendering.
+
+##### Target visual structure (consistent across all tools)
+
+Produce the same visual result regardless of tool:
+
+- One **root container** per theme, labeled with the theme name
+- Inside: one **row container** per color, labeled with the color name on the left
+- Inside each row: one **swatch** per shade — a filled rectangle labeled with the shade name and hex value
+- Text on each swatch uses the contrasted color (light or dark) based on the shade's luminance
+
+```
+╔══════════════════════════════════════════════╗
+║ Light                                         ║
+║  Primary  [ 50 ][ 100 ][ 200 ][ 500 ][ 900 ] ║
+║  Neutral  [ 50 ][ 100 ][ 200 ][ 500 ][ 900 ] ║
+╚══════════════════════════════════════════════╝
+```
+
+Swatch dimensions: **64 × 80 px**. Color label column: **88 px** wide. Gap between swatches: **0** (flush). Gap between rows: **4 px**.
+
+##### Layout primitives per tool
+
+| | Figma | Penpot | Sketch | Framer |
+|---|---|---|---|---|
+| Row container | Frame + **Auto Layout** (horizontal) | Frame + **Flex Layout** (row) | Group + **Stack** (horizontal) | Frame + **Layout** (horizontal) |
+| Theme container | Frame + **Auto Layout** (vertical) | Frame + **Flex Layout** (column) | Group + **Stack** (vertical) | Frame + **Layout** (vertical) |
+| Swatch | Frame, fill = hex | Rectangle, fill = hex | Rectangle, fill = hex | Frame, fill = hex |
+| Swatch label | Text layer inside swatch frame | Text layer inside swatch frame | Text layer inside swatch group | Text layer inside swatch frame |
+
+All containers use `hug contents` / `fit` sizing so they expand to fit their children automatically.
+
+#### 3. MCP preview image (fallback)
+
+Only if neither option above is usable, call `preview_palette` with the cells from `get_palette` (compact: true). It returns a markdown image link served by the API:
+
+```md
+![palette preview](https://...)
+```
+
+Embed it in the reply. This requires an external HTTP call and the image may not render in all UIs.
+
+### Branch B — No preview requested
+
+Skip entirely. Do not call `preview_palette`.
+
+---
+
+## Step 3 — Contrast scores (optional)
+
+After the preview step (whether or not an image was shown), ask:
+
+> Do you want contrast scores displayed for this palette?
+> - **WCAG** — ratio against light text (`#FFFFFF`) and dark text (`#000000`), with AA/AAA grades
+> - **APCA** — Lc value against light and dark text, with recommended usage
+> - **No scores** — skip
+
+Default: **No scores** — proceed without asking if the user has already stated a preference.
+
+### If WCAG or APCA requested
+
+The compact cells from `get_palette` already include `textContrast`. Use those values — **do not re-call `get_palette`**.
+
+For each theme, render a table:
+
+| Color | Shade | Hex | Light text | Dark text |
+| ----- | ----- | --- | ---------- | --------- |
+| Primary | 50 | #f0f4ff | WCAG 1.2:1 F | WCAG 19.4:1 AAA |
+| Primary | 500 | #3b5bdb | WCAG 4.6:1 AA | WCAG 4.5:1 AA |
+
+For APCA, replace ratio/score columns with Lc values and `recommendedUsage` (e.g. `BODY_TEXT`, `SPOT_TEXT`, `NON_TEXT`, `AVOID`).
+
+Only show scores for the themes and colors the user cares about — do not dump all shades unless asked.
 
 If direct write-back tooling is available for the target design tool, use it. Otherwise:
 

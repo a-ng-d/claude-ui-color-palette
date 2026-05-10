@@ -90,6 +90,18 @@ If the source is not already clear from context, ask: **Image** (dominant colors
 
 Once the source is resolved, ask: **Scale** (build a full shade palette) / **Retrieve** (load an existing palette from the platform) / **Audit** (check contrast and accessibility).
 
+### Phase 2.1 — Preview (optional)
+
+Once `PaletteData` is in context, always offer a preview before moving to Phase 2.5 or Phase 3:
+
+> Do you want to see a visual preview of the palette?
+> - **Yes** — inline image via `preview_palette`
+> - **No** — skip
+
+If yes: delegate to `ui-color-palette-scale-palette` Step 2 (preview branch). That skill handles the `preview_palette` call, the image fallback to design tools, and the contrast score question.
+
+If the user skips the preview or it is already shown, proceed to Phase 2.5.
+
 ### Phase 2.5 — Color System (optional)
 
 After the palette is ready, if the user wants semantic tokens or a role/prominence/state mapping, ask: **Define system** (build a taxonomy and resolve bindings) / **Skip** (go straight to deploy).
@@ -138,7 +150,8 @@ If the user wants to manage a published palette, ask: **Publish** / **Update** /
 5. **Platform routing**: When pushing colors to a design tool, go through the matching `ui-color-palette-<tool>` skill after the palette structure is ready.
 6. **Suggest improvements**: If contrast fails, suggest alternative shades. If a palette lacks enough variation, suggest adding tints/shades.
 7. **Format awareness**: When exporting code, confirm the target framework. Prefer Tailwind v4 for new projects, DTCG for design token interoperability.
-8. **PaletteData persistence**: Once `get_palette` has been called, immediately stream-extract to swatch rows and store the raw response opaquely as the `PaletteData` slot. Never read, print, or reason from the raw JSON. Never call `get_palette` again unless the user explicitly asks to rebuild or change the palette.
+8. **Preview before deploy**: After `PaletteData` is set, always offer a visual preview before moving to Phase 2.5 or Phase 3. Priority: (1) native UI rendering in the conversation, (2) design tool canvas if connected, (3) MCP `preview_palette` image as last resort. Delegate the branching logic to the `ui-color-palette-scale-palette` skill Step 2.
+9. **PaletteData persistence**: Once `get_palette` has been called, store the raw response opaquely as the `PaletteData` slot. Never read, print, or reason from the raw JSON. Never call `get_palette` again unless the user explicitly asks to rebuild or change the palette.
 9. **Scale is on-demand**: `ui-color-palette-scale-palette` is only needed when the user wants code export, design tool variables/tokens/styles, or an accessibility audit. Publishing a palette does **not** require scaling — `publish_palette` takes source colors and config directly.
 
 ## Session state
