@@ -59,14 +59,19 @@ Reduce `PaletteData` to two reusable row models before execution:
 - `previewRows`: `paletteName`, `themeName`, `colorName`, `shadeName`, `displayLabel`, `hex`, `description`
 
 Token name encoding (exact logic from implementation):
-1. Apply `doSnakeCase()` to `colorName` (e.g. `Primary Blue` → `primary_blue`)
+1. Apply `doSnakeCase()` to `colorName` (e.g. `Primary Blue` → `primary_blue`; single-word names like `UICP` → `uicp`)
 2. On each segment (`[colorNameSnake, shadeName]`), replace remaining spaces with `-`
 3. Filter out empty strings and `'None'`
 4. Join with `.` → `colorName_snake.shadeName`
 5. Replace `・` with `_` on the resulting string
 6. Fallback: if `colorName` is empty, use the localized default color name (snake-cased)
 
-Example: color `Primary Blue`, shade `500` → `primary_blue.500`
+Examples:
+- color `Primary Blue`, shade `500` → `primary_blue.500`
+- color `UICP`, shade `80` → `uicp.80`
+- color `Primary`, shade `source` → `primary.source`
+
+The `"source"` shade (the reference/input color for each family) is **always included** as a token alongside the generated scale steps.
 
 Set name encoding:
 - **no themes**: one set named `palette.base.name` (falls back to localized default if empty)
@@ -76,50 +81,16 @@ Token value: `shade.hex ?? '#000000'` (raw hex string; fallback to black if unde
 
 These normalized row models are the actual handoff from palette structure to Penpot token and preview generation.
 
-## Backing operations
+## Sync behaviour
 
-This skill maps to the plugin bridge workflow:
-
-- `createLocalTokens()`
-- `updateLocalTokens()`
-- optionally `createDocument()` or `updateDocument()` for preview
-
-These plugin operations are only a reference implementation. An agent should be able to perform the same work directly through Penpot API requests.
-
-## Equivalent agent-side API requests
-
-When not relying on the plugin action, use the equivalent Penpot API flow:
-
-**Case A — palette with no themes** (all shades belong to a single base group):
-
-1. Flatten the palette into shade rows (`colorName`, `shadeName`, `hex`, `description`).
-2. Get or create one token set: `catalog.addSet({ name: paletteName })`.
-3. For each shade row:
-   - Compute `tokenName`: `Case(colorName).doSnakeCase().replace(/\s+/g, '-') + '.' + shadeName`
-   - Call `tokenSet.addToken({ type: 'color', name: tokenName, value: hex, description })`
-   - Track the returned `token.id` for future updates.
-
-**Case B — palette with themes**:
-
-1. Flatten the palette into theme rows (`themeName`, `colorName`, `shadeName`, `hex`, `description`).
-2. For each unique theme:
-   - Get or create a token set: `catalog.addSet({ name: paletteName + '/' + themeName })`
-   - Get or create a theme group: `catalog.addTheme({ group: paletteName, name: themeName })`
-   - Track returned `set.id` and `theme.id` for future updates.
-3. For each shade row within a theme:
-   - Compute `tokenName` as above.
-   - Call `themeSet.addToken({ type: 'color', name: tokenName, value: hex, description })`
-   - Track the returned `token.id`.
-4. If deep sync is desired, remove orphan tokens, orphan themed sets, and orphan themes.
-5. If the user wants a preview, create or update a board/document with grouped swatches.
-
-Behavior supported by the plugin:
-
-- creates token sets when missing
-- creates theme groups when themes exist
-- creates tokens from `colorName_snake.shadeName`
-- updates token names, values, descriptions, themes, and sets
-- optionally removes orphan tokens/themes when deep sync is enabled
+- **No-theme palette**: one token set named `paletteName`. No-theme detection: all shade IDs contain `'00000000000'`.
+- **Themed palette**: one token set per theme (`paletteName/themeName`, no spaces around `/`) + one theme entry per theme (`group: paletteName`, `name: themeName`).
+- Includes the `"source"` shade for each color family alongside the numbered scale steps.
+- Token names follow `colorName_snake.shadeName` encoding (see normalized projection above).
+- Token value: `shade.hex ?? '#000000'`.
+- **Newly created sets are inactive by default** (`active: false`) — call `set.toggleActive()` only if the user explicitly wants them applied to shapes.
+- Deep sync: optionally remove orphan tokens, sets, and themes.
+- Use `penpot_api_info` to look up `TokenCatalog`, `TokenSet`, `TokenTheme` API details at execution time.
 
 ## SystemData workflow (semantic token set)
 
@@ -127,33 +98,25 @@ When `SystemData` is present in the conversation context, use this section inste
 
 ### Step 0 — ensure primitives exist
 
-Semantic tokens must reference existing primitive tokens. Before creating the semantic set:
-
-1. List all local token sets via `catalog.sets()`.
-2. Check whether the palette's primitive token sets already exist (named `paletteName` or `paletteName/themeName`).
-3. If they do **not** exist, run the full palette token sync (Cases A and B above) before continuing. This step is **mandatory** — references cannot be created without primitive tokens.
+Semantic tokens reference existing primitive tokens. Check that the palette's primitive sets already exist (`paletteName` or `paletteName/themeName`). If not, run the full primitive sync first — this step is **mandatory**.
 
 ### Step 1 — semantic token set(s)
 
-1. Name the set using the system schema name or a user-supplied label. Suggested pattern:
-   - No-theme: `systemName`
-   - Themed: one set per theme, `systemName/themeName`
-2. Find the existing set by name, or create it:
-   `catalog.addSet({ name: setName })`
+Create or find a set named after the system schema or user label:
+- No-theme: `systemName`
+- Themed: one set per theme, `systemName/themeName`
 
 ### Step 2 — semantic tokens with binding
 
 For each token in `SystemData.tokens`:
 
 1. **Skip** if `token.isExcluded === true`.
-2. Compute `tokenName`: `token.pathNames.filter(n => n !== '' && n !== 'None').join('.')`.
+2. Token name: `token.pathNames.filter(n => n !== '' && n !== 'None').join('.')`.
 3. For each theme at index `i`:
-   - `ref = token.refs[i]`
-   - **Skip** if `ref.shadeId === null` (unbound).
-   - Resolve the primitive token name from `ref.shadeId`: find the shade in `PaletteData` whose id matches `ref.shadeId`, then encode as `colorName_snake.shadeName` (same encoding as the primitive token workflow above).
-   - Set the semantic token value as a **reference** (the binding):
-     `{ type: 'color', value: '{primitiveTokenName}' }`
-4. If `token.description` is defined, set it on the token.
+   - **Skip** if `token.refs[i].shadeId === null` (unbound).
+   - Resolve the primitive name: find the shade matching `ref.shadeId` in `PaletteData`, encode as `colorName_snake.shadeName`.
+   - Token value: `'{primitiveTokenName}'` (reference string, with curly braces).
+4. Set `token.description` if defined.
 
 ### SystemData Penpot mapping
 
@@ -172,12 +135,12 @@ For each token in `SystemData.tokens`:
 | --------------------- | ------------- |
 | `palette.base.name` | Token set name (no themes) / set prefix + theme group name (with themes) |
 | No-theme palette | Single set: `paletteName` |
-| Themed palette | One set per theme: `paletteName/themeName` + one theme: `{ group: paletteName, name: themeName }` |
+| Themed palette | One set per theme: `paletteName/themeName` (no spaces around `/`) + one theme: `{ group: paletteName, name: themeName }` |
 | `colorName` (snake_case, spaces → `-`) | First segment of token name (before `.`) |
-| `shadeName` | Second segment of token name (after `.`) |
+| `shadeName` (including `"source"`) | Second segment of token name (after `.`) |
 | `shade.hex` | Token value |
 | `shade.description` | Token description |
-| Shade description     | Token description                 |
+| New token set | Created inactive (`active: false`) — toggle explicitly if needed |
 
 ## Workflow
 

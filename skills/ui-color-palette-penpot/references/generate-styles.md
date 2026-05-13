@@ -46,64 +46,48 @@ Reduce `PaletteData` to a style-ready row model before execution:
 - `paletteName`
 - `themeName`
 - `colorName`
-- `shadeName`
-- `styleName` (full Penpot color name, used as-is): segments joined with ` / ` (space-slash-space)
-  - no themes: `paletteName / colorName / shadeName`
-  - with themes: `paletteName / themeName / colorName / shadeName` (theme name falls back to localized default if empty)
+- `shadeName` — includes `"source"` (the source/reference shade for each color family)
+- `stylePath` (Penpot `LibraryColor.path`): segments joined with ` / ` (space-slash-space), **excluding** `shadeName`
+  - no themes: `paletteName / colorName`
+  - with themes: `paletteName / themeName / colorName` (theme name falls back to localized default if empty)
   - empty segments are filtered out
+- `styleLeafName` (Penpot `LibraryColor.name`): the shade name only (e.g. `"80"`, `"source"`)
 - `hex`: 6-character hex string (first 7 chars of `shade.hex`, e.g. `'#RRGGBB'`)
 - `alpha`: opacity in `[0, 1]`
 
 This normalized row model is the actual handoff from palette structure to Penpot local style operations.
 
-## Backing operations
+> **API note — `name` vs `path`**: `LibraryColor` exposes two separate string fields.
+> - `name` = the leaf segment (shade name, e.g. `"80"` or `"source"`)
+> - `path` = the folder path (e.g. `"UICP Color Primitives / Light / Primary"`)
+>
+> Set them **independently** when creating or updating. Do not concatenate them into a single `name` string.
 
-This skill maps to the plugin bridge workflow:
+## Sync behaviour
 
-- `createLocalStyles()`
-- `updateLocalStyles()`
-
-These plugin operations are only a reference implementation. An agent should be able to perform the same work directly through Penpot API requests.
-
-## Equivalent agent-side API requests
-
-When not relying on the plugin action, use the equivalent Penpot API flow:
-
-**Case A — palette with no themes** (all shades have `id.includes('00000000000')`):
-
-1. Flatten the palette into shade rows (`colorName`, `shadeName`, `hex`, `alpha`).
-2. For each shade row:
-   - Skip the shade if `hex` is undefined.
-   - Compute `styleName`: `[paletteName, colorName, shadeName].filter(s => s !== '').join(' / ')`
-   - Find the existing style by stored `styleId` via `penpot.library.local.colors.find(s => s.id === styleId)`. If not found, create: `new LocalStyle({ name: styleName, hex: hex.substring(0, 7), alpha })`.
-   - Track the returned `libraryColor.id`.
-
-**Case B — palette with themes** (shades without `'00000000000'` in id):
-
-1. Flatten the palette into theme rows (`themeName`, `colorName`, `shadeName`, `hex`, `alpha`).
-2. For each shade row:
-   - Skip the shade if `hex` is undefined.
-   - Compute `styleName`: `[paletteName, themeName, colorName, shadeName].filter(s => s !== '').join(' / ')` (theme name falls back to localized default if empty)
-   - Find or create the style as above.
-
-Behavior supported by the plugin:
-
-- creates missing local styles
-- names styles using ` / ` (space-slash-space) as group separator
-- the full path including shade name is stored as the single `name` field on the color
-- color is set from `hex.substring(0, 7)` (strips alpha channel from 8-char hex if present)
-- opacity is set from `alpha` separately
-- skips shades where `hex` is undefined
-- saves palette back to plugin data directly (no size limit check for styles)
+- Creates missing styles; finds existing ones by stored `id` before creating.
+- Includes the `"source"` shade for each color family alongside the numbered scale steps.
+- Sets `LibraryColor.path` and `LibraryColor.name` **independently** (see naming model below).
+- `color` is set from `hex.substring(0, 7)` — strips alpha channel from 8-char hex if present.
+- `opacity` is set from `alpha` separately.
+- Skips shades where `hex` is undefined.
+- No-theme detection: all shade IDs contain `'00000000000'`.
 
 ## Naming model
 
-Styles are stored as a single `name` string in Penpot, using ` / ` (space-slash-space) as the group separator:
+Penpot stores local color styles with two separate fields:
+
+| Field | Role | Example |
+|---|---|---|
+| `LibraryColor.path` | Folder hierarchy, ` / `-separated | `UICP Color Primitives / Light / Primary` |
+| `LibraryColor.name` | Leaf name (shade) | `80` or `source` |
+
+Resulting full display path (Penpot UI): `path / name`
 
 - no themes: `paletteName / colorName / shadeName`
 - with themes: `paletteName / themeName / colorName / shadeName`
 
-This is different from Figma which uses `/` without spaces. Penpot parses ` / ` to build the folder hierarchy.
+Always set `path` and `name` independently — do not concatenate them. The `" / "` separator (with spaces) is what Penpot uses to build folder hierarchy; this differs from Figma which uses `"/"` without spaces.
 
 ## Workflow
 
