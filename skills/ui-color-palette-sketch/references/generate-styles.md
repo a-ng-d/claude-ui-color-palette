@@ -46,58 +46,25 @@ Reduce `PaletteData` to a style-ready row model before execution:
 - `paletteName`
 - `themeName`
 - `colorName`
-- `shadeName`
+- `shadeName` — includes `"source"` (the source/reference shade for each color family)
 - `styleName` (full path, used as the single `name` field): segments joined with `/` (no spaces)
   - no themes: `paletteName/colorName/shadeName`
   - with themes: `paletteName/themeName/colorName/shadeName` (theme name falls back to localized default if empty)
   - empty segments are filtered out
-- `hex`: raw hex string from `shade.hex`
+- `hex`: raw hex string from `shade.hex` (Sketch API returns/accepts `#rrggbbff` format with alpha suffix)
 
 > Note: Sketch styles have no separate `alpha` field — only `hex` is used. This differs from Figma (GL + alpha) and Penpot (hex + alpha).
 
 This normalized row model is the actual handoff from palette structure to Sketch shared style operations.
 
-## Backing operations
+## Sync behaviour
 
-This skill maps to the plugin bridge workflow:
-
-- `createLocalStyles()`
-- `updateLocalStyles()`
-
-These plugin operations are only a reference implementation. An agent should be able to perform the same work directly through Sketch API requests.
-
-## Equivalent agent-side API requests
-
-When not relying on the plugin action, use the equivalent Sketch API flow:
-
-**Case A — palette with no themes** (all shades have `id.includes('00000000000')`):
-
-1. Flatten the palette into shade rows (`colorName`, `shadeName`, `hex`).
-2. Request `Document.sharedLayerStyles`.
-3. For each shade row:
-   - Skip if `hex` is undefined.
-   - Compute `styleName`: `[paletteName, colorName, shadeName].filter(s => s !== '').join('/')`
-   - Find the existing style by stored `styleId` via `localStyles.find(s => s.id === styleId)`. If not found, create: `new LocalStyle({ name: styleName, hex })`.
-   - Track the returned `sharedColorStyle.id`.
-4. Call `Settings.setDocumentSettingForKey(Document, 'ui_color_palettes', currentPalettes)` then `Document.save()`.
-
-**Case B — palette with themes** (shades without `'00000000000'` in id):
-
-1. Flatten the palette into theme rows (`themeName`, `colorName`, `shadeName`, `hex`).
-2. For each shade row:
-   - Skip if `hex` is undefined.
-   - Compute `styleName`: `[paletteName, themeName, colorName, shadeName].filter(s => s !== '').join('/')` (theme name falls back to localized default if empty)
-   - Find or create as above.
-3. Persist as above.
-
-Behavior supported by the plugin:
-
-- deduplicates by `styleId` (looks up existing styles by stored id)
-- creates missing shared layer styles
-- names styles with `/` as group separator (Sketch parses this as a folder hierarchy)
-- sets fill color from `hex` only (no alpha)
-- skips shades where `hex` is undefined
-- persists palette state to document settings and calls `Document.save()`
+- Creates missing shared layer styles; finds existing ones by stored `styleId` before creating.
+- Includes the `"source"` shade for each color family alongside the numbered scale steps.
+- Style name is the full path as a **single string** — Sketch parses `/` (no spaces) as group separator.
+- Fill color set from `hex` only (no separate alpha field — Sketch styles have no opacity layer).
+- No-theme detection: all shade IDs contain `'00000000000'`.
+- Persists palette state to document settings and calls `Document.save()`.
 
 ## Sketch mapping
 

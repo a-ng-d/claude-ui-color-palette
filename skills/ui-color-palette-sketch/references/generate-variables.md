@@ -55,7 +55,7 @@ Reduce `PaletteData` to a swatch-ready row model before execution:
 - `paletteName`
 - `themeName`
 - `colorName`
-- `shadeName`
+- `shadeName` — includes `"source"` (the source/reference shade for each color family)
 - `swatchName` (full path, used as the single `name` field): segments joined with `/` (no spaces)
   - no themes: `paletteName/colorName/shadeName`
   - with themes: `paletteName/themeName/colorName/shadeName` (theme name falls back to localized default if empty)
@@ -66,47 +66,15 @@ Reduce `PaletteData` to a swatch-ready row model before execution:
 
 This normalized row model is the actual handoff from palette structure to Sketch swatch operations.
 
-## Backing operations
+## Sync behaviour
 
-This skill maps to the plugin bridge workflow:
-
-- `createLocalVariables()`
-- `updateLocalVariables()`
-
-These plugin operations are only a reference implementation. An agent should be able to perform the same work directly through Sketch API requests.
-
-## Equivalent agent-side API requests
-
-When not relying on the plugin action, use the equivalent Sketch API flow:
-
-**Case A — palette with no themes** (all shades have `id.includes('00000000000')`):
-
-1. Flatten the palette into shade rows (`colorName`, `shadeName`, `hex`).
-2. Request `Document.swatches`.
-3. For each shade row:
-   - Skip if `hex` is undefined.
-   - Compute `swatchName`: `[paletteName, colorName, shadeName].filter(s => s !== '').join('/')`
-   - Find an existing swatch by **name** (not by id): `localSwatches.find(s => s.name === swatchName)`. If not found, create: `new LocalVariable({ name: swatchName, hex })`.
-   - **No id is stored** — swatches are matched by name on every sync.
-4. Call `Settings.setDocumentSettingForKey(Document, 'ui_color_palettes', currentPalettes)` then `Document.save()`.
-
-**Case B — palette with themes** (shades without `'00000000000'` in id):
-
-1. Flatten the palette into theme rows (`themeName`, `colorName`, `shadeName`, `hex`).
-2. For each shade row:
-   - Skip if `hex` is undefined.
-   - Compute `swatchName`: `[paletteName, themeName, colorName, shadeName].filter(s => s !== '').join('/')` (theme name falls back to localized default if empty)
-   - Find or create as above (match by name).
-3. Persist as above.
-
-Behavior supported by the plugin:
-
-- deduplicates by swatch **name** (not by id — no id is persisted)
-- creates missing swatches
-- names swatches with `/` as group separator
-- sets color from `hex` only
-- skips shades where `hex` is undefined
-- persists palette state to document settings and calls `Document.save()`
+- Deduplicates by swatch **name** — no id is persisted, matched by name on every sync.
+- Creates missing swatches; updates color of existing ones.
+- Includes the `"source"` shade for each color family alongside the numbered scale steps.
+- Swatch name is the full path as a **single string** — Sketch parses `/` (no spaces) as group separator.
+- Color set from `hex` only.
+- No-theme detection: all shade IDs contain `'00000000000'`.
+- Persists palette state to document settings and calls `Document.save()`.
 
 ## Sketch mapping
 
