@@ -41,7 +41,6 @@ Do not start from raw API calls. Start from the workflow structure.
 ## Available sub-skills
 
 - `references/generate-styles.md` — generate and update Framer local color styles
-- `references/generate-tokens.md` — orchestrate color styles and document preview together
 - `references/generate-preview.md` — draw the palette as a swatch board on the Framer canvas (canvas rendering only, not style export)
 
 ## Routing
@@ -49,8 +48,8 @@ Do not start from raw API calls. Start from the workflow structure.
 Choose the sub-skill by user intent:
 
 - “styles”, “color styles”, “sync Framer colors” → `references/generate-styles.md`
-- “tokens”, “full Framer handoff”, “styles + preview” → `references/generate-tokens.md`
-- “preview”, “palette board”, “sheet” → usually start with `references/generate-tokens.md`- "preview", "swatch board", "canvas rendering", "visual board" → `references/generate-preview.md`
+- “full Framer handoff”, “styles + preview” → styles first (`references/generate-styles.md`), then preview (`references/generate-preview.md`)
+- “preview”, “swatch board”, “canvas rendering”, “visual board” → `references/generate-preview.md`
 ## Platform API references
 
 An agent should think in terms of the Framer Plugin API surface, not only the plugin wrapper:

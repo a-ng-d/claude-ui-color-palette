@@ -42,10 +42,12 @@ Reduce `PaletteData` to a style-ready row model before execution:
 - `themeName`
 - `colorName`
 - `shadeName`
-- `styleName` (full path, single `name` field): segments joined with `/`
-  - no themes: `paletteName/colorName/shadeName`
-  - with themes: `paletteName/themeName/colorName/shadeName` (theme name falls back to localized default if empty)
+- `shadeName` — includes `"source"` (the source/reference shade; its `dark` value equals `light`)
+- `stylePath` (the `stylePath` field for `manageColorStyle`): **must start with `/"`** — `"/" + segments.join("/")`
+  - no themes: `/paletteName/colorName/shadeName`
+  - with themes: `/paletteName/themeName/colorName/shadeName` (theme name falls back to localized default if empty)
   - empty segments are filtered out
+- `styleName` (display name, derived automatically from last path segment by Framer)
 - `gl`: OpenGL-normalized RGB triple `[r, g, b]` in `[0, 1]` range
 - `alpha`: opacity in `[0, 1]`
 - `light`: `rgba(r255, g255, b255, a)` or `rgb(r255, g255, b255)` when `alpha === 1` — computed from `gl`
@@ -60,57 +62,26 @@ Reduce `PaletteData` to a style-ready row model before execution:
 
 This normalized row model is the actual handoff from palette structure to Framer color style operations.
 
-## Backing operations
+## Sync behaviour
 
-This skill maps to the plugin bridge workflow:
-
-- `createLocalStyles()`
-- `updateLocalStyles()`
-- UI action: `SYNC_LOCAL_STYLES`
-
-These plugin operations are only a reference implementation. An agent should be able to perform the same work directly through Framer API requests.
-
-## Equivalent agent-side API requests
-
-When not relying on the plugin action, use the equivalent Framer API flow:
-
-**Case A — palette with no themes** (all shades have `id.includes('00000000000')`):
-
-1. Flatten the palette into shade rows with `gl` and `alpha`.
-2. Check `framer.isAllowedTo('createColorStyle')`.
-3. Request `framer.getColorStyles()`.
-4. For each shade row:
-   - Skip if `gl` is undefined.
-   - Compute `styleName` as above.
-   - Compute `light` rgba string from `gl` + `alpha`.
-   - Compute `dark` using the mirror logic above.
-   - Find the existing style by stored `styleId` via `localStyles.find(s => s.id === styleId)`. If not found and creation is allowed: `new LocalStyle({ name: styleName, light, dark })`.
-   - Await `style.libraryColor` to get the id, then track it.
-5. Persist palette to `window.localStorage.setItem('palette_' + id, JSON.stringify(palette))`.
-
-**Case B — palette with themes** (shades without `'00000000000'` in id):
-
-1. Same as Case A but `styleName` includes the theme segment.
-2. Mirror logic scope is restricted to shades sharing the same `themeName` + `colorName`.
-
-Behavior supported by the plugin:
-
-- respects `framer.isAllowedTo('createColorStyle')` before creating
-- deduplicates by stored `styleId`
-- computes `dark` automatically from the mirror shade in the same color family (not a user input)
-- `source` shade always has `dark === light`
-- uses `gl` (OpenGL normalized) to build `rgba()`/`rgb()` strings
-- persists palette state to `window.localStorage`
+- Check `framer.isAllowedTo('createColorStyle')` before any creation call.
+- Find existing styles by stored `styleId`; create only when not found.
+- Includes the `"source"` shade — its `dark` value always equals `light`.
+- `stylePath` **must start with `/`** (e.g. `/UICP Color Primitives/Light/Primary/source`).
+- `light` and `dark` values: `rgb(r, g, b)` or `rgba(r, g, b, a)` strings computed from `gl` + `alpha`.
+- `dark` is computed from the mirror shade: `oppositeIndex = totalShades - 1 - currentIndex` (excluding `source`).
+- No-theme detection: all shade IDs contain `'00000000000'`.
+- Persists palette state to `window.localStorage`.
 
 ## Framer mapping
 
 | UI Color Palette data | Framer target |
 | --------------------- | ------------- |
-| No-theme palette | `paletteName/colorName/shadeName` as style name |
-| Themed palette | `paletteName/themeName/colorName/shadeName` as style name |
-| `shade.gl` + `shade.alpha` | `light` value: `rgb(r255, g255, b255)` or `rgba(r255, g255, b255, a)` |
-| Mirror shade at `totalShades - 1 - index` | `dark` value (same formula) |
-| `source` shade | `dark === light` (no mirror applied) |
+| No-theme palette | `stylePath`: `/paletteName/colorName/shadeName` |
+| Themed palette | `stylePath`: `/paletteName/themeName/colorName/shadeName` |
+| `shade.gl` + `shade.alpha` | `light`: `rgb(r255, g255, b255)` or `rgba(r255, g255, b255, a)` |
+| Mirror shade at `totalShades - 1 - index` | `dark` value (same rgb formula) |
+| `source` shade (including `shadeName === "source"`) | `dark === light` |
 | `framer.isAllowedTo('createColorStyle')` | Gate before any creation call |
 
 ## Important note
