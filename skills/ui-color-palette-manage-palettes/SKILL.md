@@ -199,6 +199,9 @@ ID: abc123
 - Palettes are private by default after publication — the user must explicitly `share_published_palette` to make them public.
 - Use `list_my_published_palettes` to find palette IDs for update/delete operations.
 - The `preset`, `shift`, `colors`, and `themes` fields match the structures used by `get_palette`.
+- **`preset.id` must be one of the 19 supported values** — never invent or guess an id. For the full list with canonical `stops`, `min`, `max`, and `easing` per id, refer to `ui-color-palette-scale-palette` Step 0 question 4. Always use those canonical values when building the preset object.
+- **`shift.chroma` default is `100`, not `0`** — 100 means no change. A value of 0 fully desaturates all colors. Use `{ "chroma": 100, "hue": 0 }` when no shift is intended.
+- **Default theme `id` and `name`**: for a single (unthemed) palette, the theme must have `id: "00000000000"` and `name: "None"`. For multi-theme palettes, generate a random 11-character lowercase hex string for each `id` and use descriptive names (`"Light"`, `"Dark"`, etc.).
 
 ---
 

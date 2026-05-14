@@ -60,7 +60,33 @@ Skip question 2 of Step 0. Show the existing colors (name + hex) and ask the use
 
 **3. Color space** — ask to choose: `OKLCH` (recommended), `LCH`, `OKLAB`, `HSL`, `P3`, or other.
 
-**4. Scale preset** — ask to choose: `MATERIAL` (50–900, 10 stops), `TAILWIND` (50–950, 11 stops), `ANT` (1–10), `RADIX` (1–12).
+**4. Scale preset** — ask to choose from the supported presets below. Suggest the most common ones first (`MATERIAL`, `TAILWIND`, `ANT`, `RADIX`) and mention others are available on request.
+
+**Supported presets** (full list — `id` must be one of these exact values):
+
+| Family | id | stops | min | max | easing |
+| ------ | -- | ----- | --- | --- | ------ |
+| Custom | `CUSTOM_1_10` | `[1,2,3,4,5,6]` | 10 | 90 | `LINEAR` |
+| Custom | `CUSTOM_10_100` | `[10,20,30,40,50,60]` | 10 | 90 | `LINEAR` |
+| Custom | `CUSTOM_100_1000` | `[100,200,300,400,500,600]` | 10 | 90 | `LINEAR` |
+| Google | `MATERIAL` | `[50,100,200,300,400,500,600,700,800,900]` | 24 | 96 | `LINEAR` |
+| Google | `MATERIAL_3` | `[100,99,95,90,80,70,60,50,40,30,20,10,0]` | 0 | 100 | `NONE` |
+| Framework | `TAILWIND` | `[50,100,200,300,400,500,600,700,800,900,950]` | 16 | 96 | `LINEAR` |
+| Framework | `ANT` | `[1,2,3,4,5,6,7,8,9,10]` | 24 | 96 | `LINEAR` |
+| Framework | `BOOTSTRAP` | `[100,200,300,400,500,600,700,800,900]` | 15 | 95 | `LINEAR` |
+| Framework | `RADIX` | `[1,2,3,4,5,6,7,8,9,10,11,12]` | 5 | 95 | `LINEAR` |
+| Framework | `UNTITLED_UI` | `[25,50,100,200,300,400,500,600,700,800,900,950]` | 5 | 100 | `LINEAR` |
+| Framework | `OPEN_COLOR` | `[0,1,2,3,4,5,6,7,8,9]` | 15 | 100 | `LINEAR` |
+| Atlassian | `ADS` | `[100,200,300,400,500,600,700,800,900,1000]` | 24 | 96 | `LINEAR` |
+| Atlassian | `ADS_NEUTRAL` | `[0,100,200,300,400,500,600,700,800,900,1000,1100]` | 8 | 100 | `LINEAR` |
+| Adobe | `SPECTRUM` | `[100,200,300,400,500,600,700,800,900,1000,1100,1200,1300]` | 16 | 96 | `LINEAR` |
+| Adobe | `SPECTRUM_NEUTRAL` | `[50,75,100,200,300,400,500,600,700,800,900]` | 0 | 100 | `LINEAR` |
+| More | `CARBON` | `[10,20,30,40,50,60,70,80,90,100]` | 24 | 96 | `LINEAR` |
+| More | `BASE` | `[50,100,200,300,400,500,600,700]` | 24 | 96 | `LINEAR` |
+| More | `POLARIS` | `[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]` | 16 | 100 | `EASEOUT_QUAD` |
+| More | `FLUENT` | `[10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160]` | 10 | 90 | `LINEAR` |
+
+Always use the exact canonical `stops`, `min`, `max`, and `easing` for the chosen `id`. Never mix values from different presets.
 
 **5. Themes** — ask: Light only, Light + Dark, or Custom.
 
@@ -101,32 +127,25 @@ Once all required answers are collected, build the `get_palette` input and proce
 
 ### `PresetConfiguration`
 
-Controls the lightness scale distribution.
+Controls the lightness scale distribution. **`id` must be one of the 19 supported values** — see the full list in Step 0 question 4. Always use the canonical `stops`, `min`, `max`, and `easing` for the chosen `id`.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `id` | string | Preset identifier (e.g. `"MATERIAL"`, `"TAILWIND"`, `"CUSTOM_10_100"`) |
-| `name` | string | Display name |
-| `stops` | `number[]` | Scale stop labels (e.g. `[50, 100, 200, 300, 400, 500, 600, 700, 800, 900]`) |
-| `min` | number | Minimum lightness (darkest stop), 0–100 |
-| `max` | number | Maximum lightness (lightest stop), 0–100 |
-| `easing` | string | Distribution curve: `LINEAR`, `NONE`, `EASEIN_SINE`, `EASEOUT_SINE`, `EASEINOUT_SINE`, `EASEIN_QUAD`, `EASEOUT_QUAD`, `EASEINOUT_QUAD`, `EASEIN_CUBIC`, `EASEOUT_CUBIC`, `EASEINOUT_CUBIC` |
-
-**Common presets**:
-
-| id | stops | min | max | easing |
-| -- | ----- | --- | --- | ------ |
-| `MATERIAL` | `[50,100,200,300,400,500,600,700,800,900]` | 24 | 96 | `LINEAR` |
-| `TAILWIND` | `[50,100,200,300,400,500,600,700,800,900,950]` | 16 | 96 | `LINEAR` |
-| `ANT` | `[1,2,3,4,5,6,7,8,9,10]` | 24 | 96 | `LINEAR` |
-| `RADIX` | `[1,2,3,4,5,6,7,8,9,10,11,12]` | 5 | 95 | `LINEAR` |
+| `id` | string | Preset identifier — must match exactly one of the supported preset ids |
+| `name` | string | Display name matching the preset |
+| `stops` | `number[]` | Scale stop labels — must match the canonical stops for the chosen id |
+| `min` | number | Minimum lightness (darkest stop), 0–100 — must match the canonical min |
+| `max` | number | Maximum lightness (lightest stop), 0–100 — must match the canonical max |
+| `easing` | string | Distribution curve — must match the canonical easing for the chosen id |
 
 ### `ShiftConfiguration`
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
-| `chroma` | number | Global chroma multiplier — 100 = no change, <100 = desaturate, >100 = saturate |
-| `hue` | number | Global hue rotation in degrees — 0 = no shift |
+| Field | Type | Default (no change) | Description |
+| ----- | ---- | ------------------- | ----------- |
+| `chroma` | number | **`100`** | Global chroma/saturation shift — **100 = no change**, <100 = desaturate, >100 = saturate. Do not use 0 as a neutral value; 0 removes all saturation. |
+| `hue` | number | `0` | Global hue rotation in degrees — 0 = no shift |
+
+> **`shift.chroma` default is `100`, not `0`.** A value of 0 fully desaturates all colors.
 
 ### `ColorConfiguration` (each entry in `base.colors`)
 
@@ -144,15 +163,22 @@ Controls the lightness scale distribution.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `id` | string | Unique theme ID |
-| `name` | string | Theme name (e.g. `"Light"`, `"Dark"`) |
-| `description` | string | Theme description |
-| `scale` | `Record<string, number>` | Map of stop label → lightness value (0–100). Keys must match `preset.stops`. E.g. `{ "50": 96, "100": 88, "200": 80, ..., "900": 24 }` |
+| `id` | string | Theme identifier. **For a single (unthemed) palette: use `"00000000000"` exactly.** For multi-theme palettes: generate a random 11-character lowercase hex string (e.g. `"9e3d5b0f12a"`). |
+| `name` | string | Theme name. **For a single (unthemed) palette: use `"None"` exactly.** For multi-theme palettes: e.g. `"Light"`, `"Dark"`. |
+| `description` | string | Theme description — use empty string if none |
+| `scale` | `Record<string, number>` | Map of stop label → lightness value (0–100). Keys must match `preset.stops`. If omitted, a linear scale is auto-generated from the preset `min`/`max`. E.g. `{ "50": 96, "100": 88, ..., "900": 24 }` |
 | `paletteBackground` | string | Background hex color (e.g. `"#FFFFFF"`) |
 | `visionSimulationMode` | string | `"NONE"`, `"PROTANOMALY"`, `"PROTANOPIA"`, `"DEUTERANOMALY"`, `"DEUTERANOPIA"`, `"TRITANOMALY"`, `"TRITANOPIA"`, `"ACHROMATOMALY"`, `"ACHROMATOPSIA"` |
-| `textColorsTheme` | object | `{ lightColor: string, darkColor: string }` — hex colors for text on dark/light backgrounds (default: `{ lightColor: "#FFFFFF", darkColor: "#000000" }`) |
-| `isEnabled` | boolean | Whether the theme is active |
-| `type` | string | `"default theme"` or `"custom theme"` |
+| `textColorsTheme` | object | `{ lightColor: string, darkColor: string }` — default: `{ lightColor: "#FFFFFF", darkColor: "#000000" }` |
+| `isEnabled` | boolean | Whether the theme is active — use `true` |
+| `type` | string | `"default theme"` or `"custom theme"` — use `"default theme"` unless it is a custom override |
+
+**Single vs. multi-theme:**
+
+| Scenario | `id` | `name` |
+| -------- | ---- | ------ |
+| Single theme (no dark mode) | `"00000000000"` | `"None"` |
+| Multi-theme (Light/Dark/…) | random 11-char hex | `"Light"`, `"Dark"`, etc. |
 
 **Returns**: A `PaletteData` object containing `name`, `description`, `themes` (with full color scales), and `type`.
 
@@ -252,7 +278,7 @@ If direct write-back tooling is available for the target design tool, use it. Ot
 3. create a compact swatch matrix spec
 4. hand that spec off to the relevant design workflow/tool
 
-### Example `get_palette` input
+### Example `get_palette` input — single theme (no dark mode)
 
 ```json
 {
@@ -271,12 +297,11 @@ If direct write-back tooling is available for the target design tool, use it. Ot
     "areSourceColorsLocked": false,
     "colors": [
       {
-        "id": "primary",
         "name": "primary",
         "description": "",
         "rgb": { "r": 0.23, "g": 0.51, "b": 0.96 },
         "hue": { "shift": 0, "isLocked": false },
-        "chroma": { "shift": 100, "isLocked": false },
+        "chroma": { "chroma": 100, "isLocked": false },
         "alpha": { "isEnabled": false, "backgroundColor": "#FFFFFF" }
       }
     ],
@@ -285,7 +310,27 @@ If direct write-back tooling is available for the target design tool, use it. Ot
   },
   "themes": [
     {
-      "id": "light",
+      "id": "00000000000",
+      "name": "None",
+      "description": "",
+      "paletteBackground": "#FFFFFF",
+      "visionSimulationMode": "NONE",
+      "textColorsTheme": { "lightColor": "#FFFFFF", "darkColor": "#000000" },
+      "isEnabled": true,
+      "type": "default theme"
+    }
+  ]
+}
+```
+
+### Example `get_palette` input — Light + Dark themes
+
+```json
+{
+  "base": { "...same as above..." },
+  "themes": [
+    {
+      "id": "9e3d5b0f12a",
       "name": "Light",
       "description": "",
       "scale": { "50": 96, "100": 88, "200": 80, "300": 72, "400": 64, "500": 56, "600": 48, "700": 40, "800": 32, "900": 24 },
@@ -294,6 +339,17 @@ If direct write-back tooling is available for the target design tool, use it. Ot
       "textColorsTheme": { "lightColor": "#FFFFFF", "darkColor": "#000000" },
       "isEnabled": true,
       "type": "default theme"
+    },
+    {
+      "id": "4a7f2c1e09b",
+      "name": "Dark",
+      "description": "",
+      "scale": { "50": 24, "100": 32, "200": 40, "300": 48, "400": 56, "500": 64, "600": 72, "700": 80, "800": 88, "900": 96 },
+      "paletteBackground": "#1A1A1A",
+      "visionSimulationMode": "NONE",
+      "textColorsTheme": { "lightColor": "#FFFFFF", "darkColor": "#000000" },
+      "isEnabled": true,
+      "type": "custom theme"
     }
   ]
 }
