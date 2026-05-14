@@ -1,4 +1,6 @@
-# UI Color Palette — Claude Code Plugin
+![Plugin version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fa-ng-d%2Fclaude-ui-color-palette%2Fmain%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&color=informational) ![GitHub last commit](https://img.shields.io/github/last-commit/a-ng-d/claude-ui-color-palette?color=informational) ![GitHub](https://img.shields.io/github/license/a-ng-d/claude-ui-color-palette?color=informational)
+
+# UI Color Palette on Claude Code
 
 A [Claude Code](https://code.claude.com/) plugin that brings color palette design, contrast auditing, code generation, and design tool synchronization directly into your AI-assisted workflow.
 
