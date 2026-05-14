@@ -40,7 +40,8 @@ Do not start from raw API calls. Start from the workflow structure.
 
 ## Available sub-skills
 
-- `references/generate-variables.md` — generate or sync Sketch swatches as the variable-like layer
+- `references/generate-variables.md` — generate or sync Sketch **primitive** swatches
+- `references/generate-semantic-variables.md` — generate or sync Sketch **semantic** swatches from `SystemData` (taxonomy-named swatches with resolved hex values, one per theme)
 - `references/generate-styles.md` — generate or sync Sketch shared layer styles
 - `references/generate-preview.md` — draw the palette as a swatch board on the Sketch canvas (canvas rendering only, not swatch/style export)
 
@@ -48,10 +49,17 @@ Do not start from raw API calls. Start from the workflow structure.
 
 Choose the sub-skill by user intent:
 
-- “variables”, “swatches”, “color variables” → `references/generate-variables.md`
+- “variables”, “swatches”, “color variables”, “primitive colors” → `references/generate-variables.md`
+- “semantic swatches”, “color system swatches”, “system swatch set”, `SystemData` present in context → `references/generate-semantic-variables.md`
 - “styles”, “shared styles”, “reusable fills” → `references/generate-styles.md`
-- “full Sketch setup”, “tokens”, “preview + styles + swatches” → swatches first (`references/generate-variables.md`), then styles (`references/generate-styles.md`), then preview (`references/generate-preview.md`)
+- “full Sketch setup”, “tokens”, “preview + styles + swatches” → primitives first (`references/generate-variables.md`), semantics if `SystemData` is available (`references/generate-semantic-variables.md`), then styles (`references/generate-styles.md`), then preview (`references/generate-preview.md`)
 - “preview”, “swatch board”, “canvas rendering”, “visual board” → `references/generate-preview.md`
+
+When routing a `SystemData`-based workflow to `references/generate-semantic-variables.md`, pass `SystemData` and `PaletteData` opaquely. The sub-skill:
+- **First** ensures primitive swatches exist (mandatory to guarantee PaletteData consistency)
+- Creates one swatch per theme per token, named `systemName/themeName/tokenPath`
+- Swatch value is a **raw hex** resolved from `token.refs[i].shadeId` via PaletteData — Sketch has no alias or reference mechanism
+- Excluded tokens (`isExcluded: true`) and unbound refs (`shadeId: null`) are skipped
 
 An agent should think in terms of the Sketch plugin/document API surface, not only the plugin wrapper:
 

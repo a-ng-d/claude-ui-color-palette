@@ -50,6 +50,15 @@ Choose the sub-skill by user intent:
 - “styles”, “color styles”, “sync Framer colors” → `references/generate-styles.md`
 - “full Framer handoff”, “styles + preview” → styles first (`references/generate-styles.md`), then preview (`references/generate-preview.md`)
 - “preview”, “swatch board”, “canvas rendering”, “visual board” → `references/generate-preview.md`
+- “semantic tokens”, “color system styles”, “system color styles”, `SystemData` present in context → `references/generate-styles.md` — **new semantic style set from `SystemData`**
+
+When routing a `SystemData`-based workflow to `references/generate-styles.md`, pass `SystemData` opaquely. The sub-skill maps it as follows:
+- **First**: ensure the palette's primitive color styles exist — create them if missing (mandatory prerequisite)
+- Create one color style per token, named by the system name + token path (`/systemName/tokenPath`)
+- The `light` value is resolved from the first theme ref; `dark` from the second (falls back to `light` if absent)
+- Excluded tokens (`isExcluded: true`) and unbound first-theme refs (`shadeId: null`) are skipped
+
+Note: Framer color styles support only `light` and `dark` values — not arbitrary theme modes. Systems with more than 2 themes will use only the first two; the user will be warned.
 ## Platform API references
 
 An agent should think in terms of the Framer Plugin API surface, not only the plugin wrapper:

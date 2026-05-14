@@ -74,45 +74,13 @@ This normalized row model is the actual handoff from palette structure to Figma 
 - **Values**: `{ r: gl[0], g: gl[1], b: gl[2], a: alpha }` per mode.
 - Optionally removes orphan variables and modes when deep sync is enabled.
 
-## SystemData workflow (semantic variable collection)
+## SystemData workflow
 
-When `SystemData` is present in the conversation context, use this section instead of the standard palette workflow above.
+If `SystemData` is present in context, do not use this file.
 
-### Step 0 — ensure primitives exist
+Route to `references/generate-semantic-variables.md` instead — it handles the full semantic variable collection workflow (VariableAlias bindings, mode mirroring, collection naming).
 
-Semantic variables alias existing primitive variables. Check that the palette's primitive collection exists (by stored `collectionId`). If not, run the full primitive sync first — **mandatory**.
-
-### Step 1 — semantic collection
-
-Create or find a collection named after the system schema or user label.
-
-### Step 2 — modes
-
-Mirror the primitive collection: leave default mode as `'Mode 1'` for no-theme; rename + add modes for themed. Track each `modeId` in theme order — must match `token.refs` index order.
-
-### Step 3 — semantic variables with binding
-
-For each token in `SystemData.tokens`:
-
-1. **Skip** if `token.isExcluded === true`.
-2. Variable name: `token.pathNames.filter(n => n !== '' && n !== 'None').join('/')`.
-3. For each mode at theme index `i`:
-   - **Skip** if `token.refs[i].shadeId === null` (unbound).
-   - Find the primitive variable in the primitive collection whose id matches `ref.shadeId`. Skip with warning if not found.
-   - Set value as alias: `{ type: 'VARIABLE_ALIAS', id: primitiveVariable.id }`.
-4. Set `variable.description` if defined.
-
-### SystemData Figma mapping
-
-| `SystemData` field | Figma target |
-| ------------------------------------------ | ------------------------------------------------------- |
-| Schema name or user label | Semantic variable collection name |
-| `token.pathNames.filter(...).join('/')` | Semantic variable name |
-| One mode per theme | Collection mode (mirroring primitive collection) |
-| `token.refs[i].shadeId` → primitive var id | `{ type: 'VARIABLE_ALIAS', id: primitiveVariable.id }` |
-| `token.isExcluded === true` | Skip token entirely |
-| `ref.shadeId === null` | Skip this mode's value (leave unset) |
-| `token.description` | Variable description |
+This file covers **primitive** variables only.
 
 ## Expected input
 

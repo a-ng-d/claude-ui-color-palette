@@ -90,6 +90,49 @@ This Framer implementation does not expose a separate variables/tokens layer in 
 
 For Framer, the practical reusable color layer is **color styles**.
 
+## SystemData workflow (semantic color styles)
+
+When `SystemData` is present in the conversation context, use this section instead of the standard palette workflow above.
+
+Framer color styles hold a `light` and a `dark` value. For a themed system, the first theme maps to `light` and the second to `dark`. For systems with more than 2 themes, warn the user that Framer only supports light/dark and use the first two themes only.
+
+### Step 0 — ensure primitives exist
+
+Semantic styles build on top of the primitive style set. Check that the palette's primitive styles already exist. If not, run the full primitive sync first — **mandatory**.
+
+### Step 1 — semantic styles
+
+Check `framer.isAllowedTo('createColorStyle')` before any creation call.
+
+For each token in `SystemData.tokens`:
+
+1. **Skip** if `token.isExcluded === true`.
+2. Token path: `token.pathNames.filter(n => n !== '' && n !== 'None').join('/')`.
+3. Build `stylePath`: `"/" + systemName + "/" + tokenPath` (e.g. `/MySystem/Brand/Default`).
+4. Resolve `light` value:
+   - From `token.refs[0]` (first theme). If `shadeId === null`, skip the style entirely.
+   - Find the shade matching `ref.shadeId` in `PaletteData`, read `gl` + `alpha`.
+   - Compute `rgb(r255, g255, b255)` or `rgba(r255, g255, b255, a)`.
+5. Resolve `dark` value:
+   - If only one theme: `dark === light`.
+   - If two or more themes: from `token.refs[1]`. If `shadeId === null`, fall back to `light`.
+   - If three or more themes: warn and ignore themes beyond the second.
+6. Create or update the color style with `stylePath`, `light`, and `dark`.
+
+### SystemData Framer mapping
+
+| `SystemData` field | Framer target |
+| ------------------------------------------ | -------------------------------------------- |
+| Schema name or user label | `stylePath` prefix (`/systemName/…`) |
+| `token.pathNames.filter(...).join('/')` | `stylePath` suffix (token path segments) |
+| `token.refs[0].shadeId` → shade `gl` | `light` value (`rgb` / `rgba` string) |
+| `token.refs[1].shadeId` → shade `gl` | `dark` value (`rgb` / `rgba` string) |
+| Single theme or no-theme | `dark === light` |
+| 3+ themes | Warn user; only first two themes used |
+| `token.isExcluded === true` | Skip token entirely |
+| `token.refs[0].shadeId === null` | Skip this token (no light value) |
+| `token.refs[1].shadeId === null` | Fall back to `light` for dark value |
+
 ## Workflow
 
 1. Ensure the palette exists in the current Framer plugin state.

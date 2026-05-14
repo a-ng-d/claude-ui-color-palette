@@ -92,42 +92,13 @@ These normalized row models are the actual handoff from palette structure to Pen
 - Deep sync: optionally remove orphan tokens, sets, and themes.
 - Use `penpot_api_info` to look up `TokenCatalog`, `TokenSet`, `TokenTheme` API details at execution time.
 
-## SystemData workflow (semantic token set)
+## SystemData workflow
 
-When `SystemData` is present in the conversation context, use this section instead of the standard palette workflow above.
+If `SystemData` is present in context, do not use this file.
 
-### Step 0 — ensure primitives exist
+Route to `references/generate-semantic-tokens.md` instead — it handles the full semantic token set workflow (reference string bindings, theme set naming, token path encoding).
 
-Semantic tokens reference existing primitive tokens. Check that the palette's primitive sets already exist (`paletteName` or `paletteName/themeName`). If not, run the full primitive sync first — this step is **mandatory**.
-
-### Step 1 — semantic token set(s)
-
-Create or find a set named after the system schema or user label:
-- No-theme: `systemName`
-- Themed: one set per theme, `systemName/themeName`
-
-### Step 2 — semantic tokens with binding
-
-For each token in `SystemData.tokens`:
-
-1. **Skip** if `token.isExcluded === true`.
-2. Token name: `token.pathNames.filter(n => n !== '' && n !== 'None').join('.')`.
-3. For each theme at index `i`:
-   - **Skip** if `token.refs[i].shadeId === null` (unbound).
-   - Resolve the primitive name: find the shade matching `ref.shadeId` in `PaletteData`, encode as `colorName_snake.shadeName`.
-   - Token value: `'{primitiveTokenName}'` (reference string, with curly braces).
-4. Set `token.description` if defined.
-
-### SystemData Penpot mapping
-
-| `SystemData` field | Penpot target |
-| --------------------------------------- | ----------------------------------------------- |
-| Schema name or user label | Semantic token set name |
-| `token.pathNames.filter(...).join('.')` | Semantic token name |
-| `token.refs[i].shadeId` → primitive token name | Token value: `{colorName_snake.shadeName}` |
-| `token.isExcluded === true` | Skip token entirely |
-| `ref.shadeId === null` | Skip this theme's value (leave unset) |
-| `token.description` | Token description |
+This file covers **primitive** tokens only.
 
 ## Penpot mapping
 

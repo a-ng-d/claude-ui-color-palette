@@ -152,8 +152,10 @@ Finish with a one-line summary: e.g. `12 tokens — 9 bound, 2 unbound, 1 exclud
 7. Ask what to do next:
    - **Adjust bindings** — add, change, or exclude specific tokens, then rebuild
    - **Generate semantic code** → `ui-color-palette-generate-semantic-code`
-   - **Export to Figma as a variable collection** → `ui-color-palette-figma` — pass `SystemData` and `PaletteData` opaquely. The sub-skill creates a new Figma variable collection (one mode per theme), one variable per token path, with per-mode values resolved from the token `refs`.
-   - **Export to Penpot as a token set** → `ui-color-palette-penpot` — pass `SystemData` and `PaletteData` opaquely. The sub-skill creates a new Penpot token set (one set per theme), one token per path, with values resolved from the token `refs`.
+   - **Export to Figma as a semantic variable collection** → `ui-color-palette-figma` → `references/generate-semantic-variables.md` — pass `SystemData` and `PaletteData` opaquely. Creates a dedicated semantic Figma variable collection (one mode per theme); each variable is bound to a primitive via `VariableAlias` resolved from `token.refs[i].shadeId`. Primitives must exist first.
+   - **Export to Penpot as semantic token sets** → `ui-color-palette-penpot` → `references/generate-semantic-tokens.md` — pass `SystemData` and `PaletteData` opaquely. Creates one semantic token set per theme (`systemName/themeName`); each token value is a reference string `{colorName_snake.shadeName}` resolved from `token.refs[i].shadeId`. Primitives must exist first.
+   - **Export to Sketch as semantic swatches** → `ui-color-palette-sketch` — pass `SystemData` and `PaletteData` opaquely. Since Sketch has no mode concept, one swatch is created per theme per token, with swatch names encoding `systemName/themeName/tokenPath`. Only the `hex` value is used.
+   - **Export to Framer as semantic color styles** → `ui-color-palette-framer` — pass `SystemData` and `PaletteData` opaquely. Since Framer supports only `light` / `dark` values, the first theme maps to `light` and the second to `dark`. Systems with more than 2 themes will use only the first two themes. Style names follow `systemName/tokenPath`.
 
 ---
 

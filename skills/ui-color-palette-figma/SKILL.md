@@ -47,7 +47,8 @@ Do not start from raw API calls. Start from the workflow structure.
 
 ## Available sub-skills
 
-- `references/generate-variables.md` — generate or sync Figma local variables and modes
+- `references/generate-variables.md` — generate or sync Figma local **primitive** variables and modes
+- `references/generate-semantic-variables.md` — generate or sync Figma **semantic** variable collection from `SystemData` (VariableAlias layer on top of primitives)
 - `references/generate-styles.md` — generate or sync Figma local paint styles
 - `references/generate-preview.md` — draw the palette as a swatch board on the Figma canvas (canvas rendering only, not variable/style export)
 
@@ -55,18 +56,18 @@ Do not start from raw API calls. Start from the workflow structure.
 
 Choose the sub-skill by user intent:
 
-- "variables", "modes", "theme variables" → `references/generate-variables.md`
+- "variables", "modes", "theme variables", "primitive colors" → `references/generate-variables.md`
+- "semantic variables", "color system variables", "system variable collection", `SystemData` present in context → `references/generate-semantic-variables.md`
 - "paint styles", "local styles", "style library", "swatches" → `references/generate-styles.md`
-- "full handoff", "everything in Figma", "variables + styles + preview" → variables first (`references/generate-variables.md`), then styles (`references/generate-styles.md`), then preview (`references/generate-preview.md`)
-- "semantic tokens", "color system variables", "system variable collection", `SystemData` present in context → `references/generate-variables.md` — **new collection from `SystemData`**
+- "full handoff", "everything in Figma", "variables + styles + preview" → primitives first (`references/generate-variables.md`), semantics if `SystemData` is available (`references/generate-semantic-variables.md`), then styles (`references/generate-styles.md`), then preview (`references/generate-preview.md`)
 - "preview", "swatch board", "canvas rendering", "visual board" → `references/generate-preview.md`
 
-When routing a `SystemData`-based workflow to `references/generate-variables.md`, pass `SystemData` opaquely. The sub-skill maps it as follows:
-- **First**: ensure the palette's primitive variable collection exists — create it if missing (mandatory prerequisite before any binding)
-- Create one semantic Figma variable collection named after the system schema (or a user-supplied name)
-- Add one **mode** per theme, mirroring the primitive collection's mode structure
-- Add one **variable** per token in `SystemData.tokens`, named by joining `token.pathNames` with `/`
-- Set each variable's value per mode as a **VariableAlias** pointing to the corresponding primitive variable (resolved via `token.refs[themeIndex].shadeId`)
+When routing a `SystemData`-based workflow to `references/generate-semantic-variables.md`, pass `SystemData` and `PaletteData` opaquely. The sub-skill:
+- **First** ensures the palette's primitive variable collection exists (mandatory prerequisite for alias resolution)
+- Creates one semantic Figma variable collection named after the system schema or user-supplied label
+- Adds one **mode** per theme, mirroring the primitive collection's mode structure
+- Adds one **variable** per token in `SystemData.tokens`, named by joining `token.pathNames` with `/`
+- Sets each variable's value per mode as a **VariableAlias** pointing to the corresponding primitive variable (resolved via `token.refs[themeIndex].shadeId`)
 - Excluded tokens (`isExcluded: true`) and unbound refs (`shadeId: null`) are skipped
 
 If the user asks for "tokens" in the context of Figma, clarify that Figma does not have a native token format and route to variables instead. If they want exportable design tokens, route to `ui-color-palette-generate-code`.

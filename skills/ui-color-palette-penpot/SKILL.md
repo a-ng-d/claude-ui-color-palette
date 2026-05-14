@@ -40,7 +40,8 @@ Do not start from raw API calls. Start from the workflow structure.
 
 ## Available sub-skills
 
-- `references/generate-tokens.md` — generate or sync Penpot local tokens and themed sets
+- `references/generate-tokens.md` — generate or sync Penpot local **primitive** tokens and themed sets
+- `references/generate-semantic-tokens.md` — generate or sync Penpot **semantic** token sets from `SystemData` (reference layer on top of primitives)
 - `references/generate-styles.md` — generate or sync Penpot local color styles
 - `references/generate-preview.md` — draw the palette as a swatch board on the Penpot canvas (canvas rendering only, not token/style export)
 
@@ -48,16 +49,16 @@ Do not start from raw API calls. Start from the workflow structure.
 
 Choose the sub-skill by user intent:
 
-- “tokens”, “semantic colors”, “theme tokens”, “Penpot token sets” → `references/generate-tokens.md`
+- “tokens”, “primitive colors”, “theme tokens”, “Penpot token sets” → `references/generate-tokens.md`
+- “semantic tokens”, “color system tokens”, “system token set”, `SystemData` present in context → `references/generate-semantic-tokens.md`
 - “styles”, “local colors”, “style library”, “swatches” → `references/generate-styles.md`
-- "preview", "board", "document review" → usually start with `references/generate-tokens.md`, then generate/update the document preview
-- "preview", "swatch board", "canvas rendering", "visual board" → `references/generate-preview.md`
-- "semantic tokens", "color system tokens", "system token set", `SystemData` present in context → `references/generate-tokens.md` — **new token set from `SystemData`**
+- “full handoff”, “everything in Penpot”, “tokens + styles + preview” → primitives first (`references/generate-tokens.md`), semantics if `SystemData` is available (`references/generate-semantic-tokens.md`), then styles (`references/generate-styles.md`), then preview (`references/generate-preview.md`)
+- “preview”, “board”, “document review”, “swatch board”, “canvas rendering”, “visual board” → `references/generate-preview.md`
 
-When routing a `SystemData`-based workflow to `references/generate-tokens.md`, pass `SystemData` opaquely. The sub-skill maps it as follows:
-- **First**: ensure the palette's primitive token sets exist — create them if missing (mandatory prerequisite before any binding)
-- Create one semantic token set per theme, named after the system schema (or a user-supplied label)
-- Add one **token** per entry in `SystemData.tokens`, named by joining `token.pathNames` with `.`
+When routing a `SystemData`-based workflow to `references/generate-semantic-tokens.md`, pass `SystemData` and `PaletteData` opaquely. The sub-skill:
+- **First** ensures the palette's primitive token sets exist (mandatory prerequisite for reference resolution)
+- Creates one semantic token set per theme, named `systemName/themeName` (or `systemName` for no-theme systems)
+- Adds one **token** per entry in `SystemData.tokens`, named by joining `token.pathNames` with `.`
 - Each token value references the primitive token as `{colorName_snake.shadeName}` (resolved via `token.refs[themeIndex].shadeId`)
 - Excluded tokens (`isExcluded: true`) and unbound refs (`shadeId: null`) are skipped
 ## Platform API references

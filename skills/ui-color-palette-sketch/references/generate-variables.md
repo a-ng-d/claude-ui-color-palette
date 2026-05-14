@@ -116,9 +116,16 @@ Report a concise operational summary, for example:
 
 Do not dump the full palette JSON.
 
+## SystemData workflow
+
+If `SystemData` is present in context, do not use this file.
+
+Route to `references/generate-semantic-variables.md` instead — it handles semantic swatches organized by token taxonomy, with resolved hex values per theme.
+
+This file covers **primitive** swatches only.
+
 ## Tips
 
 - In this plugin, Sketch “variables” are implemented via document swatches.
-- Theme-heavy palettes still flatten into named swatch paths.
-- If the user wants a semantic design-token workflow, explain that Sketch here does not expose a separate token API like Penpot or Figma variables.
+- Theme-heavy palettes flatten into named swatch paths (`paletteName/themeName/colorName/shadeName`).
 - If strict cleanup is required, ensure deep sync for variables is enabled.
