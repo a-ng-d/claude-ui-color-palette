@@ -1,4 +1,4 @@
-![Plugin version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fa-ng-d%2Fclaude-ui-color-palette%2Fmain%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&color=informational) ![GitHub last commit](https://img.shields.io/github/last-commit/a-ng-d/claude-ui-color-palette?color=informational) ![GitHub](https://img.shields.io/github/license/a-ng-d/claude-ui-color-palette?color=informational)
+![GitHub last commit](https://img.shields.io/github/last-commit/a-ng-d/claude-ui-color-palette?color=informational) ![GitHub](https://img.shields.io/github/license/a-ng-d/claude-ui-color-palette?color=informational)
 
 # UI Color Palette on Claude Code
 
@@ -77,8 +77,13 @@ claude --plugin-dir ./claude-ui-color-palette
 
 On first enable, the plugin prompts for optional config:
 
-- **`gitlab_url`** — Your GitLab instance URL (leave empty if not using GitLab)
-- **`framer_mcp_url`** — Your Framer MCP URL from the [Framer marketplace](https://www.framer.com/marketplace/plugins/mcp/)
+| Key | Sensitive | Description |
+|---|---|---|
+| `penpot_token` | Yes (keychain) | Your Penpot user token — find it in Penpot → Profile → Access tokens |
+| `framer_mcp_url` | No | Your Framer MCP URL from the [Framer marketplace](https://www.framer.com/marketplace/plugins/mcp/) |
+| `gitlab_url` | No | Your GitLab instance URL (e.g. `https://gitlab.company.com`) — leave empty if not using GitLab |
+
+Sensitive values are stored in the system keychain and never written to `settings.json`. You can update them at any time with `/plugin config`.
 
 ## Usage
 

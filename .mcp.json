@@ -14,7 +14,7 @@
     },
     "penpot": {
       "type": "http",
-      "url": "https://design.penpot.app/mcp/stream?userToken=eyJhbGciOiJBMjU2S1ciLCJlbmMiOiJBMjU2R0NNIn0.5WTx8Az2vpUO_u-AHw46QkcwvvXFUKFG9UiEB5oLyKFhb9A6jsAS1A.lAWxuyMqxiqC7rVK.Lq9nI2PbM8QnvfQuKzzaD5_Mbg-on62bcInB-7UhgpXhsrlxCKEfP4nnGrs_1-fAvEjjRc_kt4S43c6Qu5ShCZX2I7aomTY36ixUxYhqVbN83E_m2mpmBQeXInJYmfNUXLYUxaUiqTx2QC75Izy5deKMN2CrnoazYD9y6SWxmGrFG6qW6HkZ6L_dMbEoq7jCa3bNxyfG2dT3.usRdeaWxCaIl0hqzOHcPvA"
+      "url": "https://design.penpot.app/mcp/stream?userToken=${user_config.penpot_token}"
     },
     "sketch": {
       "type": "http",
@@ -22,7 +22,7 @@
     },
     "framer": {
       "type": "http",
-      "url": "${user_config.framer_mcp_url}"
+      "url": "https://mcp.unframer.co/mcp?id=${user_config.framer_mcp_url}"
     },
     "github": {
       "type": "http",
