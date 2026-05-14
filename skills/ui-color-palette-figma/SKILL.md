@@ -47,6 +47,8 @@ Do not start from raw API calls. Start from the workflow structure.
 
 ## Available sub-skills
 
+- `references/extract-source-colors.md` — extract solid fill colors from the current Figma selection to seed a palette
+- `references/extract-styles-colors.md` — extract solid fill colors from Figma paint styles to seed a palette
 - `references/generate-variables.md` — generate or sync Figma local **primitive** variables and modes
 - `references/generate-semantic-variables.md` — generate or sync Figma **semantic** variable collection from `SystemData` (VariableAlias layer on top of primitives)
 - `references/generate-styles.md` — generate or sync Figma local paint styles
@@ -56,6 +58,8 @@ Do not start from raw API calls. Start from the workflow structure.
 
 Choose the sub-skill by user intent:
 
+- "extract colors from selection", "pick colors from selection", "colors from Figma" → `references/extract-source-colors.md`
+- "extract colors from styles", "colors from paint styles", "seed from style library" → `references/extract-styles-colors.md`
 - "variables", "modes", "theme variables", "primitive colors" → `references/generate-variables.md`
 - "semantic variables", "color system variables", "system variable collection", `SystemData` present in context → `references/generate-semantic-variables.md`
 - "paint styles", "local styles", "style library", "swatches" → `references/generate-styles.md`

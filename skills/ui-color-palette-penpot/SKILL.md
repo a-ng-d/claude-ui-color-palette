@@ -40,6 +40,8 @@ Do not start from raw API calls. Start from the workflow structure.
 
 ## Available sub-skills
 
+- `references/extract-source-colors.md` — extract solid fill colors from the current Penpot selection to seed a palette
+- `references/extract-styles-colors.md` — extract colors from the Penpot local color library to seed a palette
 - `references/generate-tokens.md` — generate or sync Penpot local **primitive** tokens and themed sets
 - `references/generate-semantic-tokens.md` — generate or sync Penpot **semantic** token sets from `SystemData` (reference layer on top of primitives)
 - `references/generate-styles.md` — generate or sync Penpot local color styles
@@ -49,6 +51,8 @@ Do not start from raw API calls. Start from the workflow structure.
 
 Choose the sub-skill by user intent:
 
+- “extract colors from selection”, “pick colors from selection”, “colors from Penpot” → `references/extract-source-colors.md`
+- “extract colors from library”, “local colors”, “color library”, “seed from styles” → `references/extract-styles-colors.md`
 - “tokens”, “primitive colors”, “theme tokens”, “Penpot token sets” → `references/generate-tokens.md`
 - “semantic tokens”, “color system tokens”, “system token set”, `SystemData` present in context → `references/generate-semantic-tokens.md`
 - “styles”, “local colors”, “style library”, “swatches” → `references/generate-styles.md`

@@ -40,6 +40,8 @@ Do not start from raw API calls. Start from the workflow structure.
 
 ## Available sub-skills
 
+- `references/extract-source-colors.md` — extract fill colors from the current Framer selection to seed a palette
+- `references/extract-styles-colors.md` — extract colors from Framer local color styles to seed a palette
 - `references/generate-styles.md` — generate and update Framer local color styles
 - `references/generate-preview.md` — draw the palette as a swatch board on the Framer canvas (canvas rendering only, not style export)
 
@@ -47,6 +49,8 @@ Do not start from raw API calls. Start from the workflow structure.
 
 Choose the sub-skill by user intent:
 
+- “extract colors from selection”, “pick colors from selection”, “colors from Framer” → `references/extract-source-colors.md`
+- “extract colors from styles”, “color styles”, “style library”, “seed from styles” → `references/extract-styles-colors.md`
 - “styles”, “color styles”, “sync Framer colors” → `references/generate-styles.md`
 - “full Framer handoff”, “styles + preview” → styles first (`references/generate-styles.md`), then preview (`references/generate-preview.md`)
 - “preview”, “swatch board”, “canvas rendering”, “visual board” → `references/generate-preview.md`

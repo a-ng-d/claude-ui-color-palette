@@ -40,6 +40,8 @@ Do not start from raw API calls. Start from the workflow structure.
 
 ## Available sub-skills
 
+- `references/extract-source-colors.md` — extract solid fill colors from the current Sketch selection to seed a palette
+- `references/extract-styles-colors.md` — extract solid fill colors from Sketch shared layer styles to seed a palette
 - `references/generate-variables.md` — generate or sync Sketch **primitive** swatches
 - `references/generate-semantic-variables.md` — generate or sync Sketch **semantic** swatches from `SystemData` (taxonomy-named swatches with resolved hex values, one per theme)
 - `references/generate-styles.md` — generate or sync Sketch shared layer styles
@@ -49,6 +51,8 @@ Do not start from raw API calls. Start from the workflow structure.
 
 Choose the sub-skill by user intent:
 
+- “extract colors from selection”, “pick colors from selection”, “colors from Sketch” → `references/extract-source-colors.md`
+- “extract colors from styles”, “shared styles”, “style library”, “seed from styles” → `references/extract-styles-colors.md`
 - “variables”, “swatches”, “color variables”, “primitive colors” → `references/generate-variables.md`
 - “semantic swatches”, “color system swatches”, “system swatch set”, `SystemData` present in context → `references/generate-semantic-variables.md`
 - “styles”, “shared styles”, “reusable fills” → `references/generate-styles.md`
