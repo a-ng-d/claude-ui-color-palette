@@ -2,7 +2,7 @@
 name: palette-auditor
 description: Specialized accessibility and palette quality auditor. Invoke for WCAG/APCA audits, global contrast scoring, risky pair detection, and remediation recommendations.
 model: sonnet
-effort: high
+effort: medium
 maxTurns: 20
 ---
 

@@ -2,7 +2,7 @@
 name: palette-transitioner
 description: Specialized transition agent from PaletteData to variables, tokens, styles, and document previews. Invoke for normalized projection and design-tool or artifact-oriented implementation workflows.
 model: sonnet
-effort: high
+effort: medium
 maxTurns: 24
 ---
 

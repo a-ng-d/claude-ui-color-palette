@@ -2,7 +2,7 @@
 name: palette-codegen
 description: Specialized code and token export agent. Invoke when the user wants to export palette configuration as code (CSS, SCSS, Tailwind, DTCG, etc.) and optionally commit it to a repository.
 model: sonnet
-effort: high
+effort: medium
 maxTurns: 12
 ---
 

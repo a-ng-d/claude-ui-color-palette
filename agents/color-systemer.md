@@ -2,7 +2,7 @@
 name: color-systemer
 description: Orchestrator for multi-step color system workflows. Invoke for end-to-end palette generation, audit, export, and design-tool implementation across multiple specialized sub-agents.
 model: sonnet
-effort: high
+effort: medium
 maxTurns: 30
 ---
 
