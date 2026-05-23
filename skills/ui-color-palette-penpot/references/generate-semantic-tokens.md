@@ -91,15 +91,30 @@ If the primitive token is not found in the set, **skip that theme's value** and 
 
 ### Token sets
 
+**Before setting up token sets, ask the user:**
+
+> The primitive layer already has one set per theme. For the **semantic** layer, do you want:
+> - **One set per theme** *(recommended)* — `systemName/themeName` per theme; switching the active Penpot theme adapts all references at once
+> - **Single set** — one flat `systemName` set; theme adaptation relies entirely on the primitive layer; simpler but consumers cannot switch themes via the semantic sets alone
+
+Depending on the answer:
+
+**One set per theme:**
 - **No-theme system** (all shade IDs contain `'00000000000'`): one set named `systemName`.
-- **Themed system**: one set per theme named `systemName/themeName` (no spaces around `/`).
+- **Themed system**: one set per theme named `systemName/themeName` (no spaces around `/`). Each set's token value is resolved from `token.refs[i].shadeId` at the matching theme index.
 - Find existing sets by name; create if absent.
 - Do **not** reuse the primitive sets — semantic tokens live in their own sets.
 
+**Single set:**
+- Always create one set named `systemName`, regardless of how many themes the palette has.
+- For each token, use `token.refs[0].shadeId` (the first/default theme ref) to build the reference string.
+- Do **not** create per-theme sets.
+- Note to user: theme switching on this semantic layer is not available; it is handled at the primitive level.
+
 ### Token themes
 
-- **Themed system**: one theme entry per theme (`group: systemName`, `name: themeName`).
-- Find existing themes by group + name; create if absent.
+- **One set per theme (themed system)**: one theme entry per theme (`group: systemName`, `name: themeName`). Find existing themes by group + name; create if absent.
+- **Single set**: no theme entries created — the single set is used directly.
 
 ### Tokens
 
@@ -127,9 +142,11 @@ When enabled: remove semantic tokens that no longer correspond to a token in `Sy
 | ------------------------------------------- | ----------------------------------------------------------- |
 | `systemName` (label or schema name) | Semantic set name prefix |
 | No-theme system | One set: `systemName` |
-| Themed system | One set per theme: `systemName/themeName` + theme entry |
+| Themed system — one set per theme *(if chosen)* | One set per theme: `systemName/themeName` + theme entry |
+| Themed system — single set *(if chosen)* | One set: `systemName` (default theme refs used) |
 | `token.pathNames.filter(…).join('.')` | Semantic token name |
 | `token.refs[i].shadeId` → primitive name | Token value: `{colorName_snake.shadeName}` (reference string) |
+| `token.refs[0].shadeId` *(single set)* | Token value using default theme ref only |
 | `token.isExcluded === true` | Token skipped entirely |
 | `token.refs[i].shadeId === null` | Theme set value omitted (unbound) |
 | `token.description` | Token description |
@@ -141,10 +158,11 @@ When enabled: remove semantic tokens that no longer correspond to a token in `Sy
 
 1. Confirm `SystemData` and `PaletteData` are in context.
 2. Confirm the primitive token sets exist (or run `ui-color-palette-penpot-generate-tokens` first).
-3. Resolve or create the semantic token set(s) and theme group.
-4. For each non-excluded token: create the token in each theme's set with the reference string value.
-5. Report the outcome (see Output section).
-6. Ask what to do next:
+3. **Ask the user which set strategy to use** (one set per theme vs. single set) — see Token sets section above.
+4. Resolve or create the semantic token set(s) and, if applicable, the theme group.
+5. For each non-excluded token: create the token in the appropriate set(s) with the reference string value.
+6. Report the outcome (see Output section).
+7. Ask what to do next:
    - **Generate styles** → `ui-color-palette-penpot-generate-styles`
    - **Preview on canvas** → `ui-color-palette-penpot-generate-preview`
    - **Adjust bindings** → re-run `ui-color-palette-build-color-system`, then re-sync here

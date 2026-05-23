@@ -88,12 +88,25 @@ If the primitive variable is not found, **skip that mode's value** and warn: `sh
 
 ### Modes
 
-Mirror the primitive collection's mode structure:
+**Before setting up modes, ask the user:**
 
+> The primitive collection already has one mode per theme. For the **semantic** collection, do you want:
+> - **One mode per theme** *(recommended)* — mirrors the primitive structure; consumers can switch modes on the semantic collection to adapt all aliases at once
+> - **Single mode** — flat semantic layer; theme adaptation relies entirely on the primitive collection; simpler but consumers cannot switch themes via the semantic collection alone
+
+Depending on the answer:
+
+**One mode per theme:**
 - **No-theme system** (all shade IDs contain `'00000000000'`): single default mode, left as `'Mode 1'`.
-- **Themed system**: rename the default mode to the first theme name; `collection.addMode(themeName)` for each subsequent theme.
+- **Themed system**: rename the default mode to the first theme name; `collection.addMode(themeName)` for each subsequent theme. Each mode's alias target is resolved from `token.refs[i].shadeId` at the matching theme index.
 - Track each `modeId` in theme order — must match `token.refs` index order.
 - Warn and stop if `addMode` throws (Figma plan limit).
+
+**Single mode:**
+- Always use one mode (the default, `'Mode 1'`), regardless of how many themes the palette has.
+- For each token, use `token.refs[0].shadeId` (the first/default theme ref) to resolve the alias.
+- Do **not** call `addMode` — only the default mode exists.
+- Note to user: theme switching on this semantic collection is not available; it is handled at the primitive level.
 
 ### Variables
 
@@ -121,8 +134,10 @@ When enabled: remove semantic variables that no longer correspond to a token in 
 | ------------------------------------------- | ---------------------------------------------- |
 | `systemName` (label or schema name) | Semantic variable collection name |
 | `token.pathNames.filter(…).join('/')` | Semantic variable name |
-| One entry in `token.refs` per theme | One collection mode |
+| One mode per theme *(if chosen)* | One collection mode per theme |
+| Single mode *(if chosen)* | Default mode only (`'Mode 1'`) |
 | `token.refs[i].shadeId` → primitive var id | `{ type: 'VARIABLE_ALIAS', id: … }` per mode |
+| `token.refs[0].shadeId` *(single mode)* | Alias for the default mode only |
 | `token.isExcluded === true` | Token skipped entirely |
 | `token.refs[i].shadeId === null` | Mode value left unset (unbound) |
 | `token.description` | Variable description |
@@ -133,11 +148,12 @@ When enabled: remove semantic variables that no longer correspond to a token in 
 
 1. Confirm `SystemData` and `PaletteData` are in context.
 2. Confirm the primitive collection exists (or run `ui-color-palette-figma-generate-variables` first).
-3. Resolve or create the semantic collection.
-4. Set up modes to mirror the primitive collection.
-5. For each non-excluded token: create the variable and bind each mode to the corresponding primitive via `VariableAlias`.
-6. Report the outcome (see Output section).
-7. Ask what to do next:
+3. **Ask the user which mode strategy to use** (one mode per theme vs. single mode) — see Modes section above.
+4. Resolve or create the semantic collection.
+5. Set up modes according to the chosen strategy.
+6. For each non-excluded token: create the variable and bind each mode to the corresponding primitive via `VariableAlias`.
+7. Report the outcome (see Output section).
+8. Ask what to do next:
    - **Generate styles** → `ui-color-palette-figma-generate-styles`
    - **Preview on canvas** → `ui-color-palette-figma-generate-preview`
    - **Adjust bindings** → re-run `ui-color-palette-build-color-system`, then re-sync here
