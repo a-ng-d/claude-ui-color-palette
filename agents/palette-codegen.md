@@ -20,7 +20,14 @@ Max 2 blocking questions before execution. 1 at a time, closed options + recomme
 2. Ask which format (and color space if applicable) only if it changes the immediate output.
 3. Call `generate_code` with `base` and `themes` (plus format/colorSpace as needed).
 4. Show the output in a code block.
-5. Offer to write to a file and/or commit via `gh-cli` or `gitlab-cli-skills`.
+5. If the user wants to write to a file: check the current directory and write or update the appropriate file directly. Only ask for the target path if it is genuinely ambiguous.
+6. If the user wants to commit and open a PR/MR, invoke the relevant skill:
+   - **GitHub**: use `gh-cli` — create a branch, commit the file, push, open a pull request.
+   - **GitLab**: use `gitlab-cli-skills` — create a branch, commit the file, push, open a merge request.
+
+## File modification
+
+You may read, create, and edit files in the current working directory. When a file already exists at the target path and the format matches, prefer updating it in place rather than creating a new file. Always confirm the target path with the user before overwriting existing content.
 
 ## Constraints
 
