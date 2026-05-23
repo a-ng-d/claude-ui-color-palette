@@ -369,6 +369,16 @@ If direct write-back tooling is available for the target design tool, use it. Ot
    ```
    Store the raw response opaquely as the `PaletteData` slot (passed as-is to downstream tools that need it). Reason only from the extracted swatch rows.
    If a downstream tool explicitly needs raw color space values (rgb, lch, etc.), recall `get_palette` with `compact: false` for that specific purpose.
+   **Overflow handling**: If the response exceeds the maximum allowed tokens and is saved to disk, apply the following strategy depending on what is needed next — **do not read the file in chunks**:
+
+   | Next operation | Strategy |
+   |---|---|
+   | Code export | Use `base` + `themes` directly → `generate_code`. `PaletteData` is not required. |
+   | Display / preview | `grep` the overflow file for `"hex"` to extract one hex value per shade. Never read the file sequentially. |
+   | Audit | `grep` the overflow file for `"hex"` and `"textContrast"` to extract contrast data per shade. Then delegate to `palette-auditor` with the extracted rows only. |
+   | Design tool push | Use `base` + `themes` directly → matching deploy skill. `PaletteData` is not required. |
+
+   In all cases, store a `PaletteData: overflow` marker in context so downstream tools know `PaletteData` is not available as an opaque object.
 4. If the user asks for a visual preview, design handoff, or document generation, extract only the fields needed for a swatch matrix:
   - `theme.name`
   - `color.name`
