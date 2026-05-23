@@ -180,8 +180,8 @@ End with: `N tokens — X bound, Y unbound, Z excluded`
 > What do you want to do next?
 > - **Adjust bindings** — refine specific refs or exclusions, then rebuild
 > - **Generate semantic code** → `ui-color-palette-generate-semantic-code`
-> - **Push to Figma as semantic variables** → `ui-color-palette-figma`
-> - **Push to Penpot as semantic tokens** → `ui-color-palette-penpot`
+> - **Push to Figma as semantic variables** → `ui-color-palette-figma` — you'll be asked whether the semantic collection should have one mode per theme (enables standalone theme switching) or a single flat mode (theme handled at the primitive level)
+> - **Push to Penpot as semantic tokens** → `ui-color-palette-penpot` — you'll be asked whether to create one set per theme (`systemName/themeName`, enables Penpot theme switching) or a single flat set (theme handled at the primitive level)
 > - **Push to Sketch as semantic swatches** → `ui-color-palette-sketch`
 > - **Push to Framer as semantic styles** → `ui-color-palette-framer`
 
