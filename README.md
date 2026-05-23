@@ -42,7 +42,7 @@ The plugin connects to the following MCP servers:
 
 ## Agent
 
-The plugin uses **color-systemer** as the default agent.
+The plugin uses **uicper** as the default agent.
 
 It acts as the top-level orchestrator for multi-step workflows such as:
 
@@ -61,7 +61,7 @@ The default agent is configured in `settings.json`:
 
 ```json
 {
-	"agent": "color-systemer"
+	"agent": "uicper"
 }
 ```
 

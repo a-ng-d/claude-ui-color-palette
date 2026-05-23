@@ -178,5 +178,5 @@ Finish with a one-line summary: e.g. `12 tokens — 9 bound, 2 unbound, 1 exclud
 ## Recommended subagents
 
 - **`palette-color-systemer`** — guided color system design: pattern suggestion, intelligent binding proposals, iterative refinement, `get_color_system` submission. Use this instead of running the skill manually when the user needs step-by-step guidance.
-- **`color-systemer`** — orchestrates the full source → palette → system → deploy workflow
+- **`uicper`** — orchestrates the full source → palette → system → deploy workflow
 - **`palette-codegen`** — generates semantic code files from `base` + `themes` + `system`

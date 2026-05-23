@@ -123,7 +123,7 @@ Unbound tokens (no binding or ref not found in palette) appear as comments in th
 
 ## Recommended subagents
 
-- **`color-systemer`** — orchestrates the full source → palette → system → deploy workflow
+- **`uicper`** — orchestrates the full source → palette → system → deploy workflow
 - **`palette-codegen`** — normalized multi-format token and code export agent
 - **`gh-cli`** — commit and open a PR on GitHub
 - **`gitlab-cli-skills`** — commit and open an MR on GitLab
