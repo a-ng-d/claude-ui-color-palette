@@ -163,22 +163,25 @@ Controls the lightness scale distribution. **`id` must be one of the 19 supporte
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| `id` | string | Theme identifier. **For a single (unthemed) palette: use `"00000000000"` exactly.** For multi-theme palettes: generate a random 11-character lowercase hex string (e.g. `"9e3d5b0f12a"`). |
-| `name` | string | Theme name. **For a single (unthemed) palette: use `"None"` exactly.** For multi-theme palettes: e.g. `"Light"`, `"Dark"`. |
+| `id` | string | Theme identifier. **`"00000000000"` is reserved exclusively for the default base theme (name `"None"`).** For any named theme (Light, Dark, etc.): generate a random 11-character lowercase hex string (e.g. `"9e3d5b0f12a"`). |
+| `name` | string | Theme name. **`"None"` is reserved exclusively for the default base theme (id `"00000000000"`).** For named themes: e.g. `"Light"`, `"Dark"`. |
 | `description` | string | Theme description — use empty string if none |
 | `scale` | `Record<string, number>` | Map of stop label → lightness value (0–100). Keys must match `preset.stops`. If omitted, a linear scale is auto-generated from the preset `min`/`max`. E.g. `{ "50": 96, "100": 88, ..., "900": 24 }` |
 | `paletteBackground` | string | Background hex color (e.g. `"#FFFFFF"`) |
 | `visionSimulationMode` | string | `"NONE"`, `"PROTANOMALY"`, `"PROTANOPIA"`, `"DEUTERANOMALY"`, `"DEUTERANOPIA"`, `"TRITANOMALY"`, `"TRITANOPIA"`, `"ACHROMATOMALY"`, `"ACHROMATOPSIA"` |
 | `textColorsTheme` | object | `{ lightColor: string, darkColor: string }` — default: `{ lightColor: "#FFFFFF", darkColor: "#000000" }` |
 | `isEnabled` | boolean | Whether the theme is active — use `true` |
-| `type` | string | `"default theme"` or `"custom theme"` — use `"default theme"` unless it is a custom override |
+| `type` | string | `"default theme"` is reserved for the base theme (`id: "00000000000"`, `name: "None"`). All named themes (Light, Dark, etc.) must use `"custom theme"`. |
 
 **Single vs. multi-theme:**
 
-| Scenario | `id` | `name` |
-| -------- | ---- | ------ |
-| Single theme (no dark mode) | `"00000000000"` | `"None"` |
-| Multi-theme (Light/Dark/…) | random 11-char hex | `"Light"`, `"Dark"`, etc. |
+| Scenario | `id` | `name` | `type` |
+| -------- | ---- | ------ | ------ |
+| Single theme (no dark mode) | `"00000000000"` | `"None"` | `"default theme"` |
+| Multi-theme — base (always present) | `"00000000000"` | `"None"` | `"default theme"` |
+| Multi-theme — each named theme | random 11-char hex | `"Light"`, `"Dark"`, etc. | `"custom theme"` |
+
+**Rule**: the default base theme (`00000000000` / `None` / `"default theme"`) is **always included** in the themes array, whether or not named themes are present.
 
 **Returns**: A `PaletteData` object containing `name`, `description`, `themes` (with full color scales), and `type`.
 
@@ -330,6 +333,16 @@ If direct write-back tooling is available for the target design tool, use it. Ot
   "base": { "...same as above..." },
   "themes": [
     {
+      "id": "00000000000",
+      "name": "None",
+      "description": "",
+      "paletteBackground": "#FFFFFF",
+      "visionSimulationMode": "NONE",
+      "textColorsTheme": { "lightColor": "#FFFFFF", "darkColor": "#000000" },
+      "isEnabled": true,
+      "type": "default theme"
+    },
+    {
       "id": "9e3d5b0f12a",
       "name": "Light",
       "description": "",
@@ -338,7 +351,7 @@ If direct write-back tooling is available for the target design tool, use it. Ot
       "visionSimulationMode": "NONE",
       "textColorsTheme": { "lightColor": "#FFFFFF", "darkColor": "#000000" },
       "isEnabled": true,
-      "type": "default theme"
+      "type": "custom theme"
     },
     {
       "id": "4a7f2c1e09b",
