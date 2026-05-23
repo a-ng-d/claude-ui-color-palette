@@ -1,0 +1,51 @@
+{
+  "name": "yelbolt",
+  "description": "Yelbolt's official Claude Code plugins — tools for design systems, color palettes, and UI workflows.",
+  "owner": {
+    "name": "Aurélien Grimaud",
+    "email": "hello@yelbolt.co"
+  },
+  "plugins": [
+    {
+      "name": "ui-color-palette",
+      "displayName": "UI Color Palette",
+      "source": {
+        "source": "github",
+        "repo": "a-ng-d/claude-ui-color-palette"
+      },
+      "description": "Design color palettes, audit contrast, generate code, and sync to Figma, Penpot, Sketch, and Framer — powered by the UI Color Palette API",
+      "author": {
+        "name": "Aurélien Grimaud",
+        "email": "a.grimaud@involt.io"
+      },
+      "homepage": "https://docs.ui-color-palette.com/claude",
+      "repository": "https://github.com/a-ng-d/claude-ui-color-palette",
+      "license": "MIT",
+      "keywords": [
+        "color",
+        "palette",
+        "color-system",
+        "figma",
+        "penpot",
+        "sketch",
+        "framer",
+        "accessibility",
+        "wcag",
+        "tokens"
+      ],
+      "category": "design",
+      "tags": [
+        "color",
+        "palette",
+        "color-system",
+        "figma",
+        "penpot",
+        "sketch",
+        "framer",
+        "accessibility",
+        "wcag",
+        "tokens"
+      ]
+    }
+  ]
+}
