@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2026-05-23
+
+### Fixed
+
+- `palette-codegen` agent: added explicit file modification permission and step-by-step GitHub/GitLab workflow (branch → commit → push → PR/MR) via `gh-cli` and `gitlab-cli-skills`
+- `color-systemer` agent: added overflow rule — when `get_palette` response exceeds the token limit, `base` and `themes` are used directly for downstream tools instead of reading the overflow file
+- `scale-palette` skill: added overflow handling table (code export, display, audit, design tool push) with targeted `grep` extraction strategy; removed sequential chunk-reading
+- `scale-palette` skill: fixed theme configuration — `"default theme"` is now reserved exclusively for the base theme (`id: "00000000000"`, `name: "None"`); all named themes (Light, Dark, etc.) correctly use `"custom theme"` and the base theme is always included in the array
+- MCP schema (`schemas.ts`): clarified `id`, `name`, and `type` descriptions for `ThemeConfiguration` to match the correct default/custom theme rules
+
 ## [1.0.0] - 2026-05-14
 
 ### Added
@@ -54,4 +64,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitHub (`https://api.githubcopilot.com/mcp/`)
 - GitLab (user-specific instance URL)
 
+[1.0.1]: https://github.com/a-ng-d/claude-ui-color-palette/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/a-ng-d/claude-ui-color-palette/releases/tag/v1.0.0
