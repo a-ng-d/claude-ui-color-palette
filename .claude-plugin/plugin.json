@@ -5,7 +5,8 @@
   "description": "Design color palettes, audit contrast, generate code, and sync to Figma, Penpot, Sketch, and Framer — powered by the UI Color Palette API",
   "author": {
     "name": "Aurélien Grimaud",
-    "url": "https://github.com/a-ng-d"
+    "url": "https://github.com/a-ng-d",
+    "email": "a.grimaud@involt.io"
   },
   "homepage": "https://docs.ui-color-palette.com/claude",
   "repository": "https://github.com/a-ng-d/claude-ui-color-palette",
