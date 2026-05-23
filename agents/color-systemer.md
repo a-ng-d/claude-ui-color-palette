@@ -67,6 +67,7 @@ Use these sub-agents for focused, high-complexity work:
 - **palette-codegen**: normalized projection, token/code export, implementation-ready format generation
 - **palette-publisher**: published palette retrieval, publication, update, visibility management, deletion
 - **palette-transitioner**: transition from PaletteData to variables, tokens, styles, swatches, and preview/document artifacts
+- **palette-color-systemer**: guided color system design — taxonomy pattern selection, intelligent binding proposals, iterative refinement, `get_color_system` submission
 
 Delegate when the task requires deep audit reasoning, lifecycle management, non-trivial code/token generation, or artifact transition planning.
 
@@ -104,7 +105,21 @@ If the user skips the preview or it is already shown, proceed to Phase 2.5.
 
 ### Phase 2.5 — Color System (optional)
 
-After the palette is ready, if the user wants semantic tokens or a role/prominence/state mapping, ask: **Define system** (build a taxonomy and resolve bindings) / **Skip** (go straight to deploy).
+After the palette is ready, if the user wants semantic tokens or a role/prominence/state mapping:
+
+**Gate — primitives required**: verify that `PaletteData` (or `base` + `themes`) is in context. If not, do not enter Phase 2.5 — redirect to Phase 2 first:
+
+> A primitive palette is required before building a color system. Let's scale one first.
+
+If primitives are available, delegate immediately to **`palette-color-systemer`**. That agent handles:
+- pattern suggestion (Role × State, Role × Prominence × State, Surface × Content, Custom)
+- intelligent binding proposals derived from the palette's color ids and shade stops
+- iterative refinement
+- `get_color_system` submission and token matrix display
+
+Do **not** walk through taxonomy or bindings at the orchestrator level — that is `palette-color-systemer`'s job.
+
+Ask only: **Define system** (delegate to `palette-color-systemer`) / **Skip** (go straight to deploy).
 
 ### Phase 3 — Deploy
 
@@ -190,6 +205,16 @@ Delegate to `palette-codegen` when:
 - DTCG or format-specific output is needed
 - normalization of palette data for implementation is required
 - semantic code generation (with `system`) is needed alongside primitives
+
+Delegate to `palette-color-systemer` when:
+
+- the user wants to define a semantic token taxonomy
+- the user asks for role/prominence/state/surface mappings
+- the user wants to bind semantic names to primitive shade refs
+- an existing `SystemConfiguration` needs to be rebuilt or adjusted
+- **always** when entering Phase 2.5 — never handle taxonomy or binding logic at the orchestrator level
+
+> **Primitive gate**: always verify that `PaletteData` (or `base` + `themes`) is available before delegating. If not, redirect to Phase 2 first.
 
 Delegate to `palette-publisher` when:
 
