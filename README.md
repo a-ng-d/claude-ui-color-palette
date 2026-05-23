@@ -11,7 +11,8 @@ A [Claude Code](https://code.claude.com/) plugin that brings color palette desig
 | Skill                        | Description                                                                                               |
 | ---------------------------- | --------------------------------------------------------------------------------------------------------- |
 | `generate-source-colors`     | Generate source colors from an image (k-means), a text prompt (AI), or a base color (harmony)             |
-| `scale-palette`              | Build a full palette with `get_palette` and export as code/tokens (CSS, Tailwind, SwiftUI, DTCG, …)  |
+| `scale-palette`              | Build a full palette with `get_palette` and export as code/tokens (CSS, Tailwind, SwiftUI, DTCG, …)      |
+| `build-color-system`         | Define a semantic token taxonomy and bind it to palette primitives via `get_color_system`                 |
 | `manage-palettes`            | Browse, publish, share, update, and delete palettes on the platform                                       |
 | `audit-palette`              | Audit color pairs for WCAG 2.1 and APCA compliance with a global contrast score                           |
 
@@ -52,6 +53,7 @@ It acts as the top-level orchestrator for multi-step workflows such as:
 
 The orchestrator delegates specialized work to focused sub-agents:
 
+- `palette-color-systemer` — guided semantic color system design: taxonomy pattern suggestion, intelligent binding proposals, iterative refinement, and `get_color_system` submission
 - `palette-auditor` — WCAG/APCA audits, risk detection, remediation guidance
 - `palette-codegen` — normalized projection and code/token generation
 - `palette-publisher` — published palette retrieval, publication, update, visibility, deletion
