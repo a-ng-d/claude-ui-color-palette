@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.2] - 2026-05-23
+
+### Added
+
+- `palette-color-systemer` agent: new specialized agent for guided semantic color system design — suggests taxonomy patterns (Role × State, Role × Prominence × State, Surface × Content, Custom), proposes intelligent default bindings derived from palette color ids and shade stops, flags unresolvable tokens, batches adjustments before calling `get_color_system`, and displays the token matrix
+- `color-systemer` orchestrator: Phase 2.5 now enforces a hard primitive gate — `PaletteData` or `base` + `themes` must be in context before entering the color system phase; delegates immediately to `palette-color-systemer` instead of handling taxonomy inline
+- `color-systemer` orchestrator: added `palette-color-systemer` to the specialized sub-agents list and delegation rules
+
+### Changed
+
+- `figma/generate-semantic-variables`: the skill now asks whether the semantic collection should use **one mode per theme** (mirrors primitive structure, enables standalone theme switching) or a **single flat mode** (theme adaptation handled entirely at the primitive level) before creating the collection
+- `penpot/generate-semantic-tokens`: the skill now asks whether to create **one set per theme** (`systemName/themeName`, enables Penpot theme switching) or a **single flat set** (`systemName`, theme adaptation handled entirely at the primitive level) before generating token sets
+- `build-color-system` skill: Step 7 next-action descriptions for Figma and Penpot updated to inform the user of the mode/set strategy question they will encounter at deploy time
+- `palette-color-systemer` agent: Step 7 next-action descriptions for Figma and Penpot updated to match
+
 ## [1.0.1] - 2026-05-23
 
 ### Fixed
@@ -64,5 +79,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitHub (`https://api.githubcopilot.com/mcp/`)
 - GitLab (user-specific instance URL)
 
+[1.0.2]: https://github.com/a-ng-d/claude-ui-color-palette/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/a-ng-d/claude-ui-color-palette/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/a-ng-d/claude-ui-color-palette/releases/tag/v1.0.0
