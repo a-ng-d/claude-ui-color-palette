@@ -35,7 +35,7 @@ The plugin connects to the following MCP servers:
 | **UI Color Palette** | HTTP      | `https://mcp-uicp.yelbolt.workers.dev/mcp` | Core palette engine           |
 | **Figma**            | HTTP      | `https://mcp.figma.com/mcp`                | Remote Figma API              |
 | **Figma Desktop**    | HTTP      | `http://127.0.0.1:3845/mcp`                | Local Figma app               |
-| **Penpot**           | HTTP      | `https://design.penpot.app/mcp/stream?userToken=…` | Token via `penpot_token` config |
+| **Penpot**           | HTTP      | `${penpot_url}/mcp/stream?userToken=…`             | URL via `penpot_url` · token via `penpot_token` |
 | **Sketch**           | HTTP      | `http://localhost:31126/mcp`               | Requires activation in Sketch |
 | **Framer**           | HTTP      | User-specific URL                          | Requires Framer MCP plugin    |
 | **GitHub**           | HTTP      | `https://api.githubcopilot.com/mcp/`       | Issues, PRs, repos            |
@@ -107,7 +107,8 @@ On first enable, the plugin prompts for optional config:
 
 | Key | Sensitive | Description |
 |---|---|---|
-| `penpot_token` | Yes (keychain) | Your Penpot user token — find it in Penpot → Profile → Access tokens |
+| `penpot_url` | No | Your Penpot instance base URL — Penpot Cloud: `https://design.penpot.app`, self-hosted: your own domain |
+| `penpot_token` | Yes (keychain) | Your Penpot user token — find it in Penpot → Account → Integrations → MCP Server |
 | `framer_mcp_url` | No | Your Framer MCP URL from the [Framer marketplace](https://www.framer.com/marketplace/plugins/mcp/) |
 | `gitlab_url` | No | Your GitLab instance URL (e.g. `https://gitlab.company.com`) — leave empty if not using GitLab |
 

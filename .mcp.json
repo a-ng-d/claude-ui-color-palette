@@ -14,7 +14,7 @@
     },
     "penpot": {
       "type": "http",
-      "url": "https://design.penpot.app/mcp/stream?userToken=${user_config.penpot_token}"
+      "url": "${user_config.penpot_url}/mcp/stream?userToken=${user_config.penpot_token}"
     },
     "sketch": {
       "type": "http",

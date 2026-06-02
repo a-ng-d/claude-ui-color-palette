@@ -18,8 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - README: installation flow now leads with the Yelbolt marketplace (`/plugin marketplace add yelbolt/claude-marketplace` → `/plugin install ui-color-palette@yelbolt`); direct GitHub install moved to "Alternative"; added explicit `Update` command
-- MCP Servers table: Penpot entry updated from `stdio / npx mcp-remote localhost:4401` to `HTTP / design.penpot.app/mcp/stream?userToken=…` to match actual plugin configuration
+- MCP Servers table: Penpot entry updated to reflect the variabilized URL (`${penpot_url}/mcp/stream?userToken=…`)
 - Prerequisites: Penpot entry updated — references `/plugin config` for token setup instead of the removed penpot-mcp local install requirement
+- `plugin.json`: added `penpot_url` user config key (non-sensitive) for the Penpot instance base URL; supports both Penpot Cloud (`https://design.penpot.app`) and self-hosted instances
+- `.mcp.json`: Penpot server URL now composed from `${user_config.penpot_url}/mcp/stream?userToken=${user_config.penpot_token}` — base URL is no longer hardcoded
 
 ## [1.0.2] - 2026-05-23
 

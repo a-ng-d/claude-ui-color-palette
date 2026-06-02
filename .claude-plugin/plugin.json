@@ -24,6 +24,13 @@
     "tokens"
   ],
   "userConfig": {
+    "penpot_url": {
+      "type": "string",
+      "title": "Penpot instance URL",
+      "description": "Your Penpot instance base URL. For Penpot Cloud use https://design.penpot.app. For self-hosted, use your own domain (e.g. https://penpot.company.com).",
+      "sensitive": false,
+      "required": false
+    },
     "penpot_token": {
       "type": "string",
       "title": "Penpot user token",
