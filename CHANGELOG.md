@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.3] - 2026-06-02
+
+### Fixed
+
+- `figma/generate-variables`: arc and dark theme `gl` values are now correctly applied per mode — the normalized row model and sync behaviour explicitly state that `gl` is taken from the matching theme row, preventing light theme values from silently overwriting arc/dark mode values
+- `figma/generate-styles`: same fix for paint styles — each themed style now uses the `gl` from its own theme row instead of the first row found
+- `penpot/generate-tokens`: arc and dark theme `hex` values are now correctly applied per token set — each themed set uses only the rows where `themeName` matches, preventing flat hex values across all themes
+- `penpot/generate-styles`: same fix for local color styles — each themed style now uses the `hex` from the matching theme row
+- `palette-color-systemer` agent: clarified "primitive cascade handles it" for arc themes — shade-index overrides are only needed when the stop label must change across themes, not when the hex value already differs per mode
+
+### Changed
+
+- README: installation flow now leads with the Yelbolt marketplace (`/plugin marketplace add yelbolt/claude-marketplace` → `/plugin install ui-color-palette@yelbolt`); direct GitHub install moved to "Alternative"; added explicit `Update` command
+- MCP Servers table: Penpot entry updated from `stdio / npx mcp-remote localhost:4401` to `HTTP / design.penpot.app/mcp/stream?userToken=…` to match actual plugin configuration
+- Prerequisites: Penpot entry updated — references `/plugin config` for token setup instead of the removed penpot-mcp local install requirement
+
 ## [1.0.2] - 2026-05-23
 
 ### Added
@@ -79,6 +95,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitHub (`https://api.githubcopilot.com/mcp/`)
 - GitLab (user-specific instance URL)
 
+[1.0.3]: https://github.com/a-ng-d/claude-ui-color-palette/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/a-ng-d/claude-ui-color-palette/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/a-ng-d/claude-ui-color-palette/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/a-ng-d/claude-ui-color-palette/releases/tag/v1.0.0
