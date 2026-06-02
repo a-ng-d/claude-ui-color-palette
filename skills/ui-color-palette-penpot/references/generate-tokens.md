@@ -58,6 +58,8 @@ Reduce `PaletteData` to two reusable row models before execution:
 - `tokenRows`: `paletteName`, `themeName`, `colorName`, `shadeName`, `tokenSetName`, `tokenName`, `hex`, `description`
 - `previewRows`: `paletteName`, `themeName`, `colorName`, `shadeName`, `displayLabel`, `hex`, `description`
 
+> The `tokenRows` model has **one row per `(themeName, colorName, shadeName)` triplet**. Arc and dark themes produce independent `hex` values for every shade that differ from the light theme (arc themes invert the scale: shade `50` is darkest, shade `900` is lightest). Never merge, average, or deduplicate `hex` values across themes — each theme row is independent.
+
 Token name encoding (exact logic from implementation):
 1. Apply `doSnakeCase()` to `colorName` (e.g. `Primary Blue` → `primary_blue`; single-word names like `UICP` → `uicp`)
 2. On each segment (`[colorNameSnake, shadeName]`), replace remaining spaces with `-`
@@ -87,7 +89,7 @@ These normalized row models are the actual handoff from palette structure to Pen
 - **Themed palette**: one token set per theme (`paletteName/themeName`, no spaces around `/`) + one theme entry per theme (`group: paletteName`, `name: themeName`).
 - Includes the `"source"` shade for each color family alongside the numbered scale steps.
 - Token names follow `colorName_snake.shadeName` encoding (see normalized projection above).
-- Token value: `shade.hex ?? '#000000'`.
+- **Token value**: for each themed set `paletteName/themeName`, use only the `tokenRows` where `themeName` matches the current set — use **that row's** `hex ?? '#000000'`. **Never reuse the light or base theme's `hex` for other sets** — arc and dark theme rows carry independently-computed hex values. Using the wrong row's `hex` for a set is the most common cause of inverted shades appearing identical across themes.
 - **Newly created sets are inactive by default** (`active: false`) — call `set.toggleActive()` only if the user explicitly wants them applied to shapes.
 - Deep sync: optionally remove orphan tokens, sets, and themes.
 - Use `penpot_api_info` to look up `TokenCatalog`, `TokenSet`, `TokenTheme` API details at execution time.

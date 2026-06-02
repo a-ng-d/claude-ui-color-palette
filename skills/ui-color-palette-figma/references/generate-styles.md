@@ -48,9 +48,11 @@ Reduce `PaletteData` to a style-ready row model before execution:
 - `colorName`
 - `shadeName` — includes `"source"` (the source/reference shade for each color family)
 - `styleName` (full Figma style path, used as both path and name): `paletteName/colorName/shadeName` (no themes) or `paletteName/themeName/colorName/shadeName` (with themes) — empty segments filtered out
-- `gl`: OpenGL-normalized RGB triple `[r, g, b]` in `[0, 1]` range (from `shade.gl`)
+- `gl`: OpenGL-normalized RGB triple `[r, g, b]` in `[0, 1]` range — taken from **that theme's** `shade.gl`, not from the base or first theme
 - `alpha`: opacity in `[0, 1]`
 - `description`
+
+> The row model has **one row per `(themeName, colorName, shadeName)` triplet**. Arc and dark themes produce independent `gl` values for every shade. Never reuse the base or light theme's `gl` for a dark/arc theme's row — each row carries the independently-computed color for that theme.
 
 This normalized row model is the actual handoff from palette structure to Figma paint style operations.
 
@@ -59,7 +61,7 @@ This normalized row model is the actual handoff from palette structure to Figma 
 - Creates missing paint styles; finds existing ones by stored `styleId` before creating.
 - Includes the `"source"` shade for each color family alongside the numbered scale steps.
 - Style name is the full path as a **single string** — Figma parses `/` (no spaces) as group separator.
-- Fill set from `gl` (OpenGL-normalized RGB) + `alpha`. Skips shades where `gl` is undefined.
+- Fill set from `gl` (OpenGL-normalized RGB) + `alpha` — use **the row's own `gl`** (the one where `themeName` matches the style's theme path segment). **Never reuse the base or light theme's `gl`** for a dark/arc themed style; arc theme rows already carry the inverted hex values. Skips shades where `gl` is undefined.
 - No-theme detection: all shade IDs contain `'00000000000'`.
 - Optionally removes orphan styles when deep sync is enabled.
 

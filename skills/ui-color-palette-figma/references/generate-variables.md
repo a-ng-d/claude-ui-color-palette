@@ -59,9 +59,11 @@ Reduce `PaletteData` to a variable-ready row model before execution:
 - `colorName`
 - `shadeName` — includes `"source"` (the source/reference shade for each color family)
 - `variableName`: `colorName/shadeName` (slash-separated, empty segments filtered out)
-- `gl`: OpenGL-normalized RGB triple `[r, g, b]` in `[0, 1]` range (from `shade.gl`)
+- `gl`: OpenGL-normalized RGB triple `[r, g, b]` in `[0, 1]` range — taken from **that theme's** `shade.gl`, not from the base or first theme
 - `alpha`: opacity in `[0, 1]`
 - `description`
+
+> The row model has **one row per `(themeName, colorName, shadeName)` triplet**. Arc and dark themes produce independent `gl` values for every shade that differ from the light theme (arc themes invert the scale: shade `50` is darkest, shade `900` is lightest). Never merge, average, or deduplicate `gl` values across themes — each theme row is independent.
 
 This normalized row model is the actual handoff from palette structure to Figma variable operations.
 
@@ -71,7 +73,9 @@ This normalized row model is the actual handoff from palette structure to Figma 
 - **No-theme palette**: single default mode, left as `'Mode 1'`. No-theme detection: all shade IDs contain `'00000000000'`.
 - **Themed palette**: rename default mode to first theme name; `collection.addMode(themeName)` for each subsequent theme. Figma limits modes per plan — warn and stop if `addMode` throws.
 - **Variables**: named `colorName/shadeName` (`/`-separated, `'None'`/empty filtered). Includes the `"source"` shade.
-- **Values**: `{ r: gl[0], g: gl[1], b: gl[2], a: alpha }` per mode.
+- **Values**: for each mode at theme index `i`, find the normalized row where `themeName === themes[i].name`, `colorName` and `shadeName` match the current variable — use **that row's** `gl` and `alpha`:
+  `variable.setValueForMode(modeIds[i], { r: gl[0], g: gl[1], b: gl[2], a: alpha })`
+  **Never reuse the light or base theme's `gl` for other modes** — arc and dark theme rows carry independently-computed GL values. Using the wrong row's `gl` for a mode is the most common cause of inverted shades appearing flat across modes.
 - Optionally removes orphan variables and modes when deep sync is enabled.
 
 ## SystemData workflow

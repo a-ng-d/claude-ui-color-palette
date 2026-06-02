@@ -106,7 +106,7 @@ Once the taxonomy is confirmed, **generate a binding proposal** based on:
 1. **Color roles** — map `brand` → first non-neutral color, `neutral` → neutral/grey color, `danger` → red-family color (infer from color names / hue)
 2. **State mapping** — `default` → 500 (or closest mid-shade), `hover` → 600, `active` → 700, `disabled` → 200
 3. **Prominence mapping** — `subtle` → 100–200, `default` → 400–500, `strong` → 700–800
-4. **Theme overrides** — for each dark theme, shift shade references lighter (e.g. 500 → 300) unless the primitive cascade already handles it
+4. **Theme overrides** — for each dark/arc theme, check whether the primitive palette already produces the correct inverted GL values per mode (arc themes output a fully inverted scale at the primitive level: shade `50` is darkest in the arc mode, shade `900` is lightest). If the primitive variable sync correctly carries arc-specific GL values per mode, **no override is needed** — the Figma variable mode cascade resolves the right color at render time. Only add a shade-index override (e.g. `500` → `300`) when the shade **label** itself must change across themes, not just the color value.
 
 Present the proposal as a readable table:
 

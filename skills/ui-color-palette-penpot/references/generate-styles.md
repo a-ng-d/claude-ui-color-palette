@@ -52,8 +52,10 @@ Reduce `PaletteData` to a style-ready row model before execution:
   - with themes: `paletteName / themeName / colorName` (theme name falls back to localized default if empty)
   - empty segments are filtered out
 - `styleLeafName` (Penpot `LibraryColor.name`): the shade name only (e.g. `"80"`, `"source"`)
-- `hex`: 6-character hex string (first 7 chars of `shade.hex`, e.g. `'#RRGGBB'`)
+- `hex`: 6-character hex string — taken from **that theme's** `shade.hex`, not from the base or first theme (first 7 chars, e.g. `'#RRGGBB'`)
 - `alpha`: opacity in `[0, 1]`
+
+> The row model has **one row per `(themeName, colorName, shadeName)` triplet**. Arc and dark themes produce independent `hex` values for every shade. Never reuse the base or light theme's `hex` for a dark/arc theme's row — each row carries the independently-computed color for that theme.
 
 This normalized row model is the actual handoff from palette structure to Penpot local style operations.
 
@@ -68,7 +70,7 @@ This normalized row model is the actual handoff from palette structure to Penpot
 - Creates missing styles; finds existing ones by stored `id` before creating.
 - Includes the `"source"` shade for each color family alongside the numbered scale steps.
 - Sets `LibraryColor.path` and `LibraryColor.name` **independently** (see naming model below).
-- `color` is set from `hex.substring(0, 7)` — strips alpha channel from 8-char hex if present.
+- `color` is set from `hex.substring(0, 7)` — use **the row's own `hex`** (the one where `themeName` matches the style's theme path segment). **Never reuse the base or light theme's `hex`** for a dark/arc themed style. Strips alpha channel from 8-char hex if present.
 - `opacity` is set from `alpha` separately.
 - Skips shades where `hex` is undefined.
 - No-theme detection: all shade IDs contain `'00000000000'`.
