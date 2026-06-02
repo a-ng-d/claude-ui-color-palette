@@ -18,13 +18,10 @@ A [Claude Code](https://code.claude.com/) plugin that brings color palette desig
 
 ### Community skills
 
-| Skill                              | Description                                                              | Source                                                                                          |
-| ---------------------------------- | ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
-| `figma-variables-tokens-generator` | Generate a fully connected Figma design token system from a chat prompt  | [shanmus4/figma-variables-tokens-generator](https://github.com/Shanmus4/figma-variables-tokens-generator) |
-| `penpot-uiux-design`              | Create professional UI/UX designs in Penpot using MCP tools              | [github/awesome-copilot](https://github.com/github/awesome-copilot)                             |
-| `sketch-implement-design`         | Translate Sketch layers into production-ready code with visual fidelity  | [sketch-hq/skills](https://github.com/sketch-hq/skills)                                         |
-| `gh-cli`                          | GitHub CLI (`gh`) comprehensive reference for all GitHub operations      | [github/awesome-copilot](https://github.com/github/awesome-copilot)                             |
-| `gitlab-cli-skills`               | GitLab CLI (`glab`) command reference and workflows                      | [vince-winkintel/gitlab-cli-skills](https://github.com/vince-winkintel/gitlab-cli-skills)        |
+| Skill               | Description                                                         | Source                                                                                    |
+| ------------------- | ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `gh-cli`            | GitHub CLI (`gh`) comprehensive reference for all GitHub operations | [github/awesome-copilot](https://github.com/github/awesome-copilot)                       |
+| `gitlab-cli-skills` | GitLab CLI (`glab`) command reference and workflows                 | [vince-winkintel/gitlab-cli-skills](https://github.com/vince-winkintel/gitlab-cli-skills) |
 
 ## MCP Servers
 
