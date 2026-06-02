@@ -35,7 +35,7 @@ The plugin connects to the following MCP servers:
 | **UI Color Palette** | HTTP      | `https://mcp-uicp.yelbolt.workers.dev/mcp` | Core palette engine           |
 | **Figma**            | HTTP      | `https://mcp.figma.com/mcp`                | Remote Figma API              |
 | **Figma Desktop**    | HTTP      | `http://127.0.0.1:3845/mcp`                | Local Figma app               |
-| **Penpot**           | stdio     | `npx mcp-remote http://localhost:4401/sse` | Self-hosted, requires setup   |
+| **Penpot**           | HTTP      | `https://design.penpot.app/mcp/stream?userToken=…` | Token via `penpot_token` config |
 | **Sketch**           | HTTP      | `http://localhost:31126/mcp`               | Requires activation in Sketch |
 | **Framer**           | HTTP      | User-specific URL                          | Requires Framer MCP plugin    |
 | **GitHub**           | HTTP      | `https://api.githubcopilot.com/mcp/`       | Issues, PRs, repos            |
@@ -68,6 +68,32 @@ The default agent is configured in `settings.json`:
 ```
 
 ## Installation
+
+### From the Yelbolt marketplace
+
+**Step 1 — Add the marketplace** (once per machine):
+
+```bash
+/plugin marketplace add yelbolt/claude-marketplace
+```
+
+**Step 2 — Install the plugin:**
+
+```bash
+/plugin install ui-color-palette@yelbolt
+```
+
+### Update
+
+```bash
+/plugin marketplace update yelbolt
+```
+
+### Alternative — direct GitHub install
+
+```bash
+/plugin install github:a-ng-d/claude-ui-color-palette
+```
 
 ### From a local directory (development)
 
@@ -116,7 +142,7 @@ Sensitive values are stored in the system keychain and never written to `setting
 
 | Server        | Requirement                                                                         |
 | ------------- | ----------------------------------------------------------------------------------- |
-| Penpot        | Install and run [penpot-mcp](https://github.com/penpot/penpot-mcp) locally          |
+| Penpot        | Provide your user token via `/plugin config` (Penpot → Account → Integrations → MCP Server) |
 | Sketch        | Enable MCP in Sketch preferences                                                    |
 | Framer        | Install the [MCP plugin](https://www.framer.com/marketplace/plugins/mcp/) in Framer |
 | Figma Desktop | Run Figma desktop with MCP enabled                                                  |
