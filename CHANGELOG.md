@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.5] - 2026-06-05
+
+### Changed
+
+- `palette-color-systemer` agent: added Step 2.5 — explicit theme strategy choice before bindings are proposed. Two strategies are now supported: **Strategy A (primitive modes)** where `get_palette` handles all theme variations at the primitive level and semantic tokens use a single binding, and **Strategy B (semantic modes)** where each token has an explicit per-theme binding via `overrides` and the semantic collection has one mode per theme in design tools. The chosen strategy is recorded and propagated to all deploy steps (Figma, Penpot, Sketch, Framer)
+- `palette-color-systemer` agent: binding proposal table now adapts to the chosen strategy — single-column (ref only) for Strategy A, two-column (light / dark) for Strategy B
+- `palette-color-systemer` agent: clarified that `get_palette` resolves all theme variations at the primitive level for all themes; shade-index overrides in the color system are only for deliberate per-token design deviations (Strategy A) or expected across most tokens (Strategy B)
+- `palette-color-systemer` agent: Step 7 next-actions for Figma and Penpot now pass the strategy from Step 2.5 — no longer asks the mode/set question again at deploy time
+- `build-color-system` skill: Step 0 now includes a theme strategy decision (A vs B) before gathering bindings, with a comparison table; the chosen strategy is stored alongside `SystemData` and `SystemConfiguration` for use by deploy steps
+- `build-color-system` skill: Workflow updated to include strategy selection as step 3, and deploy next-actions (Figma, Penpot) now reference the strategy directly
+
 ## [1.0.4] - 2026-06-02
 
 ### Changed

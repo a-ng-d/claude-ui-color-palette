@@ -50,7 +50,16 @@ Common patterns:
 | Role × Prominence × State | `role`, `prominence`, `state` | — ; default / subtle / strong ; — |
 | Surface × Content | `surface`, `content` | background / border ; primary / secondary / inverse |
 
-**3. Bindings** (iterative — start with the most important ones) — map token paths to primitive shade refs.
+**3. Theme strategy** — before defining bindings, confirm which strategy the user wants:
+
+| Strategy | Description | `overrides` in bindings |
+| -------- | ----------- | ----------------------- |
+| **A — Primitive modes** *(recommended)* | Themes handled at the primitive level. Semantic tokens use a single binding. `get_palette` already carries the correct per-theme values at each shade stop. | Almost never — only for deliberate per-theme shade deviations |
+| **B — Semantic modes** | Themes handled at the semantic level. Each token has an explicit binding per theme via `overrides`. Semantic variable collection has one mode per theme. | Expected on most tokens that differ across themes |
+
+Record the strategy before defining bindings. It determines the binding format and how the semantic collection will be structured in design tools.
+
+**4. Bindings** (iterative — start with the most important ones) — map token paths to primitive shade refs.
 
 Format: `[memberId, memberId, …] → colorId:shadeName` (e.g. `[brand, default] → blue:500`).
 
@@ -59,10 +68,8 @@ Optional per-binding fields:
 | Field | Description |
 | ----- | ----------- |
 | `description` | Optional label for the token |
-| `overrides` | Per-theme alternative ref when the shade **index** differs: `{ darkId: "blue:300" }` |
+| `overrides` | Per-theme alternative ref: `{ themeId: "colorId:shadeName" }` — use for Strategy B, or for deliberate deviations in Strategy A |
 | `isExcluded` | `true` → token stays in SystemData but is skipped during code generation |
-
-> **When to use `overrides`**: only when the shade index (e.g. 500 → 300) must change between themes. If the primitive palette already produces different hex values per theme for the same stop, overrides are not needed — the primitive cascade handles it.
 
 ---
 
@@ -145,17 +152,20 @@ Finish with a one-line summary: e.g. `12 tokens — 9 bound, 2 unbound, 1 exclud
 
 1. Confirm `base` and `themes` are available (from context or `ui-color-palette-scale-palette`).
 2. Gather taxonomy groups and members from the user.
-3. Gather bindings (iterative — start with a subset, refine after preview).
-4. Call `get_color_system`.
-5. **Session state**: store result as `SystemData` slot, store the input `system` config as `SystemConfiguration` slot.
-6. Display the token matrix.
-7. Ask what to do next:
+3. **Choose theme strategy** — ask before defining bindings:
+   - **Strategy A — Primitive modes**: single binding per token, no overrides. `get_palette` carries per-theme values at the primitive level.
+   - **Strategy B — Semantic modes**: explicit `overrides` per theme. Semantic collection has one mode per theme in the design tool.
+4. Gather bindings (iterative — start with a subset, refine after preview).
+5. Call `get_color_system`.
+6. **Session state**: store result as `SystemData` slot, store the input `system` config as `SystemConfiguration` slot. Also record the chosen strategy (A or B) — it is needed by deploy steps.
+7. Display the token matrix.
+8. Ask what to do next:
    - **Adjust bindings** — add, change, or exclude specific tokens, then rebuild
    - **Generate semantic code** → `ui-color-palette-generate-semantic-code`
-   - **Export to Figma as a semantic variable collection** → `ui-color-palette-figma` → `references/generate-semantic-variables.md` — pass `SystemData` and `PaletteData` opaquely. Primitives must exist first. The skill will ask whether the semantic collection should have one mode per theme (mirrors the primitive structure, enables standalone theme switching) or a single flat mode (theme adaptation handled entirely at the primitive level).
-   - **Export to Penpot as semantic token sets** → `ui-color-palette-penpot` → `references/generate-semantic-tokens.md` — pass `SystemData` and `PaletteData` opaquely. Primitives must exist first. The skill will ask whether to create one set per theme (`systemName/themeName`, enables theme switching via Penpot themes) or a single flat set (`systemName`, theme adaptation handled entirely at the primitive level).
-   - **Export to Sketch as semantic swatches** → `ui-color-palette-sketch` — pass `SystemData` and `PaletteData` opaquely. Since Sketch has no mode concept, one swatch is created per theme per token, with swatch names encoding `systemName/themeName/tokenPath`. Only the `hex` value is used.
-   - **Export to Framer as semantic color styles** → `ui-color-palette-framer` — pass `SystemData` and `PaletteData` opaquely. Since Framer supports only `light` / `dark` values, the first theme maps to `light` and the second to `dark`. Systems with more than 2 themes will use only the first two themes. Style names follow `systemName/tokenPath`.
+   - **Export to Figma as a semantic variable collection** → `ui-color-palette-figma` — pass strategy: A = single flat mode on the semantic collection; B = one mode per theme on the semantic collection.
+   - **Export to Penpot as semantic token sets** → `ui-color-palette-penpot` — pass strategy: A = single flat set (`systemName`); B = one set per theme (`systemName/themeName`).
+   - **Export to Sketch as semantic swatches** → `ui-color-palette-sketch` — one swatch per theme per token, names encode `systemName/themeName/tokenPath`.
+   - **Export to Framer as semantic color styles** → `ui-color-palette-framer` — first theme maps to `light`, second to `dark`.
 
 ---
 
@@ -171,7 +181,8 @@ Finish with a one-line summary: e.g. `12 tokens — 9 bound, 2 unbound, 1 exclud
 - **ref format**: `colorId` is the color's `id` field from `PaletteData`, **not** its display name.
 - **partial bindings are fine**: unbound tokens appear in SystemData with `shadeId: null`. They show as `— unbound —` in the matrix.
 - **isExcluded vs unbound**: `isExcluded` is an explicit design decision (token exists but is intentionally disabled); unbound is a missing binding.
-- **overrides vs primitive cascade**: if the primitive palette already outputs different hex values per theme for the same shade stop, no override is needed — the cascade in CSS/SCSS handles it automatically.
+- **overrides vs primitive cascade**: `get_palette` resolves all theme variations at the primitive level — the same shade ref is correct for all themes. Do not add shade-index overrides unless a token intentionally requires a different shade index in a specific theme.
+- **source of truth for shade stops and color ids**: always read from the primitive palette (`PaletteData` or `base` config). Never assume shade names.
 
 ---
 
