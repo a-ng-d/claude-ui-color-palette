@@ -29,7 +29,7 @@ The plugin connects to the following MCP servers:
 
 | Server               | Transport | URL                                        | Notes                         |
 | -------------------- | --------- | ------------------------------------------ | ----------------------------- |
-| **UI Color Palette** | HTTP      | `https://mcp-uicp.yelbolt.workers.dev/mcp` | Core palette engine           |
+| **UI Color Palette** | HTTP      | `https://mcp.ui-color-palette.com/mcp` | Core palette engine           |
 | **Figma**            | HTTP      | `https://mcp.figma.com/mcp`                | Remote Figma API              |
 | **Figma Desktop**    | HTTP      | `http://127.0.0.1:3845/mcp`                | Local Figma app               |
 | **Penpot**           | HTTP      | `${penpot_url}/mcp/stream?userToken=…`             | URL via `penpot_url` · token via `penpot_token` |

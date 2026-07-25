@@ -104,7 +104,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### MCP servers
 
-- UI Color Palette (`https://mcp-uicp.yelbolt.workers.dev/mcp`) — core palette engine
+- UI Color Palette (`https://mcp.ui-color-palette.com/mcp`) — core palette engine
 - Figma remote (`https://mcp.figma.com/mcp`)
 - Figma Desktop (`http://127.0.0.1:3845/mcp`)
 - Penpot (`npx mcp-remote http://localhost:4401/sse`)

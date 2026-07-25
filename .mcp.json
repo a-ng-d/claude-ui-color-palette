@@ -2,7 +2,7 @@
   "mcpServers": {
     "ui-color-palette": {
       "type": "http",
-      "url": "https://mcp-uicp.yelbolt.workers.dev/mcp"
+      "url": "https://mcp.ui-color-palette.com/mcp"
     },
     "figma": {
       "type": "http",
