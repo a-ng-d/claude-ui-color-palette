@@ -22,7 +22,7 @@
     "ui-color-palette-build-color-system": {
       "source": "a-ng-d/skills-ui-color-palette",
       "sourceType": "github",
-      "skillPath": "ui-color-palette-build-color-system/SKILL.md",
+      "skillPath": "skills/ui-color-palette-build-color-system/SKILL.md",
       "computedHash": "59379c34fac92e5d462c3f7f0e329f5908365871acbc30360f042ae72f032e8c"
     },
     "ui-color-palette-figma": {
