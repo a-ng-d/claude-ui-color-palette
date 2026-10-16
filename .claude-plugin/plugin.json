@@ -1,15 +1,20 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "ui-color-palette",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Design color palettes, audit contrast, generate code, and sync to Figma, Penpot, Sketch, and Framer — powered by the UI Color Palette API",
   "author": {
     "name": "Aurélien Grimaud",
     "url": "https://github.com/a-ng-d",
     "email": "a.grimaud@involt.io"
   },
-  "homepage": "https://docs.ui-color-palette.com/claude",
+  "icon": "./assets/icon.svg",
+  "homepage": "https://ui-color-palette.com/claude",
   "repository": "https://github.com/a-ng-d/claude-ui-color-palette",
+  "documentationUrl": "https://uicp.ylb.lt/docs-claude",
+  "supportUrl": "https://uicp.ylb.lt/support",
+  "privacyPolicyUrl": "https://uicp.ylb.lt/privacy",
+  "termsOfServiceUrl": "https://uicp.ylb.lt/terms",
   "license": "MIT",
   "keywords": [
     "color",
