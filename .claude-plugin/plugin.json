@@ -10,6 +10,10 @@
   },
   "homepage": "https://uicp.ylb.lt/docs-claude",
   "repository": "https://github.com/a-ng-d/claude-ui-color-palette",
+  "documentationUrl": "https://uicp.ylb.lt/docs-claude",
+  "supportUrl": "https://uicp.ylb.lt/support",
+  "privacyPolicyUrl": "https://uicp.ylb.lt/privacy",
+  "termsOfServiceUrl": "https://uicp.ylb.lt/terms",
   "license": "MIT",
   "keywords": [
     "color",
