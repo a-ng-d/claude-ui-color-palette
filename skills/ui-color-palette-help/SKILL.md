@@ -51,7 +51,8 @@ Invoke a specific skill directly with `/ui-color-palette:<command>`.
 | ------- | ------------ |
 | `/ui-color-palette:scale-palette` | Build a full shade palette from source colors |
 | `/ui-color-palette:manage-palettes` | Browse, retrieve, or search published palettes |
-| `/ui-color-palette:audit-palette` | Audit contrast (WCAG 2.1 + APCA) |
+| `/ui-color-palette:audit-palette` | Audit contrast (WCAG 2.2 + APCA) |
+| `/ui-color-palette:report-palette` | Generate a readability report document (every shade, WCAG 2.2 / APCA scores, global synthesis) |
 
 ### Deploy — Code
 
@@ -105,6 +106,9 @@ For focused, high-complexity tasks, these sub-agents are available:
 
 **I want to check if my colors are accessible**
 > `/ui-color-palette:audit-palette` with your hex values
+
+**I want a document to share my palette with the team**
+> `/ui-color-palette:report-palette` — renders an HTML readability report of the palette in context
 
 **I want to push my palette to Figma**
 > `/ui-color-palette:figma` — will ask whether you need variables or styles

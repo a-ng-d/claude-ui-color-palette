@@ -26,7 +26,8 @@ Build, retrieve, or evaluate a palette:
 
 - **`ui-color-palette-scale-palette`**: Build a full palette with `get_palette`
 - **`ui-color-palette-manage-palettes`**: Browse, list, or retrieve an existing palette from the platform
-- **`ui-color-palette-audit-palette`**: Audit color pairs for WCAG 2.1 and APCA compliance with a global contrast score
+- **`ui-color-palette-audit-palette`**: Audit color pairs for WCAG 2.2 and APCA compliance with a global contrast score
+- **`ui-color-palette-report-palette`**: Render a shareable readability report (HTML document): every shade with hex, color-space value, WCAG 2.2 / APCA scores, readability score, and a global synthesis
 
 ### Phase 2.5 — Color System
 
@@ -38,7 +39,7 @@ Define a semantic token taxonomy on top of the palette:
 
 Export or push the palette into a target environment:
 
-- **`ui-color-palette-generate-code`**: Export palette as code (CSS, SCSS, Tailwind v3/v4, DTCG, SwiftUI, UIKit, Compose) — combine with `gh-cli` or `gitlab-cli-skills` to commit and open a PR/MR
+- **`ui-color-palette-generate-code`**: Export palette as code (CSS, SCSS, Tailwind v3/v4, DTCG, SwiftUI, UIKit, Compose) — combine with the `github` or `gitlab` MCP server to commit and open a PR/MR
 - **`ui-color-palette-generate-semantic-code`**: Export palette **with semantic layer** (requires a `SystemConfiguration`) — generates a primitives file + a semantics file per format
 - **`ui-color-palette-figma`**: Push variables or styles into Figma (Figma has no native token format — use `ui-color-palette-generate-code` for DTCG/token file export)
 - **`ui-color-palette-penpot`**: Push tokens or styles into Penpot (tokens are native to Penpot)
@@ -95,11 +96,14 @@ Once the source is resolved, ask: **Scale** (build a full shade palette) / **Ret
 
 Once `PaletteData` is in context, always offer a preview before moving to Phase 2.5 or Phase 3:
 
-> Do you want to see a visual preview of the palette?
-> - **Yes** — inline image via `preview_palette`
-> - **No** — skip
+> How do you want to see the palette?
+> - **Readability report** (recommended) — a document with every shade, its hex and color-space value, WCAG 2.2 / APCA scores and a global readability synthesis
+> - **Quick preview** — swatches inline in the conversation
+> - **Skip**
+> If you do not answer, I will generate the readability report.
 
-If yes: delegate to `ui-color-palette-scale-palette` Step 2 (preview branch). That skill handles the `preview_palette` call, the image fallback to design tools, and the contrast score question.
+- **Readability report**: run `ui-color-palette-report-palette` with the compact rows already in context (no new `get_palette` call). It publishes the document or gives its path, then recaps the verdict. It replaces the contrast score question.
+- **Quick preview**: delegate to `ui-color-palette-scale-palette` Step 2 (quick preview branch): inline swatches first, design tool canvas second, `preview_palette` image last.
 
 If the user skips the preview or it is already shown, proceed to Phase 2.5.
 
@@ -165,7 +169,7 @@ If the user wants to manage a published palette, ask: **Publish** / **Update** /
 5. **Platform routing**: When pushing colors to a design tool, go through the matching `ui-color-palette-<tool>` skill after the palette structure is ready.
 6. **Suggest improvements**: If contrast fails, suggest alternative shades. If a palette lacks enough variation, suggest adding tints/shades.
 7. **Format awareness**: When exporting code, confirm the target framework. Prefer Tailwind v4 for new projects, DTCG for design token interoperability.
-8. **Preview before deploy**: After `PaletteData` is set, always offer a visual preview before moving to Phase 2.5 or Phase 3. Priority: (1) native UI rendering in the conversation, (2) design tool canvas if connected, (3) MCP `preview_palette` image as last resort. Delegate the branching logic to the `ui-color-palette-scale-palette` skill Step 2.
+8. **Preview before deploy**: After `PaletteData` is set, always offer a visual preview before moving to Phase 2.5 or Phase 3. Priority: (1) readability report document via `ui-color-palette-report-palette`, (2) native UI rendering in the conversation, (3) design tool canvas if connected, (4) MCP `preview_palette` image as last resort.
 9. **PaletteData persistence**: Once `get_palette` has been called, store the raw response opaquely as the `PaletteData` slot. Never read, print, or reason from the raw JSON. Never call `get_palette` again unless the user explicitly asks to rebuild or change the palette.
    **Overflow rule**: If `get_palette` returns a response too large to read (saved to disk with an error message), **do not attempt to read the overflow file under any circumstances**. The `base` and `themes` parameters collected in Step 0 are still in context and are sufficient for all downstream tools (`generate_code`, `get_color_system`). Proceed immediately using those parameters — `PaletteData` is not required for code or semantic export.
 9. **Scale is on-demand**: `ui-color-palette-scale-palette` is only needed when the user wants code export, design tool variables/tokens/styles, or an accessibility audit. Publishing a palette does **not** require scaling — `publish_palette` takes source colors and config directly.

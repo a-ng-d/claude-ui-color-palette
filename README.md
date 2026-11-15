@@ -14,14 +14,8 @@ A [Claude Code](https://code.claude.com/) plugin that brings color palette desig
 | `scale-palette`              | Build a full palette with `get_palette` and export as code/tokens (CSS, Tailwind, SwiftUI, DTCG, …)      |
 | `build-color-system`         | Define a semantic token taxonomy and bind it to palette primitives via `get_color_system`                 |
 | `manage-palettes`            | Browse, publish, share, update, and delete palettes on the platform                                       |
-| `audit-palette`              | Audit color pairs for WCAG 2.1 and APCA compliance with a global contrast score                           |
-
-### Community skills
-
-| Skill               | Description                                                         | Source                                                                                    |
-| ------------------- | ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| `gh-cli`            | GitHub CLI (`gh`) comprehensive reference for all GitHub operations | [github/awesome-copilot](https://github.com/github/awesome-copilot)                       |
-| `gitlab-cli-skills` | GitLab CLI (`glab`) command reference and workflows                 | [vince-winkintel/gitlab-cli-skills](https://github.com/vince-winkintel/gitlab-cli-skills) |
+| `audit-palette`              | Audit color pairs for WCAG 2.2 and APCA compliance with a global contrast score                           |
+| `report-palette`             | Render a shareable readability report (HTML): every shade, hex, OKLCH/LCH value, WCAG 2.2 and APCA scores, global synthesis. Needs `python3` |
 
 ## MCP Servers
 
@@ -44,6 +38,7 @@ The plugin uses **uicper** as the default agent.
 
 It acts as the top-level orchestrator for multi-step workflows such as:
 
+- generate → readability report → export
 - generate → audit → export
 - generate → transition → sync to design tools
 - retrieve/publish → audit → export

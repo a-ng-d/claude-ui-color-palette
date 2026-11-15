@@ -1,6 +1,6 @@
 ---
 name: ui-color-palette-audit-palette
-description: Audit color pairs for contrast compliance against WCAG 2.1 and APCA standards. Use when the user wants to check accessibility, validate color pairings, or compute a global contrast score for a palette.
+description: Audit color pairs for contrast compliance against WCAG 2.2 and APCA standards. Use when the user wants to check accessibility, validate color pairings, or compute a global contrast score for a palette.
 argument-hint: <hex-colors...>
 ---
 
@@ -76,7 +76,7 @@ This flattened representation is the preferred input for audit reasoning, summar
 
 ## Standards
 
-- **WCAG 2.1**: Contrast ratios — AA requires 4.5:1 for normal text, 3:1 for large text; AAA requires 7:1 / 4.5:1
+- **WCAG 2.2** (contrast criteria unchanged from 2.1): Contrast ratios — AA requires 4.5:1 for normal text, 3:1 for large text; AAA requires 7:1 / 4.5:1
 - **APCA**: Lightness contrast (Lc) values — minimum Lc 60 for body text, Lc 45 for large text, Lc 30 for non-text
 
 ## Workflow
@@ -227,6 +227,14 @@ List every shade that fails both light and dark text for WCAG AA (ratio < 4.5) o
 | primary | 400 | #60A5FA | Neither text passes AA | Darken to 500 or lighten to 300 |
 
 End with the global score and recommendations.
+
+Then offer the audit as a document:
+
+> Do you want this audit as a shareable readability report?
+> - **Yes** — render it with `ui-color-palette-report-palette`, passing the recommendations above in `synthesis.recommendations`
+> - **No** — stop here
+
+Reuse the same compact rows: no new `get_palette` call.
 
 ## Tips
 

@@ -1,18 +1,6 @@
 {
   "version": 1,
   "skills": {
-    "gh-cli": {
-      "source": "github/awesome-copilot",
-      "sourceType": "github",
-      "skillsPath": "skills/gh-cli",
-      "computedHash": "cbe644b0c6760ae2a1eaafa39133920d889331327065d92a131675a665273e56"
-    },
-    "gitlab-cli-skills": {
-      "source": "vince-winkintel/gitlab-cli-skills",
-      "sourceType": "github",
-      "skillsPath": "skills/gitlab-cli-skills",
-      "computedHash": "6276a0cf385da603760de48795614bc71f821a09b4114227b5043da94512869b"
-    },
     "ui-color-palette-audit-palette": {
       "source": "a-ng-d/skills-ui-color-palette",
       "sourceType": "github",

@@ -191,15 +191,21 @@ Controls the lightness scale distribution. **`id` must be one of the 19 supporte
 
 After `get_palette` returns, always ask:
 
-> Do you want to see a visual preview of the palette?
-> - **Yes** — show a preview
-> - **No** — skip to next step
+> How do you want to see the palette?
+> - **Readability report** (recommended) — a document with every shade, its hex and color-space value, WCAG 2.2 / APCA scores and a global readability synthesis
+> - **Quick preview** — swatches inline in the conversation
+> - **Skip** — go to the next step
+> If you do not answer, I will generate the readability report.
 
-### Priority order
+### Readability report
+
+Delegate to `ui-color-palette-report-palette` with the compact rows already returned. It renders the document, publishes it or gives its path, and recaps the verdict. It also covers Step 3 (contrast scores): do not ask the contrast question afterwards.
+
+### Quick preview — priority order
 
 Apply the following priority — stop at the first option that works:
 
-#### 1. Native UI preview (preferred)
+#### 1. Native UI preview
 
 Render the palette directly in the conversation without any external call. Produce a markdown table with one column per shade and one row per color, using the `hex` values from the compact cells:
 
@@ -250,7 +256,9 @@ Skip entirely. Do not call `preview_palette`.
 
 ## Step 3 — Contrast scores (optional)
 
-After the preview step (whether or not an image was shown), ask:
+Skip this step if the readability report was generated: it already contains every score.
+
+Otherwise, after the preview step (whether or not an image was shown), ask:
 
 > Do you want contrast scores displayed for this palette?
 > - **WCAG** — ratio against light text (`#FFFFFF`) and dark text (`#000000`), with AA/AAA grades
@@ -389,6 +397,7 @@ If direct write-back tooling is available for the target design tool, use it. Ot
    | Code export | Use `base` + `themes` directly → `generate_code`. `PaletteData` is not required. |
    | Display / preview | `grep` the overflow file for `"hex"` to extract one hex value per shade. Never read the file sequentially. |
    | Audit | `grep` the overflow file for `"hex"` and `"textContrast"` to extract contrast data per shade. Then delegate to `palette-auditor` with the extracted rows only. |
+   | Readability report | Pass the overflow file path as `rows` to `ui-color-palette-report-palette` — the render script reads it directly. Never copy the rows into context. |
    | Design tool push | Use `base` + `themes` directly → matching deploy skill. `PaletteData` is not required. |
 
    In all cases, store a `PaletteData: overflow` marker in context so downstream tools know `PaletteData` is not available as an opaque object.
@@ -399,7 +408,8 @@ If direct write-back tooling is available for the target design tool, use it. Ot
   - `shade.hex`
   - preferred text color if it can be inferred from `textColorsTheme` or audit data
 5. **Ask the user what to do next.** Building the palette is not the end. The user may want to:
-  - **Preview the palette visually** first — render a swatch matrix grouped by theme and color
+  - **Get the readability report** — a shareable document with every shade and its WCAG 2.2 / APCA scores, via `ui-color-palette-report-palette`
+  - **Preview the palette visually** quickly — render a swatch matrix grouped by theme and color
   - **Generate it in a design tool** — route to `ui-color-palette-figma`, `ui-color-palette-penpot`, `ui-color-palette-framer`, or `ui-color-palette-sketch`
   - **Audit the palette** first — use `ui-color-palette-audit-palette` to check contrast and accessibility
   - **Publish the palette** — use `ui-color-palette-manage-palettes` to save it to the platform

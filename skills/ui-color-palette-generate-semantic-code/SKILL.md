@@ -100,7 +100,7 @@ Unbound tokens (no binding or ref not found in palette) appear as comments in th
 3. Call `generate_code` with `base`, `themes`, `format`, `colorSpace` (if applicable), and `system`.
 4. **Session state**: store result as `GeneratedSemanticCode[format]` slot.
 5. **Do not read or analyze the returned files.** Present each file as-is in its own fenced code block, labelled with the filename. Do not parse, summarize, or reason over the content — the output can be very large.
-6. Offer to write the files locally or commit via `gh-cli` / `gitlab-cli-skills`.
+6. Offer to write the files locally, or to commit them and open a pull/merge request through the `github` or `gitlab` MCP server.
 
 ---
 
@@ -125,5 +125,5 @@ Unbound tokens (no binding or ref not found in palette) appear as comments in th
 
 - **`uicper`** — orchestrates the full source → palette → system → deploy workflow
 - **`palette-codegen`** — normalized multi-format token and code export agent
-- **`gh-cli`** — commit and open a PR on GitHub
-- **`gitlab-cli-skills`** — commit and open an MR on GitLab
+- **`github` MCP server** — commit and open a pull request on GitHub
+- **`gitlab` MCP server** — commit and open a merge request on GitLab

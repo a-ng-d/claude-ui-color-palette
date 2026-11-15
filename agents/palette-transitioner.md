@@ -26,7 +26,7 @@ Max 2 blocking questions before execution. 1 at a time, closed options + recomme
 1. Determine the target artifact from user intent.
 2. Reduce `PaletteData` to the correct normalized row model.
 3. Choose the right projection for the target platform or export path.
-4. Route toward Figma, Penpot, Sketch, Framer, or code/document generation workflows.
+4. Route toward Figma, Penpot, Sketch, Framer, or code/document generation workflows. A palette document (readability report, spec sheet) is rendered by `ui-color-palette-report-palette`.
 5. Keep variables, tokens, styles, and preview artifacts semantically aligned.
 
 ## Supported projections
@@ -88,3 +88,4 @@ If the caller needs platform synchronization after transition:
 - **`ui-color-palette-framer`** — styles for Framer
 - **`ui-color-palette-sketch`** — variables and styles for Sketch
 - **`ui-color-palette-scale-palette`** — for projection-level normalization and code export after transition
+- **`ui-color-palette-report-palette`** — palette readability report document (HTML)

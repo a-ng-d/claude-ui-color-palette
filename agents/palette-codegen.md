@@ -22,8 +22,9 @@ Max 2 blocking questions before execution. 1 at a time, closed options + recomme
 4. Show the output in a code block.
 5. If the user wants to write to a file: check the current directory and write or update the appropriate file directly. Only ask for the target path if it is genuinely ambiguous.
 6. If the user wants to commit and open a PR/MR, invoke the relevant skill:
-   - **GitHub**: use `gh-cli` — create a branch, commit the file, push, open a pull request.
-   - **GitLab**: use `gitlab-cli-skills` — create a branch, commit the file, push, open a merge request.
+   - **GitHub**: use the `github` MCP server — create a branch, commit the file, open a pull request.
+   - **GitLab**: use the `gitlab` MCP server — create a branch, commit the file, open a merge request.
+   - Repository access goes through these MCP servers only. If the matching server is not connected, write the file locally and tell the user which server to enable.
 
 ## File modification
 
@@ -46,5 +47,5 @@ You may read, create, and edit files in the current working directory. When a fi
 ## Uses skills
 
 - **`ui-color-palette-generate-code`** — `generate_code` tool reference and format/color-space table
-- **`gh-cli`** — branches, commits, and pull requests on GitHub
-- **`gitlab-cli-skills`** — branches, commits, and merge requests on GitLab
+- **`github` MCP server** — branches, commits, and pull requests on GitHub
+- **`gitlab` MCP server** — branches, commits, and merge requests on GitLab

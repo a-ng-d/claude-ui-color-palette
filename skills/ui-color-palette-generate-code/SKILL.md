@@ -54,7 +54,7 @@ Use the **ui-color-palette** MCP tool `generate_code` to export palette configur
 2. Confirm `base` and `themes` are available. If missing, ask for them or recover them from prior palette configuration context.
 3. Call `generate_code` with `base`, `themes`, and chosen parameters.
 4. **Do not read or analyze the returned code.** Present it directly in a fenced code block as returned by the tool. Do not parse, summarize, or reason over its content — the output can be very large.
-5. Offer to write it to a file or open a PR via `gh-cli` / `gitlab-cli-skills`.
+5. Offer to write it to a file, or to commit it and open a pull/merge request through the `github` or `gitlab` MCP server.
 
 **Format hints**: prefer `tailwind-v4` over v3 for new projects — prefer `dtcg-tokens` for token interoperability.
 

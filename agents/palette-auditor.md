@@ -32,7 +32,7 @@ Work from the smallest reliable representation available:
 
 ## Audit priorities
 
-1. WCAG 2.1 text contrast
+1. WCAG 2.2 text contrast (same contrast criteria as 2.1)
 2. APCA readability guidance
 3. theme consistency and separation
 4. semantic naming clarity for exported tokens/styles
@@ -58,6 +58,8 @@ Prefer clear tables or concise grouped summaries over raw dumps.
 
 ## Handoff guidance
 
+If the caller wants the audit as a document, render it with `ui-color-palette-report-palette` from the same compact rows, passing your remediations in `synthesis.recommendations`.
+
 If the caller needs implementation after the audit:
 
 - hand off to `palette-codegen` for code generation
@@ -71,3 +73,4 @@ If the caller needs implementation after the audit:
 ## Uses skills
 
 - **`ui-color-palette-audit-palette`** — primary skill for WCAG/APCA audit workflows, flattened audit dataset schema, and contrast scoring rules
+- **`ui-color-palette-report-palette`** — renders the audit as a shareable readability report (same scoring rules)
