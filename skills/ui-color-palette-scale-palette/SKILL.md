@@ -397,7 +397,7 @@ If direct write-back tooling is available for the target design tool, use it. Ot
    | Code export | Use `base` + `themes` directly → `generate_code`. `PaletteData` is not required. |
    | Display / preview | `grep` the overflow file for `"hex"` to extract one hex value per shade. Never read the file sequentially. |
    | Audit | `grep` the overflow file for `"hex"` and `"textContrast"` to extract contrast data per shade. Then delegate to `palette-auditor` with the extracted rows only. |
-   | Readability report | Pass the overflow file path as `rows` to `ui-color-palette-report-palette` — the render script reads it directly. Never copy the rows into context. |
+   | Readability report | Build the report data from the overflow file with a shell command (see `ui-color-palette-report-palette` Step 2). Never copy the rows into context. |
    | Design tool push | Use `base` + `themes` directly → matching deploy skill. `PaletteData` is not required. |
 
    In all cases, store a `PaletteData: overflow` marker in context so downstream tools know `PaletteData` is not available as an opaque object.

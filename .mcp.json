@@ -14,7 +14,10 @@
     },
     "penpot": {
       "type": "http",
-      "url": "${user_config.penpot_url}/mcp/stream?userToken=${user_config.penpot_token}"
+      "url": "https://design.penpot.app/mcp/stream",
+      "headers": {
+        "userToken": "${user_config.penpot_token}"
+      }
     },
     "sketch": {
       "type": "http",
@@ -22,15 +25,11 @@
     },
     "framer": {
       "type": "http",
-      "url": "https://mcp.unframer.co/mcp?id=${user_config.framer_mcp_url}"
+      "url": "https://mcp.framer.com/mcp"
     },
     "github": {
       "type": "http",
       "url": "https://api.githubcopilot.com/mcp/"
-    },
-    "gitlab": {
-      "type": "http",
-      "url": "${user_config.gitlab_url}/api/v4/mcp"
     }
   }
 }

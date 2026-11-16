@@ -15,28 +15,40 @@ A [Claude Code](https://code.claude.com/) plugin that brings color palette desig
 | `build-color-system`         | Define a semantic token taxonomy and bind it to palette primitives via `get_color_system`                 |
 | `manage-palettes`            | Browse, publish, share, update, and delete palettes on the platform                                       |
 | `audit-palette`              | Audit color pairs for WCAG 2.2 and APCA compliance with a global contrast score                           |
-| `report-palette`             | Render a shareable readability report (HTML): every shade, hex, OKLCH/LCH value, WCAG 2.2 and APCA scores, global synthesis. Needs `python3` |
+| `report-palette`             | Render a shareable readability report (HTML): every shade, hex, OKLCH/LCH value, WCAG 2.2 and APCA scores, global synthesis |
 
 ## MCP Servers
 
 The plugin connects to the following MCP servers:
 
-| Server               | Transport | URL                                        | Notes                         |
-| -------------------- | --------- | ------------------------------------------ | ----------------------------- |
-| **UI Color Palette** | HTTP      | `https://mcp.ui-color-palette.com/mcp` | Core palette engine           |
-| **Figma**            | HTTP      | `https://mcp.figma.com/mcp`                | Remote Figma API              |
-| **Figma Desktop**    | HTTP      | `http://127.0.0.1:3845/mcp`                | Local Figma app               |
-| **Penpot**           | HTTP      | `${penpot_url}/mcp/stream?userToken=…`             | URL via `penpot_url` · token via `penpot_token` |
-| **Sketch**           | HTTP      | `http://localhost:31126/mcp`               | Requires activation in Sketch |
-| **Framer**           | HTTP      | User-specific URL                          | Requires Framer MCP plugin    |
-| **GitHub**           | HTTP      | `https://api.githubcopilot.com/mcp/`       | Issues, PRs, repos            |
-| **GitLab**           | HTTP      | `https://<instance>/api/v4/mcp`            | User-specific instance URL    |
+| Server               | Transport | URL                                    | Notes                                                    |
+| -------------------- | --------- | -------------------------------------- | -------------------------------------------------------- |
+| **UI Color Palette** | HTTP      | `https://mcp.ui-color-palette.com/mcp` | Core palette engine                                      |
+| **Figma**            | HTTP      | `https://mcp.figma.com/mcp`            | Remote Figma API                                         |
+| **Figma Desktop**    | HTTP      | `http://127.0.0.1:3845/mcp`            | Local Figma app, Dev Mode MCP server enabled             |
+| **Penpot**           | HTTP      | `https://design.penpot.app/mcp/stream` | Penpot Cloud; MCP key via `penpot_token`, sent as a header |
+| **Sketch**           | HTTP      | `http://localhost:31126/mcp`           | Enable MCP in Sketch preferences                         |
+| **Framer**           | HTTP      | `https://mcp.framer.com/mcp`           | Official Framer server, sign in with OAuth               |
+| **GitHub**           | HTTP      | `https://api.githubcopilot.com/mcp/`   | Issues, PRs, repos                                       |
+
+Self-hosted Penpot or GitLab need a server added by hand:
+
+```bash
+claude mcp add --transport http penpot "https://<your-penpot-domain>/mcp/stream?userToken=<your-mcp-key>"
+claude mcp add --transport http gitlab https://<your-instance>/api/v4/mcp
+```
+
+### User configuration
+
+| Key | Sensitive | Description |
+|---|---|---|
+| `penpot_token` | Yes (keychain) | Your Penpot Cloud MCP key — Penpot → Your account → Integrations → MCP Server. Sent only to `design.penpot.app` |
+
+Update it at any time with `/plugin config`.
 
 ## Agent
 
-The plugin uses **uicper** as the default agent.
-
-It acts as the top-level orchestrator for multi-step workflows such as:
+**uicper** is the plugin's orchestrator. Claude hands palette workflows to it, and you can call it directly. It acts as the top-level orchestrator for multi-step workflows such as:
 
 - generate → readability report → export
 - generate → audit → export
@@ -51,11 +63,11 @@ The orchestrator delegates specialized work to focused sub-agents:
 - `palette-publisher` — published palette retrieval, publication, update, visibility, deletion
 - `palette-transitioner` — transition from `PaletteData` to variables, tokens, styles, swatches, and preview/document artifacts
 
-The default agent is configured in `settings.json`:
+To make it your default agent, add this to your own Claude Code settings:
 
 ```json
 {
-	"agent": "uicper"
+  "agent": "ui-color-palette:uicper"
 }
 ```
 
@@ -93,19 +105,6 @@ The default agent is configured in `settings.json`:
 claude --plugin-dir ./claude-ui-color-palette
 ```
 
-### User configuration
-
-On first enable, the plugin prompts for optional config:
-
-| Key | Sensitive | Description |
-|---|---|---|
-| `penpot_url` | No | Your Penpot instance base URL — Penpot Cloud: `https://design.penpot.app`, self-hosted: your own domain |
-| `penpot_token` | Yes (keychain) | Your Penpot user token — find it in Penpot → Account → Integrations → MCP Server |
-| `framer_mcp_url` | No | Your Framer MCP URL from the [Framer marketplace](https://www.framer.com/marketplace/plugins/mcp/) |
-| `gitlab_url` | No | Your GitLab instance URL (e.g. `https://gitlab.company.com`) — leave empty if not using GitLab |
-
-Sensitive values are stored in the system keychain and never written to `settings.json`. You can update them at any time with `/plugin config`.
-
 ## Usage
 
 ```bash
@@ -124,21 +123,15 @@ Sensitive values are stored in the system keychain and never written to `setting
 # Build a palette and export to CSS with OKLCH
 /ui-color-palette:scale-palette css oklch
 
+# Readability report of the palette in context (HTML document)
+/ui-color-palette:report-palette
+
 # Audit contrast of a color set
 /ui-color-palette:audit-palette #1E293B #F8FAFC #3B82F6 #FFFFFF
 
 # Browse community palettes
 /ui-color-palette:manage-palettes sunset warm
 ```
-
-## Prerequisites
-
-| Server        | Requirement                                                                         |
-| ------------- | ----------------------------------------------------------------------------------- |
-| Penpot        | Provide your user token via `/plugin config` (Penpot → Account → Integrations → MCP Server) |
-| Sketch        | Enable MCP in Sketch preferences                                                    |
-| Framer        | Install the [MCP plugin](https://www.framer.com/marketplace/plugins/mcp/) in Framer |
-| Figma Desktop | Run Figma desktop with MCP enabled                                                  |
 
 ## License
 

@@ -9,30 +9,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `ui-color-palette-report-palette` skill: renders a self-contained HTML readability report of a palette — every shade with its swatch, hex, value in the palette's color space (OKLCH, LCH, Lab…), WCAG 2.2 ratio and level for light and dark text, APCA Lc and recommended usage, readability score (weight 400 / 700), best text color and contrast against the theme background, plus a global synthesis (global contrast score, WCAG AA and APCA Lc 60 pass rates, readability index, verdict, findings). Rendered by a bundled standard-library Python script from the compact `get_palette` rows; contrast values are read from the API, color-space values are derived with chroma-js-identical formulas
+- `ui-color-palette-report-palette` skill: renders a self-contained HTML readability report of a palette — every shade with its swatch, hex, value in the palette's color space (OKLCH, LCH, Lab…), WCAG 2.2 ratio and level for light and dark text, APCA Lc and recommended usage, readability score (weight 400 / 700), best text color and contrast against the theme background, plus a global synthesis (global contrast score, WCAG AA and APCA Lc 60 pass rates, readability index, verdict, findings). The page is assembled from a Markdown template (`references/report-template.md`) and the compact `get_palette` rows, and renders itself in the browser; contrast values are read from the API, color-space values are derived with chroma-js-identical formulas
 - `uicper` Phase 2.1 and `scale-palette` Step 2: the readability report is now the default preview; the inline swatches and the `preview_palette` image remain as quick-preview options
 - `audit-palette` skill and `palette-auditor` agent: the audit can be exported as a readability report, with the remediations passed as recommendations
 
 ### Changed
 
 - Contrast wording moved from WCAG 2.1 to WCAG 2.2 (the contrast criteria are unchanged)
-- Commits and pull/merge requests from `palette-codegen`, `generate-code` and `generate-semantic-code` now go through the `github` and `gitlab` MCP servers
+- Commits and pull requests from `palette-codegen`, `generate-code` and `generate-semantic-code` now go through the `github` MCP server (GitLab: server added by hand)
+- `uicper` is no longer forced as the default agent; its description now asks Claude to delegate palette workflows to it. The README shows how to make it your default agent
+- Framer MCP server: the official `https://mcp.framer.com/mcp` (OAuth) replaces the Unframer URL
+- Penpot MCP server: fixed to Penpot Cloud (`https://design.penpot.app/mcp/stream`), with the MCP key sent in a `userToken` header from the sensitive `penpot_token` option instead of the URL. Self-hosted Penpot is added by hand (`claude mcp add`, see README)
 
 ### Removed
 
-- Vendored community skills `gh-cli` and `gitlab-cli-skills`: their scripts read GitHub/GitLab tokens from the user's machine, which the Anthropic directory policy holds for review. The `github` and `gitlab` MCP servers already cover the same workflows
+- Vendored community skills `gh-cli` and `gitlab-cli-skills`: their scripts read GitHub/GitLab tokens from the user's machine, which the Anthropic directory policy holds for review. The `github` MCP server covers the same workflows
+- `settings.json` (plugin settings are accepted only from verified organizations)
+- `gitlab` MCP server and the `penpot_url`, `framer_mcp_url` and `gitlab_url` options: their addresses depended on user values the directory cannot check. GitLab is added by hand (`claude mcp add`, see README)
 
 ## [1.0.8] - 2026-10-18
 
 ### Changed
 
-- Plugin icon moved to `.claude-plugin/icon.png` (replaces `assets/icon.svg`)
+- Plugin icon moved into the plugin manifest folder as a PNG (replaces the SVG asset)
 
 ## [1.0.7] - 2026-10-16
 
 ### Added
 
-- Directory listing fields in `plugin.json`: `icon` (`assets/Icon/icon.svg`), `documentationUrl`, `supportUrl`, `privacyPolicyUrl` and `termsOfServiceUrl`, resolving the warnings raised by the Anthropic directory review
+- Directory listing fields in `plugin.json`: `icon`, `documentationUrl`, `supportUrl`, `privacyPolicyUrl` and `termsOfServiceUrl`, resolving the warnings raised by the Anthropic directory review
 
 ### Changed
 

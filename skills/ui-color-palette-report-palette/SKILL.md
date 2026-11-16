@@ -8,7 +8,7 @@ argument-hint: [output-path]
 
 Turn a palette into one document a designer can read, share, or print: every color, every score, one verdict.
 
-The document is rendered by `scripts/render_report.py` (Python 3, standard library only) from the compact rows that `get_palette` already returns. Contrast values come from the API and are never recomputed. Color-space values are derived from the hex with the same formulas as the palette engine (chroma-js).
+The document is assembled from `references/report-template.md` and the compact rows that `get_palette` already returns. The page computes and renders everything itself, in the browser, with no network access. Contrast values come from the API and are never recomputed. Color-space values are derived from the hex with the same formulas as the palette engine (chroma-js).
 
 ## Pre-flight — reuse what is in context
 
@@ -27,7 +27,7 @@ Call `get_palette` with:
 
 ## Step 2 — Write the report data file
 
-Write `report-data.json` in the session's scratch or working directory. Do not show it to the user.
+Write `report-data.json` next to the output file. Do not show it to the user.
 
 ### Report data contract
 
@@ -40,6 +40,7 @@ Write `report-data.json` in the session's scratch or working directory. Do not s
     "preset": { "id": "TAILWIND", "name": "Tailwind" },
     "algorithmVersion": "v3"
   },
+  "generatedAt": "2026-11-16",
   "themes": [
     { "name": "Light", "paletteBackground": "#FFFFFF", "textColors": { "light": "#FFFFFF", "dark": "#000000" } }
   ],
@@ -55,29 +56,40 @@ Write `report-data.json` in the session's scratch or working directory. Do not s
 | ----- | ------ | ----- |
 | `palette.colorSpace` | `base.colorSpace` | Picks the color-space column. `OKLCH`, `LCH`, `LAB`, `OKLAB`, `HSL`, `HSV`, `RGB`, `CMYK` are rendered natively. `HSLUV`, `P3` and `HEX` are rendered in OKLCH, and the document says so |
 | `palette.preset` | `base.preset` | `id` + `name` are enough |
+| `generatedAt` | today's date | `YYYY-MM-DD` |
 | `themes[]` | `themes` passed to `get_palette` | `textColors` mirrors `textColorsTheme` (`lightColor` → `light`, `darkColor` → `dark`); `name` must match the rows' `theme` |
-| `rows` | `get_palette` output, verbatim | Paste the array as returned, including the `source` rows. If the tool output was saved to a file, put that **file path** (a string) here instead of copying the array |
-| `synthesis` | optional | Omit it and the script writes a rule-based synthesis. Fill `recommendations` only with fixes you actually derived (for example from a `palette-auditor` run) |
+| `rows` | `get_palette` output, verbatim | The array as returned, including the `source` rows |
+| `synthesis` | optional | Omit it and the page writes a rule-based synthesis. Fill `recommendations` only with fixes you actually derived (for example from a `palette-auditor` run) |
 
-## Step 3 — Render
+The JSON is embedded in a `<script>` tag: write every `<` as `<`.
 
-Run the script from this skill's base directory:
+If the `get_palette` output was saved to a file by the host instead of being returned inline, build `report-data.json` from that file with a shell command (for example `jq`) rather than copying the rows through the conversation.
+
+## Step 3 — Assemble the HTML
+
+The template has two fenced blocks, `html report-head` and `html report-tail`. The report is: head block + data JSON + tail block.
+
+With a shell available, run from the directory holding `report-data.json`:
 
 ```bash
-python3 "<skill-base-dir>/scripts/render_report.py" report-data.json "<output>.html"
+T="<skill-base-dir>/references/report-template.md"
+{
+  awk '/^```html report-head$/{f=1;next} /^```$/{f=0} f' "$T"
+  cat report-data.json
+  awk '/^```html report-tail$/{f=1;next} /^```$/{f=0} f' "$T"
+} > "<output>.html"
 ```
 
 - `<output>`: `$ARGUMENTS` if given, otherwise `<palette-name-kebab-case>-readability-report.html` in the current working directory.
-- The script prints a JSON summary on stdout: `verdict`, `overall` scores, `byColor` scores, and `noTextShades`. Use it for the recap. Do not read the HTML back.
-
-If `python3` is not available, say so in one line and fall back to the inline preview of `ui-color-palette-scale-palette` Step 2.
+- Without a shell, read the template and write the file yourself: the head block verbatim, the data JSON, the tail block verbatim. Do not modify the blocks.
+- Do not read the assembled HTML back.
 
 ## Step 4 — Deliver
 
 1. **Publishing tool available** (an Artifact or page-publishing tool is listed in the session): publish the generated HTML file as is and give the link.
-2. **Otherwise**: give the file path as a clickable link and offer to open it (`open <file>` on macOS, `xdg-open <file>` on Linux).
+2. **Otherwise**: give the file path as a clickable link and offer to open it in a browser.
 
-Then recap in the conversation, in 3 to 5 lines, from the stdout summary:
+Then recap in the conversation in 3 to 5 lines, applying the scoring rules below to the rows in context:
 
 - verdict and global contrast score
 - WCAG 2.2 AA and APCA body-text pass rates
@@ -107,7 +119,7 @@ Shared with `ui-color-palette-audit-palette`, so a report and an audit of the sa
 | APCA | `textContrast.apca.*.lc` and `recommendedUsage` from the API |
 | Readability | `min(100, |Lc| / 108 × 100 × weight factor)`, factor 0.85 under 400, 1.15 over 500, 1 otherwise. Same formula as the plugin's contrast report |
 | Shade passes | At least one text color reaches WCAG AA (4.5:1), and at least one reaches APCA Lc 60 |
-| Global contrast score | Average of the WCAG AA pass rate and the APCA Lc 60 pass rate. Source rows are listed but not counted |
+| Global contrast score | Average of the WCAG AA pass rate and the APCA Lc 60 pass rate, rounded half up. Source rows are listed but not counted |
 | Verdict | Excellent ≥ 90 %, Good ≥ 75 %, Fair ≥ 50 %, Poor below |
 
 WCAG 2.2 did not change the contrast criteria of WCAG 2.1. APCA is the method drafted for WCAG 3 and is not yet a W3C standard: present it as guidance, not as compliance.

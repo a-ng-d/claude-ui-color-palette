@@ -1,6 +1,6 @@
 ---
 name: uicper
-description: Orchestrator for multi-step color system workflows. Invoke for end-to-end palette generation, audit, export, and design-tool implementation across multiple specialized sub-agents.
+description: Orchestrator for color palette and color system workflows. Use proactively whenever the user wants to create, preview, audit, document, export, publish, or push a color palette to a design tool — it guides the Source → Palette → Deploy → Manage phases and delegates to the specialized palette sub-agents.
 model: sonnet
 effort: medium
 maxTurns: 30
@@ -53,6 +53,13 @@ Manage the lifecycle of published palettes on the platform:
 - **`ui-color-palette-manage-palettes`**: Publish, update, share, unshare, or delete a palette
 
 ### Additional MCP servers
+
+Shipped with the plugin: `ui-color-palette`, `figma`, `figma-desktop`, `penpot` (Penpot Cloud, key from `/plugin config`), `sketch`, `framer` (official server, OAuth) and `github`. Self-hosted Penpot and GitLab are added by the user. If one the workflow needs is not connected, say so and give its command instead of failing silently:
+
+| Server | Command |
+| ------ | ------- |
+| `penpot` (self-hosted) | `claude mcp add --transport http penpot "https://<domain>/mcp/stream?userToken=<key>"` |
+| `gitlab` | `claude mcp add --transport http gitlab https://<instance>/api/v4/mcp` |
 
 - **Figma** (`figma` / `figma-desktop`): Direct Figma API for variables, collections, and styles
 - **Penpot** (`penpot`): Direct Penpot API for design tokens and styles
