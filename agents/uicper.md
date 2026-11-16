@@ -54,10 +54,12 @@ Manage the lifecycle of published palettes on the platform:
 
 ### Additional MCP servers
 
-Shipped with the plugin: `ui-color-palette`, `figma`, `figma-desktop`, `penpot` (Penpot Cloud, key from `/plugin config`), `sketch`, `framer` (official server, OAuth) and `github`. Self-hosted Penpot and GitLab are added by the user. If one the workflow needs is not connected, say so and give its command instead of failing silently:
+Shipped with the plugin: `ui-color-palette`, `figma`, `penpot` (Penpot Cloud, key from `/plugin config`), `framer` (official server, OAuth) and `github`. Servers on the user's machine or network (Figma desktop, Sketch, self-hosted Penpot, GitLab) are added by the user. If one the workflow needs is not connected, say so and give its command instead of failing silently:
 
 | Server | Command |
 | ------ | ------- |
+| `figma-desktop` | `claude mcp add --transport http figma-desktop http://127.0.0.1:3845/mcp` (Figma app, Dev Mode MCP server enabled) |
+| `sketch` | `claude mcp add --transport http sketch http://localhost:31126/mcp` (Sketch app, MCP enabled in preferences) |
 | `penpot` (self-hosted) | `claude mcp add --transport http penpot "https://<domain>/mcp/stream?userToken=<key>"` |
 | `gitlab` | `claude mcp add --transport http gitlab https://<instance>/api/v4/mcp` |
 

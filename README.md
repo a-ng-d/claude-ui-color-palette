@@ -25,15 +25,15 @@ The plugin connects to the following MCP servers:
 | -------------------- | --------- | -------------------------------------- | -------------------------------------------------------- |
 | **UI Color Palette** | HTTP      | `https://mcp.ui-color-palette.com/mcp` | Core palette engine                                      |
 | **Figma**            | HTTP      | `https://mcp.figma.com/mcp`            | Remote Figma API                                         |
-| **Figma Desktop**    | HTTP      | `http://127.0.0.1:3845/mcp`            | Local Figma app, Dev Mode MCP server enabled             |
 | **Penpot**           | HTTP      | `https://design.penpot.app/mcp/stream` | Penpot Cloud; MCP key via `penpot_token`, sent as a header |
-| **Sketch**           | HTTP      | `http://localhost:31126/mcp`           | Enable MCP in Sketch preferences                         |
 | **Framer**           | HTTP      | `https://mcp.framer.com/mcp`           | Official Framer server, sign in with OAuth               |
 | **GitHub**           | HTTP      | `https://api.githubcopilot.com/mcp/`   | Issues, PRs, repos                                       |
 
-Self-hosted Penpot or GitLab need a server added by hand:
+Servers that run on your own machine or network are added by hand: the Figma desktop app (Dev Mode MCP server enabled), the Sketch app (MCP enabled in preferences), self-hosted Penpot and GitLab.
 
 ```bash
+claude mcp add --transport http figma-desktop http://127.0.0.1:3845/mcp
+claude mcp add --transport http sketch http://localhost:31126/mcp
 claude mcp add --transport http penpot "https://<your-penpot-domain>/mcp/stream?userToken=<your-mcp-key>"
 claude mcp add --transport http gitlab https://<your-instance>/api/v4/mcp
 ```

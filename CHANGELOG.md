@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Vendored community skills `gh-cli` and `gitlab-cli-skills`: their scripts read GitHub/GitLab tokens from the user's machine, which the Anthropic directory policy holds for review. The `github` MCP server covers the same workflows
 - `settings.json` (plugin settings are accepted only from verified organizations)
+- `figma-desktop` and `sketch` MCP servers: the directory accepts servers on the user's own machine only from verified organizations. Both are added by hand with one command (see README)
 - `gitlab` MCP server and the `penpot_url`, `framer_mcp_url` and `gitlab_url` options: their addresses depended on user values the directory cannot check. GitLab is added by hand (`claude mcp add`, see README)
 
 ## [1.0.8] - 2026-10-18
